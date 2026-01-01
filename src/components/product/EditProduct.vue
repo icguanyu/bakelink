@@ -150,12 +150,12 @@ defineExpose({ open, close });
             >輸入成分與份量，可協助統計訂單所需原料。非必填欄位。</small
           >
           <el-table :data="ingredientsTable" border size="small">
-            <el-table-column label="名稱">
+            <el-table-column label="名稱" align="center">
               <template #default="{ row }">
                 <el-input v-model="row.name" placeholder="成分名稱" />
               </template>
             </el-table-column>
-            <el-table-column label="份量(公克)" width="110">
+            <el-table-column label="份量(公克)" width="110" align="center">
               <template #default="{ row }">
                 <el-input
                   inputmode="numeric"
@@ -191,7 +191,7 @@ defineExpose({ open, close });
         </div>
       </div>
       <div v-if="value === '商品圖片'">
-        <UploadPhoto
+        <UploadPhotos
           v-model="form.imageUrls"
           :disabled="false"
           @upload="

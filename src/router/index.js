@@ -46,6 +46,11 @@ const router = createRouter({
           name: "shop-schedule",
           component: () => import("../views/shop/schedule.vue"),
         },
+        {
+          path: "settings",
+          name: "shop-settings",
+          component: () => import("../views/shop/settings.vue"),
+        },
       ],
     },
   ],

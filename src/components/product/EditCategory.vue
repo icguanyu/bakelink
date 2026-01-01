@@ -74,7 +74,7 @@ defineExpose({ open, close });
       <section class="list">
         <header>
           <h3>現有種類</h3>
-          <small>點擊叉號可移除</small>
+          <small>若種類被移除，原已存在的商品將被歸類為「未分類」</small>
         </header>
         <div v-if="categories.length" class="chips">
           <div class="chip" v-for="item in categories" :key="item.id">
@@ -82,7 +82,7 @@ defineExpose({ open, close });
             <el-button
               size="small"
               icon="Minus"
-              circle 
+              circle
               plain
               @click="removeCategory(item.id)"
             />
@@ -94,7 +94,7 @@ defineExpose({ open, close });
       <section class="form">
         <header>
           <h3>新增種類</h3>
-          <small>名稱必填，備註可留空</small>
+          <!-- <small>名稱建議不超過4個字</small> -->
         </header>
         <el-form :model="form" label-width="60px" label-position="top">
           <el-form-item label="名稱" prop="name">
@@ -124,6 +124,7 @@ defineExpose({ open, close });
 
 section header {
   display: flex;
+  flex-direction: column;
   align-items: baseline;
   gap: 8px;
   margin-bottom: 12px;
