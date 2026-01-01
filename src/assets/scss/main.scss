@@ -1,0 +1,30 @@
+// 全域SCSS工具（變數/混入）
+@use "./scrollbar.scss" as *;
+@forward "./element/custom.scss";
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@200;400;500;600;700;900&display=swap");
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  font-size: 14px;
+  margin: 0;
+  // overflow: hidden;
+  font-family: "Noto Sans TC", sans-serif, "微軟正黑體";
+  background-color: #fdfbf6;
+}
+
+// #app {
+//   min-width: 960px;
+//   height: 100vh;
+// }
+
+* {
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  #app {
+    min-width: 100%;
+  }
+}
