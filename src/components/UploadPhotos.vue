@@ -10,7 +10,7 @@ const props = defineProps({
   disabled: Boolean,
   max: {
     type: Number,
-    default: 5,
+    default: 4,
   },
 });
 

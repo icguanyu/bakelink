@@ -180,11 +180,12 @@ const handleSaveProduct = (product) => {
       <div class="card" v-for="item in filteredProducts" :key="item.id">
         <div class="thumb" :class="{ disabled: !item.isEnabled }">
           <img :src="item.image" :alt="item.name" />
+          <div v-if="!item.isEnabled" class="overlay">下架</div>
           <div class="category">{{ item.category }}</div>
         </div>
         <div class="info">
           <div class="title">
-            <span>{{ item.name }}</span>
+            <span class="text-ellipsis-2">{{ item.name }}</span>
             <el-icon @click="editProduct.open(item)"><MoreFilled /></el-icon>
           </div>
           <p class="description text-ellipsis-2">{{ item.description }}</p>
@@ -236,7 +237,7 @@ const handleSaveProduct = (product) => {
     background-color: #fff;
     --el-segmented-item-selected-color: var(--el-text-color-primary);
     --el-segmented-item-selected-bg-color: #ffd100;
-    --el-segmented-item-hover-bg-color: #e7d9d4;
+    --el-segmented-item-hover-bg-color: #f1e9e6;
     --el-segmented-item-active-bg-color: #e7d9d4;
     --el-border-radius-base: 8px;
   }
@@ -268,6 +269,7 @@ const handleSaveProduct = (product) => {
     }
   }
   .thumb {
+    flex-shrink: 0;
     width: 160px;
     height: 120px;
     border-radius: 8px;
@@ -281,7 +283,7 @@ const handleSaveProduct = (product) => {
       transition: transform 0.3s ease;
     }
     &.disabled {
-      filter: grayscale(1) brightness(0.8) opacity(0.8);
+      filter: grayscale(0.8) brightness(1) opacity(0.7);
     }
     .category {
       position: absolute;
@@ -293,9 +295,25 @@ const handleSaveProduct = (product) => {
       font-size: 12px;
       border-radius: 4px;
     }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 800;
+      font-style: italic;
+      color: rgba(255, 255, 255, 0.5);
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+      letter-spacing: 4px;
+      filter: invert(1);
+      pointer-events: none;
+    }
   }
   .info {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 8px;

@@ -151,6 +151,7 @@ section header {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
     .chip__title {
+      user-select: none;
       font-weight: 600;
     }
   }

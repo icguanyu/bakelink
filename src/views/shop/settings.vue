@@ -47,6 +47,8 @@ const form = reactive({
   },
 });
 
+const segment = ref("brand");
+
 const toggleAllWeekday = (enabled) => {
   businessHours.value = businessHours.value.map((i) => ({
     ...i,
@@ -67,11 +69,30 @@ const handleSave = () => {
 
 <template>
   <div class="page">
-    <el-form label-width="100px" label-position="left">
+    <div class="segmented">
+      <el-segmented
+        v-model="segment"
+        :options="[
+          { label: '01 基本', value: 'brand' },
+          { label: '02 取貨付款', value: 'pay' },
+          { label: '03 營業時間', value: 'hours' },
+          { label: '04 包裝', value: 'pack' },
+        ]"
+      />
+    </div>
+    <el-form label-width="80px" label-position="left">
       <div class="flex flex-col gap-2">
-        <el-card class="card" shadow="hover">
-          <div class="card__title">商店設定</div>
-          <small class="hint">請填寫商家基本資料，使用者可於前台查看</small>
+        <el-card class="card" shadow="never" v-show="segment === 'brand'">
+          <div class="panel">
+            <div class="panel__header">
+              <span class="badge">01</span>
+              <div>
+                <p class="label">品牌</p>
+                <h3>商店設定</h3>
+              </div>
+            </div>
+            <small class="hint">請填寫商家基本資料，使用者可於前台查看</small>
+          </div>
 
           <div class="card__subtitle">標誌/LOGO</div>
           <UploadPhoto
@@ -110,9 +131,18 @@ const handleSave = () => {
             />
           </el-form-item>
         </el-card>
-        <el-card class="card" shadow="hover">
-          <div class="card__title">取貨與付款</div>
-          <small class="hint">設定取貨方式與接受的付款方式</small>
+        <el-card class="card" shadow="never" v-show="segment === 'pay'">
+          <div class="panel">
+            <div class="panel__header">
+              <span class="badge">02</span>
+              <div>
+                <p class="label">取貨與付款</p>
+                <h3>支付、取貨與宅配</h3>
+              </div>
+            </div>
+            <small class="hint">設定取貨方式與接受的付款方式</small>
+          </div>
+
           <el-form-item label="取貨時間">
             <div class="flex">
               <el-time-select
@@ -121,7 +151,8 @@ const handleSave = () => {
                 start="06:00"
                 step="00:30"
                 end="22:00"
-                inputmode="numeric"
+                :filterable="false"
+                style="width: 120px"
               />
               <span class="white-space-nowrap">後，開放取貨</span>
             </div>
@@ -132,11 +163,10 @@ const handleSave = () => {
                 <el-checkbox
                   v-for="item in paymentOptions"
                   :key="item.value"
-                  :label="item.value"
+                  :label="item.label"
+                  :value="item.value"
                   border
-                >
-                  {{ item.label }}
-                </el-checkbox>
+                />
               </el-space>
             </el-checkbox-group>
           </el-form-item>
@@ -147,11 +177,10 @@ const handleSave = () => {
                 <el-checkbox
                   v-for="item in pickupOptions"
                   :key="item.value"
-                  :label="item.value"
+                  :label="item.label"
+                  :value="item.value"
                   border
-                >
-                  {{ item.label }}
-                </el-checkbox>
+                />
               </el-space>
             </el-checkbox-group>
           </el-form-item>
@@ -160,40 +189,47 @@ const handleSave = () => {
             v-if="form.pickupMethods.includes('delivery')"
             class="shipping-config"
           >
-            <el-form label-width="100px" label-position="left" size="default">
-              <el-form-item label="運費">
-                <el-input-number
-                  v-model="form.shipping.fee"
-                  :min="0"
-                  :max="500"
-                  :precision="0"
-                />
-                <span class="suffix">元</span>
-              </el-form-item>
-              <el-form-item label="免運門檻">
-                <el-input-number
-                  v-model="form.shipping.freeThreshold"
-                  :min="0"
-                  :max="5000"
-                  :step="100"
-                  :precision="0"
-                />
-                <span class="suffix">元（設 0 = 不提供免運）</span>
-              </el-form-item>
-              <el-form-item label="備註">
-                <el-input
-                  v-model="form.shipping.note"
-                  type="textarea"
-                  :rows="2"
-                  placeholder="運費說明、配送範圍等"
-                />
-              </el-form-item>
-            </el-form>
+            <el-form-item label="運費">
+              <el-input-number
+                v-model="form.shipping.fee"
+                :min="0"
+                :max="500"
+                :precision="0"
+              />
+              <span class="suffix">元</span>
+            </el-form-item>
+            <el-form-item label="免運門檻">
+              <el-input-number
+                v-model="form.shipping.freeThreshold"
+                :min="0"
+                :max="5000"
+                :step="100"
+                :precision="0"
+              />
+              <span class="suffix">元（設 0 = 不提供免運）</span>
+            </el-form-item>
+            <el-form-item label="備註">
+              <el-input
+                v-model="form.shipping.note"
+                type="textarea"
+                :rows="2"
+                placeholder="運費說明、配送範圍等"
+              />
+            </el-form-item>
           </div>
         </el-card>
-        <el-card class="card" shadow="hover">
-          <div class="card__title">營業時間</div>
-          <small class="hint">門市實際營業時間</small>
+        <el-card class="card" shadow="never" v-show="segment === 'hours'">
+          <div class="panel">
+            <div class="panel__header">
+              <span class="badge">03</span>
+              <div>
+                <p class="label">營業</p>
+                <h3>營業時間</h3>
+              </div>
+            </div>
+            <small class="hint">門市實際營業時間</small>
+          </div>
+
           <div class="hours-head">
             <span>週一～週日</span>
             <el-space>
@@ -220,6 +256,7 @@ const handleSave = () => {
                 start="06:00"
                 step="00:30"
                 end="22:00"
+                :filterable="false"
               />
               <el-time-select
                 v-model="row.time[1]"
@@ -228,57 +265,65 @@ const handleSave = () => {
                 start="06:00"
                 step="00:30"
                 end="22:00"
+                :filterable="false"
               />
             </div>
           </div>
         </el-card>
-        <el-card class="card" shadow="hover">
-          <div class="card__title">包裝設定</div>
-          <small class="hint">是否提供包裝選項</small>
-          <el-form label-width="90px" label-position="left">
-            <el-form-item label="預設包裝">
-              <el-input
-                v-model="form.packaging.defaultPack"
-                placeholder="紙袋/紙盒/裸裝"
-              />
-            </el-form-item>
-            <el-form-item label="包裝費">
-              <el-input-number
-                v-model="form.packaging.packFee"
-                :min="0"
-                :max="50"
-                :precision="0"
-              />
-              <span class="suffix">元/單</span>
-            </el-form-item>
-            <el-form-item label="環保折抵">
-              <el-input-number
-                v-model="form.packaging.ecoDiscount"
-                :min="0"
-                :max="50"
-                :precision="0"
-              />
-              <span class="suffix">元/單</span>
-            </el-form-item>
-            <el-form-item label="備註">
-              <el-input
-                v-model="form.packaging.note"
-                type="textarea"
-                :rows="2"
-                placeholder="自備餐具優惠、保冷袋租借等"
-              />
-            </el-form-item>
-          </el-form>
+        <el-card class="card" shadow="never" v-show="segment === 'pack'">
+          <div class="panel">
+            <div class="panel__header">
+              <span class="badge">04</span>
+              <div>
+                <p class="label">包裝</p>
+                <h3>包裝設定</h3>
+              </div>
+            </div>
+            <small class="hint">是否提供包裝選項</small>
+          </div>
+
+          <el-form-item label="預設包裝">
+            <el-input
+              v-model="form.packaging.defaultPack"
+              placeholder="紙袋/紙盒/裸裝"
+            />
+          </el-form-item>
+          <el-form-item label="包裝費">
+            <el-input-number
+              v-model="form.packaging.packFee"
+              :min="0"
+              :max="50"
+              :precision="0"
+            />
+            <span class="suffix">元/單</span>
+          </el-form-item>
+          <el-form-item label="環保折抵">
+            <el-input-number
+              v-model="form.packaging.ecoDiscount"
+              :min="0"
+              :max="50"
+              :precision="0"
+            />
+            <span class="suffix">元/單</span>
+          </el-form-item>
+          <el-form-item label="備註">
+            <el-input
+              v-model="form.packaging.note"
+              type="textarea"
+              :rows="2"
+              placeholder="自備餐具優惠、保冷袋租借等"
+            />
+          </el-form-item>
         </el-card>
       </div>
     </el-form>
 
-    <div class="actions">
+    <el-card class="actions" shadow="never">
       <el-button size="large" @click="$router.go(-1)">取消</el-button>
       <el-button type="primary" size="large" @click="handleSave">
         儲存設定
       </el-button>
-    </div>
+    </el-card>
   </div>
 </template>
 
@@ -295,49 +340,72 @@ h2 {
   color: var(--el-text-color-primary);
 }
 
-.card {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.card__title {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--el-text-color-primary);
-  margin-bottom: 4px;
-}
-
-.hint {
-  color: var(--el-text-color-secondary);
-  font-size: 12px;
-  display: block;
-  margin-bottom: 8px;
-}
-
-.uploader {
-  width: 180px;
-  height: 180px;
-  border: 1px dashed #ddd;
+.segmented {
+  padding: 6px 0;
   border-radius: 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  cursor: pointer;
-  background: #fafafa;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  background-color: #fff;
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 16px;
+  z-index: 10;
+  overflow-x: auto;
+  .el-segmented {
+    padding: 0 8px;
+    background-color: #fff;
+    --el-segmented-item-selected-color: var(--el-text-color-primary);
+    --el-segmented-item-selected-bg-color: #ffd100;
+    --el-segmented-item-hover-bg-color: #f1e9e6;
+    --el-segmented-item-active-bg-color: #e7d9d4;
+    --el-border-radius-base: 8px;
   }
+}
 
-  .placeholder {
-    color: #999;
-    font-size: 13px;
-    text-align: center;
-    padding: 8px;
+.el-card {
+  border-radius: 8px;
+}
+.panel {
+  margin-bottom: 16px;
+  .panel__header {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 4px;
+    .badge {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: #0f172a;
+      color: white;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 20px;
+      color: #0f172a;
+      white-space: nowrap;
+    }
+    .label {
+      margin: 0;
+      font-size: 12px;
+      color: #748096;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+  }
+  .hint {
+    color: var(--el-text-color-secondary);
+    display: block;
+    margin-bottom: 8px;
+    margin-left: auto;
   }
 }
 
@@ -385,8 +453,15 @@ h2 {
 }
 
 .actions {
-  display: flex;
-  justify-content: flex-end;
+  position: sticky;
+  background-color: #fff;
+  bottom: 0;
   gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 12px;
+  }
 }
 </style>

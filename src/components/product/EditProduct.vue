@@ -96,7 +96,7 @@ defineExpose({ open, close });
   >
     <el-segmented
       v-model="value"
-      :options="['基本資訊', '詳細成分', '商品圖片']"
+      :options="['基本資訊', '商品圖片', '詳細成分']"
       block
     />
     <br />
