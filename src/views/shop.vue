@@ -41,7 +41,7 @@
     main {
       .container {
         border-radius: 0;
-      
+        padding-bottom: 80px;
       }
     }
   }

@@ -328,8 +328,5 @@ const handleSaveProduct = (product) => {
       }
     }
   }
-  .new-product {
-    bottom: 100px;
-  }
 }
 </style>

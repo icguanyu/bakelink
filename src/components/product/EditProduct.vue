@@ -77,7 +77,7 @@ defineExpose({ open, close });
     <br />
     <el-form :model="form" label-width="120px" label-position="left">
       <div v-if="value === '基本資訊'">
-        <el-form-item label="品名" required>
+        <el-form-item  required>
           <el-input v-model="form.name" placeholder="輸入產品名稱" />
         </el-form-item>
         <el-form-item label="類別" required>

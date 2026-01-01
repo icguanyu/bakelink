@@ -50,10 +50,16 @@ aside {
     color: #fff;
     text-decoration: none;
     padding: 8px 16px;
+    .el-badge {
+      &::v-deep(sup) {
+        border: none;
+      }
+    }
     .icon {
       width: 35px;
       height: 35px;
       img {
+        user-select: none;
         width: 100%;
         height: 100%;
         object-fit: contain;
