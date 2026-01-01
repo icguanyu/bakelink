@@ -20,7 +20,7 @@
   main {
     background-color: #6d3112;
     flex: 1;
-    height: 100vh;
+    height: 100dvh;
     overflow-y: hidden;
 
     .container {
@@ -41,7 +41,7 @@
     main {
       .container {
         border-radius: 0;
-        padding-bottom: 80px;
+        // padding-bottom: 80px;
       }
     }
   }

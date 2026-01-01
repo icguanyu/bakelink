@@ -8,8 +8,8 @@ const props = defineProps({
 });
 const emits = defineEmits(["update:modelValue"]);
 const list = ref([
-  { id: 1, name: "啟用" },
-  { id: 2, name: "下架" },
+  { value: true, label: "啟用" },
+  { value: false, label: "下架" },
 ]);
 </script>
 
@@ -19,14 +19,12 @@ const list = ref([
     @clear="$emit('update:modelValue', null)"
     @update:modelValue="$emit('update:modelValue', $event)"
     :placeholder="placeholder"
-    filterable
-    clearable
   >
     <el-option
-      v-for="item in list"
-      :key="item.id"
-      :label="item.name"
-      :value="item.name"
+      v-for="i in list"
+      :key="i.id"
+      :label="i.label"
+      :value="i.value"
     />
   </el-select>
 </template>

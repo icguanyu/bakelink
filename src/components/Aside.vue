@@ -36,7 +36,7 @@ aside {
   position: sticky;
   top: 0;
   flex-shrink: 0;
-  height: 100vh;
+  height: 100dvh;
   background-color: #6d3112;
   display: flex;
   flex-direction: column;

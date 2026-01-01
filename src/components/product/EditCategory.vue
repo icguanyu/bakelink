@@ -65,7 +65,7 @@ defineExpose({ open, close });
   <el-dialog
     v-model="visible"
     title="編輯商品種類"
-    width="75%"
+    width="800px"
     append-to-body
     destroy-on-close
     :close-on-click-modal="false"

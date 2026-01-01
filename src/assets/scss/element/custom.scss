@@ -17,57 +17,57 @@
 //     background-color: #616e88;
 //   }
 // }
-// .el-table.border {
-//   border-width: 1px 1px 0 1px;
-//   border-style: solid;
-//   border-color: #bebebe;
-//   border-radius: 8px;
-// }
-// .el-table.el-table--fluid-height {
-//   border-width: 1px;
-// }
+.el-table.border {
+  border-width: 1px 1px 0 1px;
+  border-style: solid;
+  border-color: #bebebe;
+  border-radius: 8px;
+}
+.el-table.el-table--fluid-height {
+  border-width: 1px;
+}
 
-// .el-table {
-//   z-index: 1;
-//   --el-table-border-color: #f2f5f9 !important;
-//   thead {
-//     th {
-//       background-color: #f6f6f6 !important;
-//       font-weight: normal;
-//       color: #364250;
-//     }
-//   }
-//   .el-select {
-//     min-width: initial;
-//   }
-//   .pre-line {
-//     white-space: pre;
-//     max-height: 100px;
-//     overflow-y: auto;
-//     overflow-x: hidden;
-//   }
-//   .expand-content {
-//     padding: 12px 24px;
-//   }
-//   &::v-deep(.row-black) {
-//     background-color: #f3f3f3 !important;
-//   }
-//   &::v-deep(.row-white) {
-//     background-color: #ffffff !important;
-//   }
-// }
-// .el-table__row {
-//   transition: none !important;
-// }
-// .el-table.children,
-// .el-table.small {
-//   // .el-table__cell {
-//   //   padding: 5px 0;
-//   // }
-//   .cell {
-//     padding: 0 5px;
-//   }
-// }
+.el-table {
+  z-index: 1;
+  --el-table-border-color: #f2f5f9 !important;
+  thead {
+    th {
+      background-color: #f6f6f6 !important;
+      font-weight: normal;
+      color: #364250;
+    }
+  }
+  .el-select {
+    min-width: initial;
+  }
+  .pre-line {
+    white-space: pre;
+    max-height: 100px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .expand-content {
+    padding: 12px 24px;
+  }
+  &::v-deep(.row-black) {
+    background-color: #f3f3f3 !important;
+  }
+  &::v-deep(.row-white) {
+    background-color: #ffffff !important;
+  }
+}
+.el-table__row {
+  transition: none !important;
+}
+.el-table.children,
+.el-table.small {
+  // .el-table__cell {
+  //   padding: 5px 0;
+  // }
+  .cell {
+    padding: 0 5px;
+  }
+}
 // .el-button + .el-button {
 //   margin-left: 6px;
 // }
@@ -251,7 +251,7 @@
 // }
 @media (max-width: 640px) {
   .el-dialog {
-    max-width: 95%;
+    max-width: 90%;
     --el-dialog-margin-top: 10vh;
   }
 }

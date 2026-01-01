@@ -13,25 +13,35 @@ const emit = defineEmits(["save"]);
 
 const visible = ref(false);
 const value = ref("基本資訊");
-const imageUrl = ref("");
+
 const formRef = ref(null);
 const form = reactive({
   id: null,
   name: "",
   category: "",
-  price: null,
+  price: 100,
   description: "",
   ingredients: "",
-  status: null,
+  imageUrls: [],
+  isEnabled: null,
 });
+
+const ingredientsTable = ref([]);
+const newIngredient = reactive({ name: "", amount: "", visible: true });
 
 const resetForm = () => {
   formRef.value.resetFields();
-  imageUrl.value = "";
+  ingredientsTable.value = [];
+  newIngredient.name = "";
+  newIngredient.amount = "";
+  newIngredient.visible = true;
 };
 
 const open = (product = {}) => {
   Object.assign(form, product);
+  ingredientsTable.value = product.ingredientsTable
+    ? product.ingredientsTable.map((i) => ({ ...i }))
+    : [];
   visible.value = true;
 };
 
@@ -39,27 +49,38 @@ const close = () => {
   visible.value = false;
 };
 
-const handleImageChange = (file) => {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    imageUrl.value = e.target.result;
-  };
-  reader.readAsDataURL(file.raw);
-  return false; // 阻止自動上傳
-};
-
 const submit = () => {
   if (!form.name || !form.category || !form.price) {
     ElMessage.warning("請填寫必填欄位（品名、類別、定價）");
     return;
   }
+
   const payload = {
     ...form,
-    image: imageUrl.value,
+    ingredientsTable: ingredientsTable.value,
   };
 
   emit("save", payload);
   visible.value = false;
+};
+
+const addIngredient = () => {
+  if (!newIngredient.name.trim()) {
+    ElMessage.warning("請填寫成分名稱");
+    return;
+  }
+  ingredientsTable.value.push({
+    name: newIngredient.name.trim(),
+    amount: newIngredient.amount.trim(),
+    visible: newIngredient.visible,
+  });
+  newIngredient.name = "";
+  newIngredient.amount = "";
+  newIngredient.visible = true;
+};
+
+const removeIngredient = (idx) => {
+  ingredientsTable.value.splice(idx, 1);
 };
 
 defineExpose({ open, close });
@@ -69,21 +90,28 @@ defineExpose({ open, close });
   <el-dialog
     v-model="visible"
     :title="form.id ? '編輯商品' : '新增商品'"
-    width="480px"
+    width="800px"
     append-to-body
     destroy-on-close
   >
-    <el-segmented v-model="value" :options="['基本資訊', '商品圖片']" block />
+    <el-segmented
+      v-model="value"
+      :options="['基本資訊', '詳細成分', '商品圖片']"
+      block
+    />
     <br />
     <el-form :model="form" label-width="120px" label-position="left">
       <div v-if="value === '基本資訊'">
-        <el-form-item  required>
-          <el-input v-model="form.name" placeholder="輸入產品名稱" />
+        <el-form-item label="產品名稱" required>
+          <el-input
+            v-model="form.name"
+            placeholder="產品名稱（例：原味軟法）"
+          />
         </el-form-item>
-        <el-form-item label="類別" required>
+        <el-form-item label="產品類別" required>
           <SelectCategory v-model="form.category" />
         </el-form-item>
-        <el-form-item label="定價" required>
+        <el-form-item label="產品定價" required>
           <el-input-number
             v-model="form.price"
             :min="0"
@@ -91,7 +119,7 @@ defineExpose({ open, close });
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item label="介紹">
+        <el-form-item label="產品簡介">
           <el-input
             v-model="form.description"
             type="textarea"
@@ -111,26 +139,67 @@ defineExpose({ open, close });
 
         <el-form-item label="狀態">
           <SelectProductStatus
-            v-model="form.status"
+            v-model="form.isEnabled"
             :placeholder="'選擇產品狀態'"
           />
         </el-form-item>
       </div>
-      <div v-else>
-        <el-form-item label="產品圖片">
-          <!-- <el-upload
-            class="image-uploader"
-            action="#"
-            :show-file-list="false"
-            :on-change="handleImageChange"
-            :before-upload="beforeImageUpload"
-            :auto-upload="false"
+      <div v-if="value === '詳細成分'">
+        <div class="ing-table">
+          <small class="hint"
+            >輸入成分與份量，可協助統計訂單所需原料。非必填欄位。</small
           >
-            <img v-if="imageUrl" :src="imageUrl" class="preview" />
-            <el-icon v-else class="uploader-icon"><Plus /></el-icon>
-          </el-upload> -->
-          <small class="hint">建議尺寸 600x400，檔案小於 2MB</small>
-        </el-form-item>
+          <el-table :data="ingredientsTable" border size="small">
+            <el-table-column label="名稱">
+              <template #default="{ row }">
+                <el-input v-model="row.name" placeholder="成分名稱" />
+              </template>
+            </el-table-column>
+            <el-table-column label="份量(公克)" width="110">
+              <template #default="{ row }">
+                <el-input
+                  inputmode="numeric"
+                  v-model="row.amount"
+                  placeholder="份量(公克)"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="顯示" width="60" align="center">
+              <template #default="{ row }">
+                <el-switch size="small" v-model="row.visible" />
+              </template>
+            </el-table-column>
+            <el-table-column label="" width="50" align="center">
+              <template #default="{ $index }">
+                <el-icon class="delete-btn" @click="removeIngredient($index)">
+                  <Delete />
+                </el-icon>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <el-button
+            type="primary"
+            plain
+            size="small"
+            @click="
+              ingredientsTable.push({ name: '', amount: '', visible: true })
+            "
+          >
+            新增
+          </el-button>
+        </div>
+      </div>
+      <div v-if="value === '商品圖片'">
+        <UploadPhoto
+          v-model="form.imageUrls"
+          :disabled="false"
+          @upload="
+            (url) => {
+              form.imageUrls = url;
+            }
+          "
+        />
       </div>
     </el-form>
 
@@ -142,6 +211,25 @@ defineExpose({ open, close });
 </template>
 
 <style scoped lang="scss">
+.ing-table {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  .hint {
+    color: #8c939d;
+    font-size: 12px;
+  }
+  .delete-btn {
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .ing-add {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
 .image-uploader {
   border: 1px dashed var(--el-border-color);
   border-radius: 6px;
@@ -170,12 +258,5 @@ defineExpose({ open, close });
     justify-content: center;
     background-color: #f5f7fa;
   }
-}
-
-.hint {
-  display: block;
-  margin-top: 8px;
-  color: var(--el-text-color-secondary);
-  font-size: 12px;
 }
 </style>

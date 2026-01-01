@@ -3,7 +3,7 @@ const props = defineProps({
   modelValue: String,
   placeholder: {
     type: String,
-    default: "請選擇",
+    default: "請選擇種類",
   },
 });
 const emits = defineEmits(["update:modelValue"]);
