@@ -4,7 +4,6 @@
 //   --el-disabled-border-color: #c1c9da;
 // }
 
-
 // .el-menu {
 //   border-right: none;
 //   flex: 1;
@@ -118,36 +117,6 @@
 // .el-card.small {
 //   .el-card__body {
 //     padding: 8px 20px;
-//   }
-// }
-
-// .columns-2 {
-//   display: grid;
-//   grid-template-columns: repeat(2, 1fr);
-//   gap: 16px;
-//   & > * {
-//     min-width: 0;
-//   }
-//   & > .full-width {
-//     grid-column: 1 / -1;
-//   }
-// }
-
-// .columns-3 {
-//   display: grid;
-//   grid-template-columns: repeat(3, 1fr);
-//   gap: 16px;
-//   & > .full-width {
-//     grid-column: 1 / -1;
-//   }
-// }
-
-// .columns-4 {
-//   display: grid;
-//   grid-template-columns: repeat(4, 1fr);
-//   gap: 16px;
-//   & > .full-width {
-//     grid-column: 1 / -1;
 //   }
 // }
 
@@ -280,3 +249,9 @@
 //     font-weight: bold;
 //   }
 // }
+@media (max-width: 640px) {
+  .el-dialog {
+    max-width: 95%;
+    --el-dialog-margin-top: 10vh;
+  }
+}

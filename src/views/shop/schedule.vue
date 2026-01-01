@@ -1,3 +1,5 @@
 <template>
-  <div></div>
+  <div>
+    Ship Schedule
+  </div>
 </template>

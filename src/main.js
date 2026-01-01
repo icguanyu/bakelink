@@ -4,7 +4,7 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
-
+import "boxicons/css/boxicons.min.css";
 import ElementPlus from 'element-plus'
 import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 import zhTw from "element-plus/es/locale/lang/zh-tw";

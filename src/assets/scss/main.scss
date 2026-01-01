@@ -1,6 +1,5 @@
 // 全域SCSS工具（變數/混入）
 @use "./scrollbar.scss" as *;
-@forward "./element/custom.scss";
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@200;400;500;600;700;900&display=swap");
 
 html,
@@ -9,7 +8,7 @@ body {
   width: 100%;
   font-size: 14px;
   margin: 0;
-  // overflow: hidden;
+  overflow: hidden;
   font-family: "Noto Sans TC", sans-serif, "微軟正黑體";
   background-color: #fdfbf6;
 }
@@ -26,5 +25,137 @@ body {
 @media (max-width: 768px) {
   #app {
     min-width: 100%;
+  }
+}
+
+//
+.flex {
+  display: flex;
+  gap: 4px;
+}
+.flex-1 {
+  flex: 1;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+.flex-col {
+  flex-direction: column;
+}
+.gap-2 {
+  gap: 8px;
+}
+.gap-4 {
+  gap: 16px;
+}
+
+.align-center {
+  align-items: center;
+}
+.align-end {
+  align-items: end;
+}
+.justify-center {
+  justify-content: center;
+}
+.justify-end {
+  justify-content: flex-end;
+}
+.justify-between {
+  justify-content: space-between;
+}
+
+.m-0 {
+  margin: 0 !important;
+}
+.mt-1 {
+  margin-top: 0.875rem !important;
+}
+.mb-1 {
+  margin-bottom: 0.875rem !important;
+}
+.ml-1 {
+  margin-left: 0.875rem !important;
+}
+.mr-1 {
+  margin-right: 0.875rem !important;
+}
+.ml-auto {
+  margin-left: auto !important;
+}
+.text-center {
+  text-align: center !important;
+}
+.text-right {
+  text-align: right !important;
+}
+.text-left {
+  text-align: left !important;
+}
+.font-bold {
+  font-weight: bold !important;
+}
+.font-normal {
+  font-weight: normal !important;
+}
+.w-full {
+  width: 100% !important;
+}
+.w-auto {
+  width: auto !important;
+}
+.h-full {
+  height: 100% !important;
+}
+.hidden {
+  display: none !important;
+}
+.block {
+  display: block !important;
+}
+.inline-block {
+  display: inline-block !important;
+}
+.white-space-nowrap {
+  white-space: nowrap;
+}
+.float-right {
+  float: right !important;
+}
+.text-ellipsis-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.text-ellipsis-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.text-ellipsis-3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.columns-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  & > * {
+    min-width: 0;
+  }
+  & > .full-width {
+    grid-column: 1 / -1;
+  }
+}
+//
+
+@media (max-width: 640px) {
+  .columns-2 {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 }

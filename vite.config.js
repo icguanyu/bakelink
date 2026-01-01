@@ -32,6 +32,7 @@ export default defineConfig({
         api: "modern-compiler",
         additionalData: `
           @use "@/assets/scss/element/index.scss" as element;
+          @use "@/assets/scss/element/custom.scss" as *;
         `,
       },
     },

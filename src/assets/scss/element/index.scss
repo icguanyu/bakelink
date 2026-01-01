@@ -1,7 +1,7 @@
 @forward "element-plus/theme-chalk/src/common/var.scss" with (
   $colors: (
     "primary": (
-      "base": #b15a2d,
+      "base": #6d3112,
     ),
     "success": (
       "base": #67c23a,
@@ -27,9 +27,9 @@
     "disabled": #c0c4cc,
   ),
   $common-component-size: (
-    "large": 44px,
+    "large": 48px,
     // 40px
-    "default": 36px,
+    "default": 40px,
     // 32px
     "small": 28px,
     // 24px
