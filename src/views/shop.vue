@@ -18,13 +18,13 @@
   display: flex;
 
   main {
-    background-color: #6d3112;
+    background-color: #1c2345;
     flex: 1;
     height: 100dvh;
     overflow-y: hidden;
 
     .container {
-      border-radius: 10px 0 0 10px;
+      border-radius: 20px 0 0 20px;
       background-color: #fdfbf6;
       height: 100%;
       overflow: auto;
