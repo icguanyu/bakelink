@@ -243,17 +243,17 @@ const scrollToToday = async () => {
             </div>
             <div v-if="order.status !== '收單中'" class="order-details">
               <div class="detail-item">
-                <span class="detail-label">待取貨</span>
+                <span class="detail-label">待取</span>
                 <span class="detail-value pending">{{ order.pending }} 筆</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">已取貨</span>
+                <span class="detail-label">已取</span>
                 <span class="detail-value success"
                   >{{ order.pickedUp }} 筆</span
                 >
               </div>
               <div class="detail-item">
-                <span class="detail-label">違約單</span>
+                <span class="detail-label">違約</span>
                 <span class="detail-value danger">{{ order.breached }} 筆</span>
               </div>
             </div>
@@ -451,12 +451,7 @@ const scrollToToday = async () => {
       left: 0;
       top: 0;
       height: 100%;
-      background: linear-gradient(
-        90deg,
-        #15a34c 0%,
-        #2e8b57 50%,
-        #15a34c 100%
-      );
+      background: linear-gradient(90deg, #15a34c 0%, #2e8b57 50%, #15a34c 100%);
       background-size: 200% 100%;
       border-radius: inherit;
       transition: width 0.2s ease;
