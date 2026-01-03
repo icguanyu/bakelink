@@ -319,10 +319,8 @@ const handleSave = () => {
     </el-form>
 
     <el-card class="actions" shadow="never">
-      <el-button size="large" @click="$router.go(-1)">取消</el-button>
-      <el-button type="primary" size="large" @click="handleSave">
-        儲存設定
-      </el-button>
+      <el-button @click="$router.go(-1)">取消</el-button>
+      <el-button type="primary" @click="handleSave"> 儲存設定 </el-button>
     </el-card>
   </div>
 </template>

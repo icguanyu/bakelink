@@ -37,7 +37,7 @@ aside {
   top: 0;
   flex-shrink: 0;
   height: 100dvh;
-  background-color: #6d3112;
+  background-color: #43291c;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -70,7 +70,7 @@ aside {
     }
   }
   .link.router-link-active {
-    background-color: #5a2610;
+    background-color: #663e2d;
     &:after {
       content: "";
       display: block;
