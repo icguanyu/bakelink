@@ -1,0 +1,1 @@
+import{L as t,c as o,t as r,y as a,o as s}from"./index-BD4Hr-wl.js";const l={__name:"[id]",setup(n){const e=t().params.id;return(i,u)=>(s(),o("div",null,"order detail id: "+r(a(e)),1))}};export{l as default};
