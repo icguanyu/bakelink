@@ -14,7 +14,7 @@ const data = ref([
         totalOrders: 30,
         pickedUp: 0,
         pending: 0,
-        expanded: false,
+        breached: 0,
       },
       {
         id: 14,
@@ -23,7 +23,7 @@ const data = ref([
         totalOrders: 13,
         pickedUp: 0,
         pending: 0,
-        expanded: false,
+        breached: 0,
       },
       {
         id: 15,
@@ -32,7 +32,7 @@ const data = ref([
         totalOrders: 25,
         pickedUp: 0,
         pending: 0,
-        expanded: false,
+        breached: 0,
       },
       {
         id: 0,
@@ -41,16 +41,16 @@ const data = ref([
         totalOrders: 20,
         pickedUp: 18,
         pending: 2,
-        expanded: false,
+        breached: 0,
       },
       {
         id: 1,
         date: "2026-01-03",
-        status: "收單中",
+        status: "已結單",
         totalOrders: 15,
         pickedUp: 8,
         pending: 7,
-        expanded: false,
+        breached: 0,
       },
     ],
   },
@@ -65,7 +65,7 @@ const data = ref([
         totalOrders: 23,
         pickedUp: 20,
         pending: 3,
-        expanded: false,
+        breached: 0,
       },
       {
         id: 3,
@@ -75,7 +75,7 @@ const data = ref([
         totalOrders: 8,
         pickedUp: 8,
         pending: 0,
-        expanded: false,
+        breached: 0,
       },
       {
         id: 4,
@@ -85,7 +85,7 @@ const data = ref([
         totalOrders: 12,
         pickedUp: 10,
         pending: 2,
-        expanded: false,
+        breached: 0,
       },
       {
         id: 5,
@@ -95,27 +95,27 @@ const data = ref([
         totalOrders: 10,
         pickedUp: 10,
         pending: 0,
-        expanded: false,
+        breached: 0,
       },
       {
         id: 6,
         date: "2025-12-10",
 
-        status: "收單中",
+        status: "出貨結束",
         totalOrders: 18,
-        pickedUp: 5,
-        pending: 13,
-        expanded: false,
+        pickedUp: 18,
+        pending: 0,
+        breached: 0,
       },
       {
         id: 7,
         date: "2025-12-05",
 
-        status: "已結單",
+        status: "出貨結束",
         totalOrders: 6,
         pickedUp: 6,
         pending: 0,
-        expanded: false,
+        breached: 0,
       },
     ],
   },
@@ -128,18 +128,18 @@ const data = ref([
 
         status: "出貨結束",
         totalOrders: 13,
-        pickedUp: 13,
+        pickedUp: 11,
         pending: 0,
-        expanded: false,
+        breached: 2,
       },
       {
         id: 11,
         date: "2025-11-25",
         status: "出貨結束",
         totalOrders: 9,
-        pickedUp: 9,
+        pickedUp: 8,
         pending: 0,
-        expanded: false,
+        breached: 1,
       },
     ],
   },
@@ -235,6 +235,7 @@ const scrollToToday = async () => {
                 <div v-if="order.status !== '收單中'" class="progress-bar">
                   <div
                     class="progress-fill"
+                    :class="{ incomplete: getProgress(order) < 100 }"
                     :style="{ width: getProgress(order) + '%' }"
                   ></div>
                 </div>
@@ -242,7 +243,7 @@ const scrollToToday = async () => {
             </div>
             <div v-if="order.status !== '收單中'" class="order-details">
               <div class="detail-item">
-                <span class="detail-label">未取貨</span>
+                <span class="detail-label">待取貨</span>
                 <span class="detail-value pending">{{ order.pending }} 筆</span>
               </div>
               <div class="detail-item">
@@ -250,6 +251,10 @@ const scrollToToday = async () => {
                 <span class="detail-value success"
                   >{{ order.pickedUp }} 筆</span
                 >
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">違約單</span>
+                <span class="detail-value danger">{{ order.breached }} 筆</span>
               </div>
             </div>
           </div>
@@ -446,9 +451,27 @@ const scrollToToday = async () => {
       left: 0;
       top: 0;
       height: 100%;
-      background: #2d5f80;
+      background: linear-gradient(
+        90deg,
+        #15a34c 0%,
+        #2e8b57 50%,
+        #15a34c 100%
+      );
+      background-size: 200% 100%;
       border-radius: inherit;
       transition: width 0.2s ease;
+      animation: shimmer 3s infinite;
+
+      &.incomplete {
+        background: linear-gradient(
+          90deg,
+          #ffd700 0%,
+          #ffa500 50%,
+          #ffd700 100%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 3s infinite;
+      }
     }
   }
 }
@@ -472,6 +495,15 @@ const scrollToToday = async () => {
   &.status-completed {
     background: #e2e3e5;
     color: #383d41;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }
 
@@ -511,7 +543,6 @@ const scrollToToday = async () => {
             }
             .order-progress {
               width: 100%;
-             
             }
             .order-details {
               width: 100%;

@@ -1,7 +1,25 @@
-<script setup></script>
+<script setup>
+import { computed } from "vue";
+import dayjs from "dayjs";
+
+const currentYear = computed(() => dayjs().format("YYYY"));
+const currentMonth = computed(() => dayjs().format("MMM").toUpperCase());
+const currentDate = computed(() => dayjs().format("DD"));
+</script>
 
 <template>
   <aside>
+    <div class="date-box">
+      <div class="year">{{ currentYear }}</div>
+      <div class="month">{{ currentMonth }}</div>
+      <div class="date">{{ currentDate }}</div>
+    </div>
+    <router-link class="link" to="/shop">
+      <div class="icon">
+        <img src="@/assets/images/icons/home.png" alt="" />
+      </div>
+      <div class="title">總覽</div>
+    </router-link>
     <router-link class="link" to="/shop/schedule">
       <div class="icon">
         <img src="@/assets/images/icons/calendar.png" alt="" />
@@ -40,8 +58,40 @@ aside {
   background-color: #1c2345;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  padding: 8px 0;
   gap: 8px;
+  .date-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+    margin: 0 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #fff;
+
+    .year {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.6);
+      letter-spacing: 0.5px;
+    }
+    .month {
+      font-size: 12px;
+      font-weight: 700;
+      color: #ffd700;
+      margin: 0;
+      letter-spacing: 1px;
+    }
+    .date {
+      font-size: 24px;
+
+      line-height: 1;
+      color: #fff;
+    }
+  }
+
   .link {
     position: relative;
     display: flex;
@@ -69,7 +119,7 @@ aside {
       font-size: 12px;
     }
   }
-  .link.router-link-active {
+  .link.router-link-exact-active {
     background-color: #303758;
     &:after {
       content: "";
@@ -86,6 +136,14 @@ aside {
 }
 @media (max-width: 640px) {
   aside {
+    .date-box {
+      .year {
+        font-size: 9px;
+      }
+      .date {
+        font-size: 22px;
+      }
+    }
     .link {
       padding: 4px 8px;
       .el-badge {
