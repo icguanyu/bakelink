@@ -8,6 +8,7 @@ import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/backlink/',
   server: {
     host: true,
     port: 8080,
