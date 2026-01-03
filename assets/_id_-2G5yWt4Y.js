@@ -1,1 +1,0 @@
-import{L as t,c as o,t as r,z as a,o as s}from"./index-DOMPc8ao.js";const l={__name:"[id]",setup(n){const e=t().params.id;return(i,u)=>(s(),o("div",null,"order detail id: "+r(a(e)),1))}};export{l as default};
