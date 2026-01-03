@@ -213,7 +213,7 @@ const scrollToToday = async () => {
           :key="order.id"
           :id="isToday(order) ? 'today-order-anchor' : undefined"
         >
-          <div class="order-item">
+          <div class="order-item" :class="{ isToday: isToday(order) }">
             <div class="order-header">
               <div class="order-main-info">
                 <span class="order-date">
@@ -227,10 +227,12 @@ const scrollToToday = async () => {
               </div>
               <div class="order-progress">
                 <div class="progress-text">
-                  <span class="count">訂單：{{ order.totalOrders }}</span>
-                  <span class="percent">{{ getProgress(order) }}%</span>
+                  <span class="count">訂單數：{{ order.totalOrders }}</span>
+                  <span v-if="order.status !== '收單中'" class="percent">
+                    {{ getProgress(order) }}%
+                  </span>
                 </div>
-                <div class="progress-bar">
+                <div v-if="order.status !== '收單中'" class="progress-bar">
                   <div
                     class="progress-fill"
                     :style="{ width: getProgress(order) + '%' }"
@@ -238,7 +240,7 @@ const scrollToToday = async () => {
                 </div>
               </div>
             </div>
-            <div class="order-details">
+            <div v-if="order.status !== '收單中'" class="order-details">
               <div class="detail-item">
                 <span class="detail-label">未取貨</span>
                 <span class="detail-value pending">{{ order.pending }} 筆</span>
@@ -251,7 +253,7 @@ const scrollToToday = async () => {
               </div>
             </div>
           </div>
-          <div class="order-button">
+          <div class="order-button" :class="{ isToday: isToday(order) }">
             <el-icon><ArrowRight /></el-icon>
           </div>
         </div>
@@ -354,6 +356,10 @@ const scrollToToday = async () => {
       position: relative;
       flex: 1 1 auto;
     }
+    .order-item.isToday {
+      border: 1px solid #2d5f80;
+      box-shadow: 0 4px 8px rgba(45, 95, 128, 0.2);
+    }
     .order-button {
       cursor: pointer;
       display: flex;
@@ -368,6 +374,9 @@ const scrollToToday = async () => {
         font-size: 20px;
         color: #7f8c8d;
       }
+    }
+    .order-button.isToday {
+      border: 1px solid #2d5f80;
     }
   }
 }
@@ -423,6 +432,7 @@ const scrollToToday = async () => {
     align-items: center;
     font-size: 14px;
     color: #2c3e50;
+    gap: 8px;
   }
   .progress-bar {
     position: relative;
@@ -474,9 +484,6 @@ const scrollToToday = async () => {
       .today-order {
         .order-progress {
           width: 100%;
-          .progress-text {
-            font-size: 12px;
-          }
           .progress-bar {
             height: 8px;
           }
@@ -504,12 +511,7 @@ const scrollToToday = async () => {
             }
             .order-progress {
               width: 100%;
-              .progress-text {
-                font-size: 12px;
-              }
-              .progress-bar {
-                height: 8px;
-              }
+             
             }
             .order-details {
               width: 100%;
