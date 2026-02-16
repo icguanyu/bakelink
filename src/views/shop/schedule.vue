@@ -216,6 +216,7 @@ const initScheduleList = () => {
     selectedDateForDetails.value = firstDayOfMonth?.date || null;
   }
 };
+
 initScheduleList();
 
 // 更新排程列表
@@ -240,6 +241,44 @@ const goToday = () => {
   baseDate.value = dayjs();
   selectedDateForDetails.value = null;
   updateScheduleList();
+};
+
+// 上一天
+const goPreviousDay = () => {
+  if (!selectedDateForDetails.value) {
+    selectedDateForDetails.value = dayjs().format("YYYY-MM-DD");
+    return;
+  }
+  
+  const currentDate = dayjs(selectedDateForDetails.value);
+  const previousDate = currentDate.subtract(1, "day");
+  
+  // 檢查是否需要切換月份
+  if (previousDate.format("YYYY-MM") !== baseDate.value.format("YYYY-MM")) {
+    baseDate.value = previousDate;
+    updateScheduleList();
+  }
+  
+  selectedDateForDetails.value = previousDate.format("YYYY-MM-DD");
+};
+
+// 下一天
+const goNextDay = () => {
+  if (!selectedDateForDetails.value) {
+    selectedDateForDetails.value = dayjs().format("YYYY-MM-DD");
+    return;
+  }
+  
+  const currentDate = dayjs(selectedDateForDetails.value);
+  const nextDate = currentDate.add(1, "day");
+  
+  // 檢查是否需要切換月份
+  if (nextDate.format("YYYY-MM") !== baseDate.value.format("YYYY-MM")) {
+    baseDate.value = nextDate;
+    updateScheduleList();
+  }
+  
+  selectedDateForDetails.value = nextDate.format("YYYY-MM-DD");
 };
 
 // 獲取當前月份顯示文字
@@ -378,25 +417,41 @@ const closeEditor = () => {
       <!-- 右側：訂單詳情面板 -->
       <div v-else-if="selectedDateForDetails" class="schedule-right">
         <div class="detail-header">
-          <div>
-            <h3>
-              {{
-                dayjs(selectedDateForDetails).format("YYYY 年 M 月 DD 日 (ddd)")
-              }}
-            </h3>
-            <p class="detail-stats" v-if="selectedDateStats">
-              共 {{ selectedDateStats.total }} 筆訂單 |
-              <span class="stat-ordered"
-                >↓ {{ selectedDateStats.ordered }}</span
-              >
-              <span class="stat-completed"
-                >✓ {{ selectedDateStats.completed }}</span
-              >
-              <span class="stat-cancelled"
-                >✕ {{ selectedDateStats.cancelled }}</span
-              >
-              | 營收 ${{ selectedDateStats.revenue }}
-            </p>
+          <div class="detail-header-left">
+            <el-button
+              class="day-nav-btn"
+              icon="ArrowLeft"
+              circle
+              size="small"
+              @click="goPreviousDay"
+            />
+            <div>
+              <h3>
+                {{
+                  dayjs(selectedDateForDetails).format("YYYY 年 M 月 DD 日 (ddd)")
+                }}
+              </h3>
+              <p class="detail-stats" v-if="selectedDateStats">
+                共 {{ selectedDateStats.total }} 筆訂單 |
+                <span class="stat-ordered"
+                  >↓ {{ selectedDateStats.ordered }}</span
+                >
+                <span class="stat-completed"
+                  >✓ {{ selectedDateStats.completed }}</span
+                >
+                <span class="stat-cancelled"
+                  >✕ {{ selectedDateStats.cancelled }}</span
+                >
+                | 營收 ${{ selectedDateStats.revenue }}
+              </p>
+            </div>
+            <el-button
+              class="day-nav-btn"
+              icon="ArrowRight"
+              circle
+              size="small"
+              @click="goNextDay"
+            />
           </div>
           <div class="detail-actions">
             <el-button
@@ -582,6 +637,17 @@ const closeEditor = () => {
   padding: 16px 20px;
   border-bottom: 1px solid #e2e8f0;
   gap: 12px;
+
+  .detail-header-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .day-nav-btn {
+    flex-shrink: 0;
+    border: 1px solid #e2e8f0;
+  }
 
   h3 {
     font-size: 16px;

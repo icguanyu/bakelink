@@ -87,7 +87,18 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div class="page">
+  <div class="settings-manager">
+    <div class="page-header">
+      <div class="header-top">
+        <div>
+          <h2>設定</h2>
+          <p class="subtitle">管理商店基本資訊、付款方式、營業時間與包裝設定</p>
+        </div>
+        <!-- <div class="header-actions">
+          <el-button type="primary" @click="handleSave">儲存設定</el-button>
+        </div> -->
+      </div>
+    </div>
     <div class="segmented">
       <el-segmented
         v-model="segment"
@@ -352,16 +363,42 @@ const handleLogout = () => {
 </template>
 
 <style scoped lang="scss">
-.page {
+.settings-manager {
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
+
+.page-header {
+  background-color: transparent;
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+
+    .subtitle {
+      margin: 4px 0 0 0;
+      font-size: 14px;
+      color: #909399;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+  }
+}
+
 h2 {
   margin: 0;
   font-weight: 700;
   color: var(--el-text-color-primary);
+  font-size: 24px;
 }
 
 .segmented {
@@ -371,9 +408,9 @@ h2 {
   display: flex;
   justify-content: space-between;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  // position: sticky;
-  // top: 16px;
-  // z-index: 10;
+  position: sticky;
+  top: 16px;
+  z-index: 10;
   overflow-x: auto;
   .el-segmented {
     padding: 0 8px;
@@ -484,8 +521,20 @@ h2 {
 }
 
 @media (max-width: 640px) {
-  .page {
+  .settings-manager {
     padding: 12px;
+  }
+
+  .page-header {
+    .header-top {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+
+      .el-button {
+        width: 100%;
+      }
+    }
   }
 }
 </style>

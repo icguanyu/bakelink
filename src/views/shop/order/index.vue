@@ -10,6 +10,7 @@ const activeTab = ref("all");
 const searchQuery = ref("");
 const selectedDate = ref(dayjs().format("YYYY-MM-DD"));
 const viewMode = ref("detailed"); // 'detailed' 或 'simple'
+const showStats = ref(true); // 控制統計卡片顯示
 
 // 模擬訂單資料
 const orders = ref([
@@ -399,6 +400,20 @@ const setDayAfterTomorrow = () => {
   selectedDate.value = dayjs().add(2, "day").format("YYYY-MM-DD");
 };
 
+// 上一天
+const goPreviousDay = () => {
+  selectedDate.value = dayjs(selectedDate.value)
+    .subtract(1, "day")
+    .format("YYYY-MM-DD");
+};
+
+// 下一天
+const goNextDay = () => {
+  selectedDate.value = dayjs(selectedDate.value)
+    .add(1, "day")
+    .format("YYYY-MM-DD");
+};
+
 const isSelectedDate = (offset) => {
   const targetDate = dayjs().add(offset, "day").format("YYYY-MM-DD");
   return selectedDate.value === targetDate;
@@ -411,8 +426,35 @@ const clearSearch = () => {
 
 <template>
   <div class="order-manager">
+    <!-- 頂部標題 -->
+    <div class="order-header">
+      <div class="header-top">
+        <div>
+          <h2>訂單管理</h2>
+          <p class="subtitle">查看與管理每日訂單，追蹤訂單狀態</p>
+        </div>
+        <div class="header-actions">
+          <el-button
+            :icon="showStats ? 'View' : 'Hide'"
+            @click="showStats = !showStats"
+          >
+            {{ showStats ? "顯示統計" : "隱藏統計" }}
+          </el-button>
+          <el-button
+            :icon="viewMode === 'detailed' ? 'Document' : 'List'"
+            @click="viewMode = viewMode === 'detailed' ? 'simple' : 'detailed'"
+          >
+            {{ viewMode === "detailed" ? "詳細模式" : "簡易模式" }}
+          </el-button>
+
+          <el-button icon="Back" @click="setToday"> 回到今天 </el-button>
+          <el-button type="primary" icon="Plus">新增訂單</el-button>
+        </div>
+      </div>
+    </div>
+
     <!-- 頂部統計卡片 -->
-    <div class="stats-cards">
+    <div v-show="showStats" class="stats-cards">
       <div class="stat-card">
         <div
           class="stat-icon"
@@ -480,6 +522,12 @@ const clearSearch = () => {
     <!-- 日期選擇與搜尋 -->
     <div class="toolbar">
       <div class="date-selector">
+        <el-button
+          icon="ArrowLeft"
+          circle
+          size="small"
+          @click="goPreviousDay"
+        />
         <el-date-picker
           v-model="selectedDate"
           type="date"
@@ -488,31 +536,12 @@ const clearSearch = () => {
           value-format="YYYY-MM-DD"
           style="width: 160px"
         />
-        <div class="date-shortcuts">
-          <el-button
-            :type="isSelectedDate(0) ? 'primary' : 'default'"
-            @click="setToday"
-          >
-            今天
-          </el-button>
-          <el-button
-            :type="isSelectedDate(1) ? 'primary' : 'default'"
-            @click="setTomorrow"
-          >
-            明天
-          </el-button>
-          <el-button
-            :type="isSelectedDate(2) ? 'primary' : 'default'"
-            @click="setDayAfterTomorrow"
-          >
-            後天
-          </el-button>
-        </div>
+        <el-button icon="ArrowRight" circle size="small" @click="goNextDay" />
       </div>
       <div style="display: flex; gap: 8px; align-items: center">
         <el-input
           v-model="searchQuery"
-          placeholder="搜尋訂單編號、客戶姓名、電話"
+          placeholder="搜尋編號、姓名、電話..."
           prefix-icon="Search"
           style="max-width: 280px"
         />
@@ -521,16 +550,6 @@ const clearSearch = () => {
           @click="clearSearch"
           :disabled="!searchQuery"
         />
-      </div>
-      <div class="toolbar-actions">
-        <el-button
-          :icon="viewMode === 'detailed' ? 'Document' : 'List'"
-          @click="viewMode = viewMode === 'detailed' ? 'simple' : 'detailed'"
-        >
-          {{ viewMode === "detailed" ? "簡易模式" : "詳細模式" }}
-        </el-button>
-        <!-- <el-button icon="Download">匯出</el-button> -->
-        <el-button type="primary" icon="Plus">新增訂單</el-button>
       </div>
     </div>
 
@@ -579,6 +598,39 @@ const clearSearch = () => {
   padding: 20px;
   background: #f8fafc;
   min-height: 100vh;
+}
+
+.order-header {
+  margin-bottom: 24px;
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+
+    h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 8px 0;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #64748b;
+      margin: 0;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    .el-button {
+      margin: 0;
+    }
+  }
 }
 
 // 統計卡片
@@ -643,7 +695,7 @@ const clearSearch = () => {
 // 工具列
 .toolbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   margin-bottom: 20px;
   gap: 16px;
@@ -652,12 +704,13 @@ const clearSearch = () => {
   .date-selector {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
-  }
 
-  .toolbar-actions {
-    display: flex;
-    margin-left: auto;
+    .el-button[circle] {
+      flex-shrink: 0;
+      border: 1px solid #e2e8f0;
+    }
   }
 }
 
@@ -737,6 +790,7 @@ const clearSearch = () => {
 .orders-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-auto-rows: 1fr;
   gap: 16px;
 }
 
@@ -777,6 +831,30 @@ const clearSearch = () => {
     padding: 12px;
   }
 
+  .order-header {
+    margin-bottom: 16px;
+
+    .header-top {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+    }
+
+    .header-actions {
+      justify-content: stretch;
+      flex-wrap: wrap;
+
+      .el-button:first-child {
+        display: none;
+      }
+
+      .el-button {
+        flex: 1;
+        min-width: calc(50% - 4px);
+      }
+    }
+  }
+
   .stats-cards {
     display: none;
   }
@@ -786,32 +864,28 @@ const clearSearch = () => {
     align-items: stretch;
 
     .date-selector {
-      flex-direction: column;
-      align-items: stretch;
+      flex-wrap: wrap;
 
       .el-date-editor {
         width: 100% !important;
+        order: 2;
       }
 
-      .date-shortcuts {
-        justify-content: stretch;
+      .el-button[circle] {
+        flex-shrink: 0;
+      }
 
-        .el-button {
-          flex: 1;
-        }
+      .el-button[circle]:first-child {
+        order: 1;
+      }
+
+      .el-button[circle]:nth-child(3) {
+        order: 3;
       }
     }
 
     .el-input {
       max-width: 100% !important;
-    }
-
-    .toolbar-actions {
-      justify-content: stretch;
-
-      .el-button {
-        flex: 1;
-      }
     }
   }
 

@@ -59,7 +59,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="page">
+  <div class="products-manager">
+    <!-- 頂部標題 -->
+    <div class="page-header">
+      <div class="header-top">
+        <div>
+          <h2>產品管理</h2>
+          <p class="subtitle">管理麵包產品資訊，快速編輯與分類</p>
+        </div>
+        <el-button type="primary" icon="Plus" @click="editProduct.open()">
+          新增產品
+        </el-button>
+      </div>
+    </div>
+
     <EditCategory ref="editCategory" />
     <EditProduct ref="editProduct" @update="initProducts" />
     <div class="toolbar">
@@ -76,6 +89,9 @@ onMounted(() => {
       <div class="card" v-for="item in filteredProducts" :key="item.id">
         <div class="thumb" :class="{ disabled: !item.is_active }">
           <img v-if="item.image_url" :src="item.image_url" :alt="item.name" />
+          <div v-else class="image-placeholder">
+            <span>No Image</span>
+          </div>
           <div v-if="!item.is_active" class="overlay">下架</div>
           <div class="category">{{ item.category_name }}</div>
         </div>
@@ -94,7 +110,7 @@ onMounted(() => {
       description="沒有符合條件的產品"
     ></el-empty>
 
-    <div class="new-product flex justify-end">
+    <!-- <div class="new-product flex justify-end">
       <el-button
         type="primary"
         circle
@@ -103,17 +119,49 @@ onMounted(() => {
         plain
         @click="editProduct?.open()"
       />
-    </div>
+    </div> -->
   </div>
 </template>
 
 <style lang="scss" scoped>
 @use "@/assets/scss/scrollbar.scss" as *;
+
+.products-manager {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .page {
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.page-header {
+  margin-bottom: 8px;
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+
+    h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 8px 0;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #64748b;
+      margin: 0;
+    }
+  }
 }
 
 .toolbar {
@@ -171,15 +219,29 @@ onMounted(() => {
     border-radius: 8px;
     overflow: hidden;
     position: relative;
-    background-size: cover;
-    background-position: center center;
-    background-image: url("https://imagefaker.access.mx.com/440x230/999999/eee/?retina=1&text=No_Photo");
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
       transition: transform 0.3s ease;
+    }
+    .image-placeholder {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #94a3b8;
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+
+      span {
+        font-weight: 500;
+      }
     }
     &.disabled {
       filter: grayscale(0.8) brightness(1) opacity(0.7);
@@ -256,6 +318,22 @@ onMounted(() => {
 }
 
 @media (max-width: 640px) {
+  .products-manager {
+    padding: 12px;
+  }
+
+  .page-header {
+    .header-top {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+
+      .el-button {
+        width: 100%;
+      }
+    }
+  }
+
   .page {
     padding: 12px;
   }

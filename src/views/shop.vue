@@ -78,7 +78,7 @@ const toggleAside = () => {
     }
 
     .container {
-      background-color: #fdfbf6;
+      background-color: #f8fafc;
       height: 100%;
       overflow: auto;
       @include scrollbar(

@@ -79,6 +79,35 @@ const removeIngredient = (idx) => {
   form.ingredient_details.splice(idx, 1);
 };
 
+const deleteProduct = async () => {
+  ElMessageBox.confirm("確定要刪除此商品嗎？此操作無法恢復。", "刪除確認", {
+    confirmButtonText: "確定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      loading.value = true;
+      try {
+        await Products.Delete(form.id);
+        ElNotification({
+          title: "成功",
+          message: "商品已刪除",
+          type: "success",
+        });
+        close();
+        emit("update");
+      } catch (err) {
+        console.log("delete product error", err);
+        ElMessage.error("刪除商品失敗，請稍後再試");
+      } finally {
+        loading.value = false;
+      }
+    })
+    .catch(() => {
+      // 使用者取消刪除
+    });
+};
+
 defineExpose({ open, close });
 </script>
 
@@ -97,6 +126,7 @@ defineExpose({ open, close });
     <br />
     <el-form
       :model="form"
+      :loading="loading"
       ref="formRef"
       label-width="120px"
       label-position="left"
@@ -203,13 +233,33 @@ defineExpose({ open, close });
     </el-form>
 
     <template #footer>
-      <el-button @click="close">取消</el-button>
-      <el-button
-        type="primary"
-        @click="beforeSave(formRef)"
-        :loading="loading"
-        >{{ form.id ? "儲存" : "新增" }}</el-button
+      <div
+        :style="{
+          display: 'flex',
+          justifyContent: form.id ? 'space-between' : 'center',
+          alignItems: 'center',
+          width: '100%',
+        }"
       >
+        <el-button
+          v-if="form.id"
+          type="danger"
+          plain
+          @click="deleteProduct"
+          :loading="loading"
+        >
+          刪除商品
+        </el-button>
+        <div>
+          <el-button @click="close">取消</el-button>
+          <el-button
+            type="primary"
+            @click="beforeSave(formRef)"
+            :loading="loading"
+            >{{ form.id ? "儲存" : "新增" }}</el-button
+          >
+        </div>
+      </div>
     </template>
   </el-dialog>
 </template>

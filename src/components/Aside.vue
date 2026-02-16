@@ -35,7 +35,7 @@ const currentDate = computed(() => dayjs().format("DD"));
       <div class="icon">
         <img src="@/assets/images/icons/calendar.png" alt="" />
       </div>
-      <div class="title">行事曆</div>
+      <div class="title">接單</div>
     </router-link>
     <router-link class="link" to="/shop/order">
       <el-badge :value="100" :max="99" :offset="[-10, 4]">
