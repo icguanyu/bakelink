@@ -1,7 +1,8 @@
 import axios from "axios";
 const mode = import.meta.env.MODE;
 const token = localStorage.getItem("bakelink-token");
-
+console.log(mode);
+console.log(import.meta.env.VITE_APIURL);
 let isShowAlert = false; // 避免顯示太多次 ElMessageBox
 
 if (token) {
