@@ -1,10 +1,17 @@
 <script setup>
-import { computed, ref } from "vue";
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  nextTick,
+  ref,
+  watch,
+} from "vue";
 import { useRouter } from "vue-router";
 import dayjs from "dayjs";
 
 const router = useRouter();
-
+const scrollContainerRef = ref(null);
 // 訂單狀態
 const activeTab = ref("all");
 const searchQuery = ref("");
@@ -287,6 +294,16 @@ const orders = ref([
   },
 ]);
 
+orders.value.sort((a, b) => {
+  const getNumber = (order) => {
+    const match = order.id.match(/(\d{3})$/);
+    return match ? Number(match[1]) : 0;
+  };
+  const numberDiff = getNumber(a) - getNumber(b);
+  if (numberDiff !== 0) return numberDiff;
+  return a.id.localeCompare(b.id);
+});
+
 const statusOptions = [
   { label: "全部", value: "all", color: "" },
   { label: "已下單", value: "ordered", color: "#3b82f6", count: 0 },
@@ -367,9 +384,15 @@ const filteredOrders = computed(() => {
     );
   }
 
-  // 依取貨時間排序（最近的在前）
+  // 依訂單號碼排序（由小到大）
   return result.sort((a, b) => {
-    return dayjs(a.pickupTime).diff(dayjs(b.pickupTime));
+    const getNumber = (order) => {
+      const match = order.id.match(/(\d{3})$/);
+      return match ? Number(match[1]) : 0;
+    };
+    const numberDiff = getNumber(a) - getNumber(b);
+    if (numberDiff !== 0) return numberDiff;
+    return a.id.localeCompare(b.id);
   });
 });
 
@@ -422,6 +445,76 @@ const isSelectedDate = (offset) => {
 const clearSearch = () => {
   searchQuery.value = "";
 };
+
+const anchorWindowSize = 8;
+const scrollState = ref({ y: 0, max: 0 });
+const anchorNavRef = ref(null);
+
+const updateScrollState = () => {
+  const container = scrollContainerRef.value;
+  if (!container) return;
+  const y = container.scrollTop || 0;
+  const scrollHeight = container.scrollHeight;
+  const max = Math.max(0, scrollHeight - container.clientHeight);
+  scrollState.value = { y, max };
+
+  const anchorNav = anchorNavRef.value;
+  if (!anchorNav) return;
+  const anchorMax = anchorNav.scrollHeight - anchorNav.clientHeight;
+  if (anchorMax <= 0) {
+    anchorNav.scrollTop = 0;
+    return;
+  }
+  const ratio = max > 0 ? y / max : 0;
+  anchorNav.scrollTop = Math.round(anchorMax * ratio);
+};
+
+const handleScroll = () => {
+  window.requestAnimationFrame(updateScrollState);
+};
+
+const getOrderAnchorId = (order) => `order-${order.id}`;
+
+const getOrderNumberLabel = (order) => {
+  const match = order.id.match(/(\d{3})$/);
+  return match ? match[1] : "000";
+};
+
+const visibleAnchors = computed(() => filteredOrders.value);
+
+const scrollToOrder = (order) => {
+  const anchorId = getOrderAnchorId(order);
+  const target = document.getElementById(anchorId);
+  if (!target) return;
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+};
+
+onMounted(() => {
+  scrollContainerRef.value = document.querySelector(".container");
+  if (scrollContainerRef.value) {
+    scrollContainerRef.value.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+  }
+  window.addEventListener("resize", handleScroll, { passive: true });
+});
+
+onBeforeUnmount(() => {
+  if (scrollContainerRef.value) {
+    scrollContainerRef.value.removeEventListener("scroll", handleScroll);
+  }
+  window.removeEventListener("resize", handleScroll);
+});
+
+watch(
+  filteredOrders,
+  () => {
+    nextTick(() => {
+      updateScrollState();
+    });
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -576,13 +669,18 @@ const clearSearch = () => {
 
     <!-- 訂單列表 -->
     <div class="orders-grid">
-      <OrderCard
+      <div
         v-for="order in filteredOrders"
         :key="order.id"
-        :order="order"
-        :view-mode="viewMode"
-        @status-change="updateStatus"
-      />
+        class="order-card-anchor"
+        :id="getOrderAnchorId(order)"
+      >
+        <OrderCard
+          :order="order"
+          :view-mode="viewMode"
+          @status-change="updateStatus"
+        />
+      </div>
 
       <!-- 空狀態 -->
       <div v-if="filteredOrders.length === 0" class="empty-state">
@@ -590,10 +688,27 @@ const clearSearch = () => {
         <p class="empty-text">目前沒有訂單</p>
       </div>
     </div>
+
+    <div
+      v-if="filteredOrders.length"
+      ref="anchorNavRef"
+      class="order-anchor-nav"
+    >
+      <button
+        v-for="order in visibleAnchors"
+        :key="order.id"
+        type="button"
+        class="anchor-item"
+        @click="scrollToOrder(order)"
+      >
+        {{ getOrderNumberLabel(order) }}
+      </button>
+    </div>
   </div>
 </template>
 
 <style scoped lang="scss">
+@use "@/assets/scss/scrollbar.scss" as *;
 .order-manager {
   padding: 20px;
   background: #f8fafc;
@@ -794,6 +909,57 @@ const clearSearch = () => {
   gap: 16px;
 }
 
+.order-card-anchor {
+  scroll-margin-top: 80px;
+}
+
+.order-anchor-nav {
+  position: fixed;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  max-height: 40vh;
+  overflow-y: auto;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  backdrop-filter: blur(6px);
+  @include scrollbar(
+    rgba(192, 192, 192, 0.7),
+    rgba(120, 120, 120, 0.9),
+    rgba(133, 133, 133, 0.08)
+  );
+  .anchor-item {
+    width: 36px;
+    height: 22px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .anchor-item:hover {
+    border-color: #3b82f6;
+    color: #1d4ed8;
+  }
+
+  .anchor-ellipsis {
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1;
+  }
+}
+
 // 空狀態
 .empty-state {
   grid-column: 1 / -1;
@@ -891,6 +1057,10 @@ const clearSearch = () => {
 
   .orders-grid {
     grid-template-columns: 1fr;
+  }
+
+  .order-anchor-nav {
+    display: flex;
   }
 }
 
