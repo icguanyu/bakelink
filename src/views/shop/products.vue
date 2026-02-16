@@ -1,187 +1,83 @@
 <script setup>
-import { computed, ref } from "vue";
 import EditProduct from "@/components/product/EditProduct.vue";
-
+import { ProductCategory, Products } from "@/api/products";
+import { reactive } from "vue";
 const editCategory = ref();
 const editProduct = ref();
-const value = ref("全部");
-
-const options = [
-  "全部",
-  "吐司",
-  "可頌",
-  "貝果",
-  "法棍",
-  "酸種",
-  "波蘿",
-  "雜糧",
-  "甜甜圈",
-  "蛋塔",
-  "鹽可頌",
-  "牛角包",
-  "丹麥",
-  "未分類",
-];
-
-const products = [
-  {
-    id: 1,
-    name: "經典牛奶吐司外脆內軟，適合做法式吐司。",
-    category: "吐司",
-    price: 120,
-    description: "柔軟奶香，當日現烤基底吐司。",
-    tag: "招牌",
-    image: new URL("@/assets/images/sample/6.jpg", import.meta.url).href,
-    isEnabled: true,
-  },
-  {
-    id: 2,
-    name: "法式厚切吐司",
-    category: "吐司",
-    price: 140,
-    description: "外脆內軟，適合做法式吐司。",
-    tag: "厚切",
-    image: new URL("@/assets/images/sample/2.jpg", import.meta.url).href,
-    isEnabled: false,
-  },
-  {
-    id: 3,
-    name: "海鹽奶油可頌",
-    category: "可頌",
-    price: 75,
-    description: "層次酥脆，帶淡淡海鹽風味。",
-    tag: "人氣",
-    image: new URL("@/assets/images/sample/3.jpg", import.meta.url).href,
-    isEnabled: true,
-  },
-  {
-    id: 4,
-    name: "伯爵茶貝果",
-    category: "貝果",
-    price: 90,
-    description: "茶香濃郁，口感紮實。",
-    tag: "茶香",
-    image: new URL("@/assets/images/sample/4.jpg", import.meta.url).href,
-    isEnabled: false,
-  },
-  {
-    id: 5,
-    name: "煙燻火腿三明治",
-    category: "雜糧",
-    price: 160,
-    description: "全麥雜糧麵包夾煙燻火腿與起司。",
-    tag: "輕食",
-    image: new URL("@/assets/images/sample/1.jpg", import.meta.url).href,
-    isEnabled: true,
-  },
-  {
-    id: 6,
-    name: "小麥酸種",
-    category: "酸種",
-    price: 180,
-    description: "自然發酵 24 小時，帶淡淡酸香。",
-    tag: "低酵母",
-    image: new URL("@/assets/images/sample/10.jpg", import.meta.url).href,
-    isEnabled: true,
-  },
-  {
-    id: 7,
-    name: "蜂蜜核桃雜糧",
-    category: "雜糧",
-    price: 150,
-    description: "核桃與蜂蜜增加香氣與口感。",
-    tag: "高纖",
-    image: new URL("@/assets/images/sample/2.jpg", import.meta.url).href,
-    isEnabled: true,
-  },
-  {
-    id: 8,
-    name: "手作波蘿麵包",
-    category: "波蘿",
-    price: 65,
-    description: "外層脆皮波蘿，內裡鬆軟奶香。",
-    tag: "下午茶",
-    image: new URL("@/assets/images/sample/9.jpg", import.meta.url).href,
-    isEnabled: true,
-  },
-  {
-    id: 9,
-    name: "蒜香法棍",
-    category: "法棍",
-    price: 110,
-    description: "外酥內軟，蒜香奶油均勻滲入。",
-    tag: "熱賣",
-    image: new URL("@/assets/images/sample/5.jpg", import.meta.url).href,
-    isEnabled: true,
-  },
-  {
-    id: 10,
-    name: "巧克力可頌",
-    category: "可頌",
-    price: 85,
-    description: "夾入黑巧克力棒，烤後微微融化。",
-    tag: "甜點",
-    image: new URL("@/assets/images/sample/7.jpg", import.meta.url).href,
-    isEnabled: false,
-  },
-  {
-    id: 11,
-    name: "起司鹹可頌",
-    category: "可頌",
-    price: 90,
-    description: "表層烤上帕瑪森與切達雙起司。",
-    tag: "鹹香",
-    image: new URL("@/assets/images/sample/6.jpg", import.meta.url).href,
-    isEnabled: true,
-  },
-  {
-    id: 12,
-    name: "桂圓紅棗吐司",
-    category: "吐司",
-    price: 150,
-    description: "桂圓與紅棗丁拌入麵糰，香甜耐嚼。",
-    tag: "季節",
-    image: new URL("@/assets/images/sample/8.jpg", import.meta.url).href,
-    isEnabled: false,
-  },
-];
+const currentCategory = ref(null);
+const loading = ref(false);
+const props = {
+  label: "name",
+  value: "id",
+};
+const form = reactive({
+  page: null,
+  limit: null,
+  keyword: "",
+  category_id: null, // 暫時不須透過分類搜尋，撈出全部即可
+});
+const categories = ref([{ name: "全部", id: null }]);
+const products = ref([]);
 
 const filteredProducts = computed(() => {
-  if (value.value === "全部") return products;
-  return products.filter((item) => item.category === value.value);
+  if (currentCategory.value === null) return products.value;
+  return products.value.filter(
+    (item) => item.category_id === currentCategory.value,
+  );
 });
 
-const categoryList = computed(() => {
-  return options
-    .filter((opt) => opt !== "全部")
-    .map((name) => ({ name, value: name }));
-});
-
-const handleSaveProduct = (product) => {
-  console.log("儲存產品：", product);
-  // TODO: 新增或更新產品到 products 列表，或呼叫 API
+const initProductCategories = async () => {
+  loading.value = true;
+  try {
+    const res = await ProductCategory.List();
+    // console.log("product categories", res);
+    categories.value = [{ name: "全部", id: null }, ...res.data.data];
+  } catch (error) {
+    console.log("catch", error);
+  } finally {
+    loading.value = false;
+  }
 };
+
+const initProducts = async () => {
+  loading.value = true;
+  try {
+    const res = await Products.List();
+    console.log("products", res);
+    products.value = res.data.data;
+  } catch (error) {
+    console.log("catch", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(() => {
+  initProductCategories();
+  initProducts();
+});
 </script>
 
 <template>
   <div class="page">
     <EditCategory ref="editCategory" />
-    <EditProduct
-      ref="editProduct"
-      :categories="categoryList"
-      @save="handleSaveProduct"
-    />
+    <EditProduct ref="editProduct" @update="initProducts" />
     <div class="toolbar">
-      <el-segmented v-model="value" :options="options" />
+      <el-segmented
+        v-model="currentCategory"
+        :options="categories"
+        :props="props"
+        v-loading="loading"
+      />
       <el-button icon="setting" text @click="editCategory.open()"></el-button>
     </div>
 
     <div class="columns-2">
       <div class="card" v-for="item in filteredProducts" :key="item.id">
-        <div class="thumb" :class="{ disabled: !item.isEnabled }">
-          <img :src="item.image" :alt="item.name" />
-          <div v-if="!item.isEnabled" class="overlay">下架</div>
-          <div class="category">{{ item.category }}</div>
+        <div class="thumb" :class="{ disabled: !item.is_active }">
+          <img v-if="item.image_url" :src="item.image_url" :alt="item.name" />
+          <div v-if="!item.is_active" class="overlay">下架</div>
+          <div class="category">{{ item.category_name }}</div>
         </div>
         <div class="info">
           <div class="title">
@@ -275,6 +171,9 @@ const handleSaveProduct = (product) => {
     border-radius: 8px;
     overflow: hidden;
     position: relative;
+    background-size: cover;
+    background-position: center center;
+    background-image: url("https://imagefaker.access.mx.com/440x230/999999/eee/?retina=1&text=No_Photo");
     img {
       width: 100%;
       height: 100%;

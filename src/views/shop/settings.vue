@@ -1,13 +1,18 @@
 <script setup>
 import { reactive, ref } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
+
+const router = useRouter();
+const authStore = useAuthStore();
 
 const paymentOptions = [
   { label: "現金", value: "cash" },
-  { label: "銀行轉帳", value: "bank" },
   { label: "Line Pay", value: "linepay" },
-  { label: "信用卡", value: "card" },
-  { label: "街口支付", value: "jkpay" },
-  { label: "Apple Pay", value: "applepay" },
+  // { label: "銀行轉帳", value: "bank" },
+  // { label: "信用卡", value: "card" },
+  // { label: "街口支付", value: "jkpay" },
+  // { label: "Apple Pay", value: "applepay" },
 ];
 
 const pickupOptions = [
@@ -20,7 +25,7 @@ const businessHours = ref(
     day: d,
     enabled: !["六", "日"].includes(d) ? true : false,
     time: ["09:00", "18:00"],
-  }))
+  })),
 );
 
 const form = reactive({
@@ -64,6 +69,20 @@ const handleSave = () => {
   console.log("儲存商家設定：", payload);
   ElMessage.success("設定已儲存");
   // TODO: 呼叫 API 儲存
+};
+
+const handleLogout = () => {
+  ElMessageBox.confirm("確定要登出嗎？", "登出確認", {
+    confirmButtonText: "確定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(() => {
+      authStore.logout();
+      ElMessage.success("已登出");
+      router.push("/");
+    })
+    .catch(() => {});
 };
 </script>
 
@@ -129,6 +148,13 @@ const handleSave = () => {
               :rows="3"
               placeholder="品牌故事、主打品項"
             />
+          </el-form-item>
+
+          <el-divider />
+          <el-form-item label="帳號管理">
+            <el-button type="danger" plain @click="handleLogout">
+              登出帳號
+            </el-button>
           </el-form-item>
         </el-card>
         <el-card class="card" shadow="never" v-show="segment === 'pay'">

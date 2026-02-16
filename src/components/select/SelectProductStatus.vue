@@ -1,6 +1,6 @@
 <script setup>
 const props = defineProps({
-  modelValue: String,
+  modelValue: Boolean,
   placeholder: {
     type: String,
     default: "請選擇",

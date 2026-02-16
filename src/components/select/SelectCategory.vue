@@ -1,4 +1,5 @@
 <script setup>
+import { ProductCategory } from "@/api/products";
 const props = defineProps({
   modelValue: String,
   placeholder: {
@@ -6,27 +7,26 @@ const props = defineProps({
     default: "請選擇種類",
   },
 });
+const loading = ref(false);
 const emits = defineEmits(["update:modelValue"]);
-const categories = ref([
-  { id: 1, name: "吐司" },
-  { id: 2, name: "可頌" },
-  { id: 3, name: "貝果" },
-  { id: 4, name: "法棍" },
-  { id: 5, name: "雜糧" },
-  { id: 6, name: "酸種" },
-  { id: 7, name: "波蘿" },
-  { id: 8, name: "甜甜圈" },
-  { id: 9, name: "蛋塔" },
-  { id: 10, name: "鹽可頌" },
-  { id: 11, name: "牛角包" },
-  { id: 12, name: "丹麥" },
-  { id: 14, name: "佛卡夏" },
-  { id: 15, name: "帕尼尼" },
-  { id: 16, name: "軟法" },
-  { id: 17, name: "雜糧" },
-  { id: 18, name: "全麥" },
-  { id: 19, name: "司康" },
-]);
+const categories = ref([]);
+
+const initProductCategories = async () => {
+  loading.value = true;
+  try {
+    const res = await ProductCategory.List();
+    console.log("res", res);
+    categories.value = res.data.data;
+  } catch (err) {
+    console.log("fetch categories error", err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(() => {
+  initProductCategories();
+});
 </script>
 
 <template>
@@ -35,12 +35,13 @@ const categories = ref([
     @clear="$emit('update:modelValue', null)"
     @update:modelValue="$emit('update:modelValue', $event)"
     :placeholder="placeholder"
+    :loading="loading"
   >
     <el-option
       v-for="category in categories"
       :key="category.id"
       :label="category.name"
-      :value="category.name"
+      :value="category.id"
     />
   </el-select>
 </template>

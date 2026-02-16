@@ -1,37 +1,21 @@
 <script setup>
-import { computed, reactive, ref, watch } from "vue";
-
+import { ProductCategory } from "@/api/products";
 const emit = defineEmits(["save"]);
-
+const loading = ref(false);
 const visible = ref(false);
-const categories = ref([
-  { id: 1, name: "吐司" },
-  { id: 2, name: "可頌" },
-  { id: 3, name: "貝果" },
-  { id: 4, name: "法棍" },
-  { id: 5, name: "雜糧" },
-  { id: 6, name: "酸種" },
-  { id: 7, name: "波蘿" },
-  { id: 8, name: "甜甜圈" },
-  { id: 9, name: "蛋塔" },
-  { id: 10, name: "鹽可頌" },
-  { id: 11, name: "牛角包" },
-  { id: 12, name: "丹麥" },
-  { id: 14, name: "佛卡夏" },
-  { id: 15, name: "帕尼尼" },
-  { id: 16, name: "軟法" },
-  { id: 17, name: "雜糧" },
-  { id: 18, name: "全麥" },
-  { id: 19, name: "司康" },
-]);
+const categories = ref([]);
 
 const localCategories = ref([]);
 
 const form = reactive({
-  name: "",
+  page: null,
+  limit: null,
+  keyword: "",
 });
 
-const hasCategories = computed(() => localCategories.value.length > 0);
+const newCategory = reactive({
+  name: "",
+});
 
 const open = () => {
   visible.value = true;
@@ -41,16 +25,49 @@ const close = () => {
   visible.value = false;
 };
 
-const addCategory = () => {
-  categories.value.push({
-    id: Date.now(),
-    name: form.name,
-  });
-  form.name = "";
+const addCategory = async () => {
+  loading.value = true;
+  try {
+    const res = await ProductCategory.Create(newCategory);
+    ElNotification({
+      title: "成功",
+      message: "已新增種類",
+      type: "success",
+    });
+    newCategory.name = "";
+    await initProductCategories();
+  } catch (error) {
+    console.log("catch", error);
+  } finally {
+    loading.value = false;
+  }
 };
 
 const removeCategory = (id) => {
-  categories.value = categories.value.filter((item) => item.id !== id);
+  ElMessageBox.confirm("確定要刪除這個種類嗎？", "警告", {
+    confirmButtonText: "確定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      loading.value = true;
+      try {
+        await ProductCategory.Delete(id);
+        ElNotification({
+          title: "成功",
+          message: "已刪除種類",
+          type: "success",
+        });
+        await initProductCategories();
+      } catch (error) {
+        console.log("catch", error);
+      } finally {
+        loading.value = false;
+      }
+    })
+    .catch(() => {
+      // 取消刪除
+    });
 };
 
 const submit = () => {
@@ -59,6 +76,23 @@ const submit = () => {
 };
 
 defineExpose({ open, close });
+
+const initProductCategories = async () => {
+  loading.value = true;
+  try {
+    const res = await ProductCategory.List(form);
+    console.log("res", res);
+    categories.value = res.data.data;
+  } catch (err) {
+    console.log("fetch categories error", err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+// mounted(() => {
+//   initProductCategories();
+// });
 </script>
 
 <template>
@@ -69,9 +103,10 @@ defineExpose({ open, close });
     append-to-body
     destroy-on-close
     :close-on-click-modal="false"
+    @opened="initProductCategories"
   >
     <div class="layout">
-      <section class="list">
+      <section class="list" v-loading="loading">
         <header>
           <h3>現有種類</h3>
           <small>若種類被移除，原已存在的商品將被歸類為「未分類」</small>
@@ -88,6 +123,7 @@ defineExpose({ open, close });
             />
           </div>
         </div>
+
         <el-empty v-else description="目前沒有種類" />
       </section>
 
@@ -96,9 +132,9 @@ defineExpose({ open, close });
           <h3>新增種類</h3>
           <!-- <small>名稱建議不超過4個字</small> -->
         </header>
-        <el-form :model="form" label-width="60px" label-position="top">
+        <el-form :model="newCategory" label-width="60px" label-position="top">
           <el-form-item label="名稱" prop="name">
-            <el-input v-model="form.name" placeholder="輸入種類名稱" />
+            <el-input v-model="newCategory.name" placeholder="輸入種類名稱" />
           </el-form-item>
 
           <el-form-item>
@@ -109,8 +145,10 @@ defineExpose({ open, close });
     </div>
 
     <template #footer>
-      <el-button @click="close">取消</el-button>
-      <el-button type="primary" @click="submit">儲存</el-button>
+      <el-button @click="close">返回</el-button>
+      <!-- <el-button type="primary" @click="submit" :loading="loading"
+        >儲存</el-button
+      > -->
     </template>
   </el-dialog>
 </template>

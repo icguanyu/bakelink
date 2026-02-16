@@ -12,6 +12,7 @@ const router = createRouter({
     {
       path: "/shop",
       name: "shop",
+      meta: { requireAuth: true },
       component: () => import("../views/shop.vue"),
       children: [
         {
@@ -60,6 +61,22 @@ const router = createRouter({
     }
     return { top: 0 };
   },
+});
+
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem("bakelink-token");
+
+  if (to.matched.some((m) => m.meta.requireAuth)) {
+    // requireAuth = true = 需驗證
+    if (!token) {
+      ElMessage.error("請重新登入");
+      next("/");
+    } else {
+      next();
+    }
+  } else {
+    next();
+  }
 });
 
 export default router;
