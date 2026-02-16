@@ -1,7 +1,32 @@
+<script setup>
+import { ref } from "vue";
+
+const isAsideOpen = ref(true);
+
+const toggleAside = () => {
+  isAsideOpen.value = !isAsideOpen.value;
+};
+</script>
+
 <template>
   <div class="shop">
-    <Aside />
+    <Aside
+      :class="{ 'is-collapsed': !isAsideOpen }"
+      :aria-hidden="!isAsideOpen"
+      @toggle="toggleAside"
+    />
     <main>
+      <button
+        v-if="!isAsideOpen"
+        class="aside-toggle-tag"
+        type="button"
+        aria-label="Open aside menu"
+        @click="toggleAside"
+      >
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
       <div class="container">
         <!-- <header>Header Content</header> -->
         <router-view></router-view>
@@ -18,13 +43,41 @@
   display: flex;
 
   main {
+    position: relative;
     background-color: #1c2345;
     flex: 1;
     height: 100dvh;
     overflow-y: hidden;
 
+    .aside-toggle-tag {
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 42px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: 0 8px 8px 0;
+      background: #fcae08;
+      cursor: pointer;
+      z-index: 6;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+      .bar {
+        display: block;
+        width: 16px;
+        height: 2px;
+        background-color: #fff;
+        border-radius: 999px;
+      }
+    }
+
     .container {
-      border-radius: 20px 0 0 20px;
       background-color: #fdfbf6;
       height: 100%;
       overflow: auto;

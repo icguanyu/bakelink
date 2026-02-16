@@ -371,9 +371,9 @@ h2 {
   display: flex;
   justify-content: space-between;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 16px;
-  z-index: 10;
+  // position: sticky;
+  // top: 16px;
+  // z-index: 10;
   overflow-x: auto;
   .el-segmented {
     padding: 0 8px;

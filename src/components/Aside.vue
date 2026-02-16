@@ -2,6 +2,8 @@
 import { computed } from "vue";
 import dayjs from "dayjs";
 
+const emit = defineEmits(["toggle"]);
+
 const currentYear = computed(() => dayjs().format("YYYY"));
 const currentMonth = computed(() => dayjs().format("MMM").toUpperCase());
 const currentDate = computed(() => dayjs().format("DD"));
@@ -9,6 +11,15 @@ const currentDate = computed(() => dayjs().format("DD"));
 
 <template>
   <aside>
+    <div
+      class="aside-toggle"
+      aria-label="Toggle aside menu"
+      @click="emit('toggle')"
+    >
+      <div class="icon">
+        <img src="@/assets/images/icons/expand_left.svg" alt="" />
+      </div>
+    </div>
     <div class="date-box">
       <div class="year">{{ currentYear }}</div>
       <div class="month">{{ currentMonth }}</div>
@@ -54,12 +65,20 @@ aside {
   position: sticky;
   top: 0;
   flex-shrink: 0;
+  width: 70px;
+  flex-basis: 70px;
   height: 100dvh;
   background-color: #1c2345;
   display: flex;
   flex-direction: column;
   padding: 8px 0;
   gap: 8px;
+  overflow: hidden;
+  transition:
+    width 0.2s ease,
+    flex-basis 0.2s ease,
+    opacity 0.2s ease;
+
   .date-box {
     display: flex;
     flex-direction: column;
@@ -133,6 +152,23 @@ aside {
       transform: translateY(-50%) translateX(50%) rotate(45deg);
     }
   }
+  .aside-toggle {
+    text-align: center;
+    cursor: pointer;
+    img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+    }
+  }
+}
+
+aside.is-collapsed {
+  width: 0;
+  flex-basis: 0;
+  opacity: 0;
+  padding: 0;
+  pointer-events: none;
 }
 @media (max-width: 640px) {
   aside {

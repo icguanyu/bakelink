@@ -1190,7 +1190,6 @@ const formatTime = (datetime) => {
   .schedule-right {
     min-width: 100%;
     min-height: 300px;
-    max-height: 400px;
   }
 
   .schedule-list {
