@@ -418,10 +418,6 @@ const updateStatus = (order, newStatus) => {
   ElMessage.success(`訂單 ${order.id} 已更新為${getStatusLabel(newStatus)}`);
 };
 
-const viewOrderDetail = (orderId) => {
-  router.push(`/shop/order/${orderId}`);
-};
-
 // 快捷日期選擇
 const setToday = () => {
   selectedDate.value = dayjs().format("YYYY-MM-DD");
@@ -599,12 +595,7 @@ const clearSearch = () => {
 
     <!-- 訂單列表 -->
     <div class="orders-grid">
-      <div
-        v-for="order in filteredOrders"
-        :key="order.id"
-        class="order-card"
-        @click="viewOrderDetail(order.id)"
-      >
+      <div v-for="order in filteredOrders" :key="order.id" class="order-card">
         <!-- 訂單頭部 -->
         <div class="order-header">
           <div class="order-id">
@@ -633,32 +624,19 @@ const clearSearch = () => {
             <el-icon><Phone /></el-icon>
             {{ order.phone }}
           </div>
+          <div v-if="viewMode === 'detailed'" class="customer-pickup">
+            <el-icon><AlarmClock /></el-icon>
+
+            <span class="pickup-time">
+              <span v-if="!isToday(order.pickupTime)" class="pickup-date">{{
+                formatDate(order.pickupTime)
+              }}</span>
+              {{ formatTime(order.pickupTime) }}
+            </span>
+          </div>
         </div>
 
         <!-- 取貨時間 -->
-        <div
-          class="order-pickup"
-          :class="{
-            soon: isSoon(order.pickupTime),
-            today: isToday(order.pickupTime),
-          }"
-        >
-          <el-icon><AlarmClock /></el-icon>
-          <span class="pickup-label">取貨時間</span>
-          <span class="pickup-time">
-            <span v-if="!isToday(order.pickupTime)" class="pickup-date">{{
-              formatDate(order.pickupTime)
-            }}</span>
-            {{ formatTime(order.pickupTime) }}
-          </span>
-          <el-tag
-            v-if="isSoon(order.pickupTime)"
-            type="danger"
-            size="small"
-            effect="dark"
-            >即將到時</el-tag
-          >
-        </div>
 
         <!-- 訂購項目 -->
         <div v-if="viewMode === 'detailed'" class="order-items">
@@ -936,14 +914,14 @@ const clearSearch = () => {
 
   .order-customer {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     align-items: center;
     justify-content: space-between;
 
     .customer-info {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 4px;
 
       .customer-icon {
         color: #3b82f6;
@@ -957,13 +935,14 @@ const clearSearch = () => {
       }
     }
 
-    .customer-phone {
+    .customer-phone,
+    .customer-pickup {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       font-size: 13px;
       color: #64748b;
-      margin-left: 26px;
+      margin-left: 18px;
 
       .el-icon {
         font-size: 14px;
@@ -971,70 +950,10 @@ const clearSearch = () => {
     }
   }
 
-  .order-pickup {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    background: #f8fafc;
-    border-radius: 8px;
-    border-left: 3px solid #64748b;
-
-    &.today {
-      background: #fef3c7;
-      border-left-color: #f59e0b;
-
-      .pickup-label {
-        color: #92400e;
-      }
-
-      .pickup-time {
-        color: #92400e;
-        font-weight: 700;
-      }
-    }
-
-    &.soon {
-      background: #fee2e2;
-      border-left-color: #ef4444;
-      animation: pulse 2s infinite;
-
-      .pickup-label {
-        color: #991b1b;
-      }
-
-      .pickup-time {
-        color: #991b1b;
-        font-weight: 700;
-      }
-    }
-
-    .el-icon {
-      font-size: 18px;
-      color: #64748b;
-    }
-
-    .pickup-label {
-      color: #64748b;
-    }
-
-    .pickup-time {
-      font-size: 15px;
-      font-weight: 600;
-      color: #1e293b;
-      margin-left: auto;
-
-      .pickup-date {
-        margin-right: 4px;
-        color: #64748b;
-      }
-    }
-  }
-
   .order-items {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
     padding: 10px 12px;
     background: #f0f9ff;
     border-radius: 8px;
