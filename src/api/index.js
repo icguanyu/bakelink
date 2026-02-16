@@ -1,5 +1,5 @@
 import axios from "axios";
-
+const mode = import.meta.env.MODE;
 const token = localStorage.getItem("bakelink-token");
 
 let isShowAlert = false; // 避免顯示太多次 ElMessageBox
@@ -7,7 +7,10 @@ let isShowAlert = false; // 避免顯示太多次 ElMessageBox
 if (token) {
   axios.defaults.headers.common["Authorization"] = "Bearer " + token;
 }
-axios.defaults.baseURL = import.meta.env.VITE_APIURL;
+axios.defaults.baseURL =
+  mode === "development"
+    ? "http://localhost:3000"
+    : import.meta.env.VITE_APIURL;
 
 axios.interceptors.response.use(
   (response) => {
