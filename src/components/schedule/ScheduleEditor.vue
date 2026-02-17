@@ -1,78 +1,40 @@
 <script setup>
-import { computed, ref, watch } from "vue";
-import SelectProduct from "@/components/select/SelectProduct.vue";
+import { Schedules } from "@/api/schedules";
+import { scheduleStatusOptions } from "@/utils/constants";
+import { ElNotification } from "element-plus";
+const statusOptions = scheduleStatusOptions;
 
 const props = defineProps({
   dateLabel: {
     type: String,
     default: "",
   },
-  initialProducts: {
-    type: Array,
-    default: () => [],
-  },
-  initialStatus: {
-    type: String,
-    default: "draft",
-  },
-  initialStartTime: {
-    type: String,
-    default: "",
-  },
-  initialEndTime: {
-    type: String,
-    default: "",
-  },
 });
 
 const emit = defineEmits(["close", "save"]);
+const loading = ref(false);
+const form = reactive({
+  schedule_date: props.dateLabel,
+  status: "DRAFT",
+  order_start_at: null,
+  order_end_at: null,
+  items: [],
+});
 
-const statusOptions = [
-  { label: "草稿", value: "draft" },
-  { label: "預告", value: "announce" },
-  { label: "收單中", value: "open" },
-  { label: "已結單", value: "closed" },
-  { label: "出貨結束", value: "shipped" },
-];
-
-const status = ref(props.initialStatus);
-const startTime = ref(props.initialStartTime);
-const endTime = ref(props.initialEndTime);
 const selectedProducts = ref([]);
 const selectedProductId = ref("");
 const selectProductRef = ref(null);
-const displayDateLabel = computed(() => {
-  if (!props.dateLabel) return "";
-  const parts = props.dateLabel.split("/");
-  if (parts.length === 3) return `${parts[1]}/${parts[2]}`;
-  return props.dateLabel;
-});
-
-const resetFromProps = () => {
-  status.value = props.initialStatus;
-  startTime.value = props.initialStartTime;
-  endTime.value = props.initialEndTime;
-  selectedProducts.value = props.initialProducts.map((item) => ({
-    id: item.id,
-    name: item.name,
-    max: item.max ?? null,
-  }));
-  selectedProductId.value = "";
-};
 
 watch(
-  () => [
-    props.initialProducts,
-    props.initialStatus,
-    props.initialStartTime,
-    props.initialEndTime,
-  ],
-  resetFromProps,
+  () => props.dateLabel,
+  (val) => {
+    console.log("date change:", val);
+  },
   { immediate: true },
 );
 
 const excludeProductIds = computed(() => {
-  return selectedProducts.value.map((item) => item.id);
+  return form.items.map((item) => item.product_id);
 });
 
 const addProduct = () => {
@@ -83,45 +45,52 @@ const addProduct = () => {
   if (!product) return;
 
   // 檢查產品是否已存在
-  const isDuplicate = selectedProducts.value.some(
-    (item) => item.id === product.id,
-  );
+  const isDuplicate = form.items.some((item) => item.product_id === product.id);
   if (isDuplicate) {
     ElMessage.warning("此產品已在列表中");
     selectedProductId.value = "";
     return;
   }
 
-  selectedProducts.value.push({
-    id: product.id,
+  form.items.push({
+    product_id: product.id,
     name: product.name,
-    max: 0,
+    sales_limit: 0,
   });
   selectedProductId.value = "";
 };
 
 const removeProduct = (id) => {
-  selectedProducts.value = selectedProducts.value.filter(
-    (item) => item.id !== id,
-  );
+  form.items = form.items.filter((item) => item.product_id !== id);
 };
 
 const closeEditor = () => {
   emit("close");
 };
 
-const saveEditor = () => {
-  emit("save", {
-    status: status.value,
-    startTime: startTime.value,
-    endTime: endTime.value,
-    products: selectedProducts.value.map((item) => ({
-      id: item.id,
-      name: item.name,
-      max: item.max ?? null,
-    })),
-  });
+const saveEditor = async () => {
+  loading.value = true;
+  try {
+    await Schedules.Create(form);
+    ElNotification({
+      title: "成功",
+      message: "排程已儲存",
+      type: "success",
+    });
+    closeEditor()
+  } catch (error) {
+    console.log("catch:", error);
+  } finally {
+    loading.value = false;
+  }
 };
+
+const displayDateLabel = computed(() => {
+  if (!props.dateLabel) return "";
+  const parts = props.dateLabel.split("/");
+  if (parts.length === 3) return `${parts[1]}/${parts[2]}`;
+  return props.dateLabel;
+});
 </script>
 
 <template>
@@ -136,22 +105,28 @@ const saveEditor = () => {
           class="editor-save"
           type="primary"
           circle
+          :loading="loading"
           @click="saveEditor"
         >
           <el-icon><Check /></el-icon>
         </el-button>
       </div>
     </div>
-    <div class="editor-body">
+    <div class="editor-body" v-loading="loading">
       <div class="editor-section">
         <div class="section-title">排程資訊</div>
-        <el-form class="schedule-form" label-position="top">
+        <el-form
+          :model="form"
+          ref="formRef"
+          class="schedule-form"
+          label-position="top"
+        >
           <div class="field-row">
             <el-form-item label="日期" class="field">
               <div class="field-value">{{ dateLabel || "-" }}</div>
             </el-form-item>
-            <el-form-item label="開單狀態" class="field">
-              <el-select v-model="status" placeholder="選擇狀態">
+            <el-form-item label="開單狀態" class="field" prop="status">
+              <el-select v-model="form.status" placeholder="選擇狀態">
                 <el-option
                   v-for="option in statusOptions"
                   :key="option.value"
@@ -162,20 +137,29 @@ const saveEditor = () => {
             </el-form-item>
           </div>
           <div class="field-row">
-            <el-form-item label="開單開始時間" class="field">
-              <el-time-picker
-                v-model="startTime"
+            <el-form-item
+              label="開單開始時間"
+              class="field"
+              prop="order_start_at"
+            >
+              <el-date-picker
+                v-model="form.order_start_at"
+                type="datetime"
                 placeholder="開始時間"
-                format="HH:mm"
-                value-format="HH:mm"
+                value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
-            <el-form-item label="開單截止時間" class="field">
-              <el-time-picker
-                v-model="endTime"
+            <el-form-item
+              label="開單截止時間"
+              class="field"
+              prop="order_end_at"
+            >
+              <el-date-picker
+                v-model="form.order_end_at"
+                type="datetime"
                 placeholder="截止時間"
-                format="HH:mm"
-                value-format="HH:mm"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                :default-time="new Date(2000, 1, 1, 12, 0, 0)"
               />
             </el-form-item>
           </div>
@@ -201,12 +185,12 @@ const saveEditor = () => {
             />
           </div>
 
-          <div v-if="selectedProducts.length === 0" class="empty-products">
+          <div v-if="form.items.length === 0" class="empty-products">
             尚未新增產品
           </div>
           <div v-else class="product-list">
             <div
-              v-for="item in selectedProducts"
+              v-for="item in form.items"
               :key="item.id"
               class="product-wrapper"
             >
@@ -218,7 +202,7 @@ const saveEditor = () => {
                 <div class="product-limit">
                   <div class="field-label">可售上限</div>
                   <el-input-number
-                    v-model="item.max"
+                    v-model="item.sales_limit"
                     :min="0"
                     :max="999"
                     size="small"
@@ -230,12 +214,14 @@ const saveEditor = () => {
                 plain
                 icon="delete"
                 size="small"
-                @click="removeProduct(item.id)"
+                @click="removeProduct(item.product_id)"
               />
             </div>
           </div>
         </div>
       </div>
+
+      <!-- <pre>{{ form }}</pre> -->
     </div>
   </div>
 </template>

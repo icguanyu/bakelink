@@ -8,6 +8,10 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  isLoading: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(["select"]);
@@ -41,7 +45,7 @@ const selectDate = (date) => {
       >
         <div
           class="schedule-header-row"
-          :class="{ 'no-orders': !schedule.hasOrders }"
+          :class="{ 'no-orders': !schedule.hasSchedule }"
         >
           <div class="date-section">
             <div
@@ -57,21 +61,18 @@ const selectDate = (date) => {
             </div>
           </div>
 
-          <div v-if="schedule.hasOrders" class="mini-stats">
-            <span v-if="schedule.stats.ordered > 0" class="stat-badge ordered">
-              ↓ {{ schedule.stats.ordered }}
+          <div v-if="isLoading && !schedule.hasSchedule" class="mini-stats">
+            <span class="stat-badge muted">載入中</span>
+          </div>
+          <div v-else-if="schedule.hasSchedule" class="mini-stats">
+            <span v-if="schedule.orderCount > 0" class="stat-badge ordered">
+              訂 {{ schedule.orderCount }}
             </span>
-            <span
-              v-if="schedule.stats.completed > 0"
-              class="stat-badge completed"
-            >
-              ✓ {{ schedule.stats.completed }}
+            <span v-if="schedule.itemCount > 0" class="stat-badge completed">
+              品 {{ schedule.itemCount }}
             </span>
-            <span
-              v-if="schedule.stats.cancelled > 0"
-              class="stat-badge cancelled"
-            >
-              ✕ {{ schedule.stats.cancelled }}
+            <span class="stat-badge highlight">
+              {{ schedule.statusLabel }}
             </span>
           </div>
           <div v-else class="no-orders-tag">未開單</div>
@@ -222,6 +223,7 @@ const selectDate = (date) => {
   font-size: 10px;
   flex-wrap: wrap;
   justify-content: center;
+  min-height: 16px;
 
   .stat-badge {
     padding: 1px 4px;
@@ -250,6 +252,11 @@ const selectDate = (date) => {
       background: #fef3c7;
       color: #92400e;
     }
+
+    &.muted {
+      background: #f1f5f9;
+      color: #94a3b8;
+    }
   }
 }
 
@@ -260,6 +267,7 @@ const selectDate = (date) => {
   border-radius: 3px;
   text-align: center;
   flex: 1;
+  min-height: 16px;
 }
 
 @media (max-width: 1024px) {

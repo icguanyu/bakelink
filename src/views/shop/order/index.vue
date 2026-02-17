@@ -9,6 +9,7 @@ import {
 } from "vue";
 import { useRouter } from "vue-router";
 import dayjs from "dayjs";
+import { orderStatusOptions } from "@/utils/constants";
 
 const router = useRouter();
 const scrollContainerRef = ref(null);
@@ -304,12 +305,7 @@ orders.value.sort((a, b) => {
   return a.id.localeCompare(b.id);
 });
 
-const statusOptions = [
-  { label: "全部", value: "all", color: "" },
-  { label: "已下單", value: "ordered", color: "#3b82f6", count: 0 },
-  { label: "已完成", value: "completed", color: "#10b981", count: 0 },
-  { label: "已取消", value: "cancelled", color: "#ef4444", count: 0 },
-];
+const statusOptions = orderStatusOptions;
 
 // 計算當前日期各狀態數量
 const statusCounts = computed(() => {

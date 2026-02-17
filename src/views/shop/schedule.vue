@@ -1,148 +1,35 @@
 <script setup>
-import { computed, ref } from "vue";
 import dayjs from "dayjs";
-import { ElMessage, ElMessageBox } from "element-plus";
-import ScheduleCalendar from "@/components/schedule/ScheduleCalendar.vue";
-import ScheduleEditor from "@/components/schedule/ScheduleEditor.vue";
+import { Schedules } from "@/api/schedules";
+import { scheduleStatusOptions } from "@/utils/constants";
 
 // 排程狀態
 const baseDate = ref(dayjs()); // 當前展示的基準月份
-const selectedDateForDetails = ref(null); // 選中的日期用於右側詳情面板
+const selectedDate = ref(null); // 選中的日期用於右側詳情面板
 const scheduleList = ref([]);
-const isEditorOpen = ref(false);
-const editorForm = ref({
-  status: "draft",
-  startTime: "",
-  endTime: "",
-  products: [],
+const scheduleMap = ref({});
+const schedule = reactive({
+  schedule_date: "",
+  status: "DRAFT",
+  order_start_at: null,
+  order_end_at: null,
+  items: [],
+  orders: [],
 });
+const isEditorOpen = ref(false);
+const isMonthLoading = ref(false);
+const isDayLoading = ref(false);
 
-// 模擬產品資料 - 今日出爐的麵包
-const products = ref([
-  {
-    id: "PROD-001",
-    name: "丹麥牛角麵包",
-    category: "牛角麵包",
-    image: "🥐",
-    price: 45,
-    stock: 25,
-    available: true,
-  },
-  {
-    id: "PROD-002",
-    name: "法式長棍麵包",
-    category: "吐司",
-    image: "🍞",
-    price: 65,
-    stock: 15,
-    available: true,
-  },
-  {
-    id: "PROD-003",
-    name: "核桃提子麵包",
-    category: "軟麵包",
-    image: "🍞",
-    price: 55,
-    stock: 20,
-    available: true,
-  },
-]);
+const scheduleStatusLabelMap = scheduleStatusOptions.reduce((map, option) => {
+  map[option.value] = option.label;
+  return map;
+}, {});
 
-// 模擬日期與產品的關聯 - 對應日期出爐的產品
-const dateProductsMap = {
-  "2026-02-16": ["PROD-001", "PROD-002", "PROD-003", "PROD-004", "PROD-006"], // 今天
-  "2026-02-15": ["PROD-001", "PROD-003", "PROD-005", "PROD-006"], // 昨天
-  "2026-02-17": ["PROD-002", "PROD-004", "PROD-005"], // 明天
-  "2026-02-18": ["PROD-001", "PROD-002", "PROD-003", "PROD-004"], // 後天
+const getScheduleDateKeys = (scheduleDate) => {
+  if (!scheduleDate) return [];
+  const localDate = dayjs(scheduleDate).format("YYYY-MM-DD");
+  return localDate ? [localDate] : [];
 };
-
-// 模擬排程資料 - 從訂單資料生成
-const orders = ref([
-  // 今天的訂單
-  {
-    id: "ORD-20260216-001",
-    customerName: "陳小美",
-    pickupTime: "2026-02-16 14:00",
-    status: "ordered",
-    totalAmount: 465,
-    items: 2,
-  },
-  {
-    id: "ORD-20260216-002",
-    customerName: "王大明",
-    pickupTime: "2026-02-16 15:30",
-    status: "ordered",
-    totalAmount: 605,
-    items: 2,
-  },
-  {
-    id: "ORD-20260216-004",
-    customerName: "魏志軒",
-    pickupTime: "2026-02-16 10:30",
-    status: "ordered",
-    totalAmount: 1290,
-    items: 7,
-  },
-  {
-    id: "ORD-20260216-009",
-    customerName: "鄒芊芊",
-    pickupTime: "2026-02-16 15:00",
-    status: "ordered",
-    totalAmount: 895,
-    items: 5,
-  },
-  {
-    id: "ORD-20260216-013",
-    customerName: "吳昀庭",
-    pickupTime: "2026-02-16 17:30",
-    status: "ordered",
-    totalAmount: 2770,
-    items: 6,
-  },
-  // 昨天的訂單
-  {
-    id: "ORD-20260215-015",
-    customerName: "張雅芳",
-    pickupTime: "2026-02-15 18:00",
-    status: "completed",
-    totalAmount: 540,
-    items: 2,
-  },
-  {
-    id: "ORD-20260215-014",
-    customerName: "劉建國",
-    pickupTime: "2026-02-15 17:30",
-    status: "cancelled",
-    totalAmount: 330,
-    items: 1,
-  },
-  // 明天的訂單
-  {
-    id: "ORD-20260217-001",
-    customerName: "黃志明",
-    pickupTime: "2026-02-17 10:00",
-    status: "ordered",
-    totalAmount: 555,
-    items: 2,
-  },
-  {
-    id: "ORD-20260217-002",
-    customerName: "李淑芬",
-    pickupTime: "2026-02-17 14:30",
-    status: "ordered",
-    totalAmount: 300,
-    items: 1,
-  },
-  // 後天的訂單
-  {
-    id: "ORD-20260218-001",
-    customerName: "周美玲",
-    pickupTime: "2026-02-18 11:00",
-    status: "ordered",
-    totalAmount: 580,
-    items: 2,
-  },
-]);
 
 // 生成排程列表（日曆邏輯）
 const generateScheduleList = () => {
@@ -163,33 +50,27 @@ const generateScheduleList = () => {
   let currentDate = calendarStart;
   while (currentDate.isBefore(calendarEnd) || currentDate.isSame(calendarEnd)) {
     const date = currentDate.format("YYYY-MM-DD");
-    const dateOrders = orders.value.filter((o) =>
-      o.pickupTime.startsWith(date),
-    );
-
     const currentMonth = currentDate.format("YYYY-MM");
     const baseMonth = baseDate.value.format("YYYY-MM");
     const isCurrentMonth = currentMonth === baseMonth;
 
-    const stats = {
-      total: dateOrders.length,
-      ordered: dateOrders.filter((o) => o.status === "ordered").length,
-      completed: dateOrders.filter((o) => o.status === "completed").length,
-      cancelled: dateOrders.filter((o) => o.status === "cancelled").length,
-      revenue: dateOrders
-        .filter((o) => o.status !== "cancelled")
-        .reduce((sum, o) => sum + o.totalAmount, 0),
-    };
+    const scheduleData = scheduleMap.value[date] || null;
+    const orderCount = scheduleData?.order_count ?? 0;
+    const itemCount = scheduleData?.item_count ?? 0;
+    const status = scheduleData?.status || "DRAFT";
+    const statusLabel = scheduleStatusLabelMap[status] || status;
+    const hasSchedule = Boolean(scheduleData);
+    const hasOrders = orderCount > 0;
 
     list.push({
       date,
       dateObj: currentDate.clone(),
-      orders: dateOrders.sort((a, b) =>
-        dayjs(a.pickupTime).diff(dayjs(b.pickupTime)),
-      ),
-      stats,
-      isOpen: true, // 默認開放接單
-      hasOrders: dateOrders.length > 0, // 是否有訂單
+      orderCount,
+      itemCount,
+      status,
+      statusLabel,
+      hasSchedule,
+      hasOrders,
       isCurrentMonth, // 是否為當月日期
     });
 
@@ -198,26 +79,42 @@ const generateScheduleList = () => {
   return list;
 };
 
-scheduleList.value = generateScheduleList();
+const seedScheduleList = () => {
+  scheduleList.value = generateScheduleList();
+  initScheduleList();
+};
 
 // 初始化排程列表
 const initScheduleList = () => {
   scheduleList.value = generateScheduleList();
 
-  // 預設開啟今日（如果有訂單）或當月的第一天
-  const today = dayjs().format("YYYY-MM-DD");
-  const todaySchedule = scheduleList.value.find((s) => s.date === today);
-
-  if (todaySchedule && todaySchedule.hasOrders) {
-    selectedDateForDetails.value = today;
-  } else {
-    // 否則顯示當月的第一天
-    const firstDayOfMonth = scheduleList.value.find((s) => s.isCurrentMonth);
-    selectedDateForDetails.value = firstDayOfMonth?.date || null;
+  // 若已有選取且仍在當月就保留
+  const currentSelection = selectedDate.value;
+  const currentSelectionSchedule = currentSelection
+    ? scheduleList.value.find((s) => s.date === currentSelection)
+    : null;
+  if (currentSelectionSchedule?.isCurrentMonth) {
+    selectedDate.value = currentSelection;
+    return;
   }
-};
 
-initScheduleList();
+  // 預設開啟今天（若在當月）
+  const today = dayjs().format("YYYY-MM-DD");
+  const todaySchedule = scheduleList.value.find(
+    (s) => s.date === today && s.isCurrentMonth,
+  );
+  if (todaySchedule) {
+    selectedDate.value = today;
+    return;
+  }
+
+  // 否則顯示當月第一個有排程的日期，沒有就顯示當月第一天
+  const firstScheduleDay = scheduleList.value.find(
+    (s) => s.hasSchedule && s.isCurrentMonth,
+  );
+  const firstDayOfMonth = scheduleList.value.find((s) => s.isCurrentMonth);
+  selectedDate.value = firstScheduleDay?.date || firstDayOfMonth?.date || null;
+};
 
 // 更新排程列表
 const updateScheduleList = () => {
@@ -227,58 +124,58 @@ const updateScheduleList = () => {
 // 上一個月
 const goPreviousMonth = () => {
   baseDate.value = baseDate.value.subtract(1, "month");
-  updateScheduleList();
+  initScheduleDataByMonth();
 };
 
 // 下一個月
 const goNextMonth = () => {
   baseDate.value = baseDate.value.add(1, "month");
-  updateScheduleList();
+  initScheduleDataByMonth();
 };
 
 // 回到今天
 const goToday = () => {
   baseDate.value = dayjs();
-  selectedDateForDetails.value = null;
-  updateScheduleList();
+  selectedDate.value = null;
+  initScheduleDataByMonth();
 };
 
 // 上一天
 const goPreviousDay = () => {
-  if (!selectedDateForDetails.value) {
-    selectedDateForDetails.value = dayjs().format("YYYY-MM-DD");
+  if (!selectedDate.value) {
+    selectedDate.value = dayjs().format("YYYY-MM-DD");
     return;
   }
-  
-  const currentDate = dayjs(selectedDateForDetails.value);
+
+  const currentDate = dayjs(selectedDate.value);
   const previousDate = currentDate.subtract(1, "day");
-  
+
   // 檢查是否需要切換月份
   if (previousDate.format("YYYY-MM") !== baseDate.value.format("YYYY-MM")) {
     baseDate.value = previousDate;
-    updateScheduleList();
+    initScheduleDataByMonth();
   }
-  
-  selectedDateForDetails.value = previousDate.format("YYYY-MM-DD");
+
+  selectedDate.value = previousDate.format("YYYY-MM-DD");
 };
 
 // 下一天
 const goNextDay = () => {
-  if (!selectedDateForDetails.value) {
-    selectedDateForDetails.value = dayjs().format("YYYY-MM-DD");
+  if (!selectedDate.value) {
+    selectedDate.value = dayjs().format("YYYY-MM-DD");
     return;
   }
-  
-  const currentDate = dayjs(selectedDateForDetails.value);
+
+  const currentDate = dayjs(selectedDate.value);
   const nextDate = currentDate.add(1, "day");
-  
+
   // 檢查是否需要切換月份
   if (nextDate.format("YYYY-MM") !== baseDate.value.format("YYYY-MM")) {
     baseDate.value = nextDate;
-    updateScheduleList();
+    initScheduleDataByMonth();
   }
-  
-  selectedDateForDetails.value = nextDate.format("YYYY-MM-DD");
+
+  selectedDate.value = nextDate.format("YYYY-MM-DD");
 };
 
 // 獲取當前月份顯示文字
@@ -286,37 +183,29 @@ const getCurrentMonthLabel = computed(() => {
   return baseDate.value.format("YYYY 年 M 月");
 });
 
-// 取得選中日期的訂單
-const selectedDateOrders = computed(() => {
-  if (!selectedDateForDetails.value) return [];
-  return (
-    scheduleList.value.find((s) => s.date === selectedDateForDetails.value)
-      ?.orders || []
-  );
-});
+// const selectedDateStats = computed(() => {
+//   if (!selectedDate.value) return null;
+//   const list = Array.isArray(schedule.orders) ? schedule.orders : [];
+//   if (list.length === 0) return null;
 
-// 取得選中日期的統計
-const selectedDateStats = computed(() => {
-  if (!selectedDateForDetails.value) return null;
-  return (
-    scheduleList.value.find((s) => s.date === selectedDateForDetails.value)
-      ?.stats || null
-  );
-});
+//   const stats = {
+//     total: list.length,
+//     ordered: 0,
+//     completed: 0,
+//     cancelled: 0,
+//     revenue: 0,
+//   };
 
-// 取得選中日期的出爐產品
-const selectedDateProducts = computed(() => {
-  if (!selectedDateForDetails.value) return [];
-  const productIds = dateProductsMap[selectedDateForDetails.value] || [];
-  return productIds
-    .map((id) => products.value.find((p) => p.id === id))
-    .filter(Boolean);
-});
+//   list.forEach((order) => {
+//     const status = order?.status;
+//     if (status === "ordered") stats.ordered += 1;
+//     if (status === "completed") stats.completed += 1;
+//     if (status === "cancelled") stats.cancelled += 1;
+//     if (status !== "cancelled") stats.revenue += getOrderAmount(order);
+//   });
 
-const selectedDateLabel = computed(() => {
-  if (!selectedDateForDetails.value) return "";
-  return dayjs(selectedDateForDetails.value).format("YYYY/MM/DD");
-});
+//   return stats;
+// });
 
 const getStatusLabel = (status) => {
   const map = {
@@ -336,47 +225,72 @@ const getStatusColor = (status) => {
   return map[status] || "#6b7280";
 };
 
-const toggleScheduleOpen = (scheduleItem) => {
-  ElMessageBox.confirm(
-    `確定要${scheduleItem.isOpen ? "關閉" : "開放"} ${scheduleItem.date} 的接單嗎？`,
-    "提示",
-    {
-      confirmButtonText: "確定",
-      cancelButtonText: "取消",
-      type: "warning",
-    },
-  )
-    .then(() => {
-      scheduleItem.isOpen = !scheduleItem.isOpen;
-      ElMessage.success(
-        `${scheduleItem.date} 已${scheduleItem.isOpen ? "開放" : "關閉"}接單`,
-      );
-    })
-    .catch(() => {});
-};
-
-const formatTime = (datetime) => {
-  return dayjs(datetime).format("HH:mm");
-};
-
 const openEditor = () => {
-  editorForm.value = {
-    status: "draft",
-    startTime: "",
-    endTime: "",
-    products: selectedDateProducts.value.map((product) => ({
-      id: product.id,
-      name: product.name,
-      limit: product.stock ?? 0,
-      max: product.stock ?? null,
-    })),
-  };
   isEditorOpen.value = true;
 };
 
 const closeEditor = () => {
   isEditorOpen.value = false;
 };
+
+const initScheduleDataByMonth = async () => {
+  const month = baseDate.value.format("YYYY-MM");
+  isMonthLoading.value = true;
+  scheduleMap.value = {};
+  seedScheduleList();
+  try {
+    const res = await Schedules.GetByMonth(month);
+    const list = Array.isArray(res?.data.data) ? res.data.data : [];
+    console.log("Schedules.GetByMonth:", month, list);
+    scheduleMap.value = list.reduce((map, item) => {
+      const keys = getScheduleDateKeys(item.schedule_date);
+      keys.forEach((key) => {
+        map[key] = item;
+      });
+      return map;
+    }, {});
+    updateScheduleList();
+  } catch (error) {
+  } finally {
+    isMonthLoading.value = false;
+  }
+};
+
+const initScheduleDataByDate = async (date) => {
+  if (!date) return;
+  isDayLoading.value = true;
+  try {
+    const res = await Schedules.GetByDate(date);
+    console.log("Schedules.GetByDate:", date, res);
+    if (res.data === null) {
+      Object.assign(schedule, {
+        schedule_date: date,
+        status: "DRAFT",
+        order_start_at: null,
+        order_end_at: null,
+        items: [],
+        orders: [],
+      });
+      return;
+    }
+    Object.assign(schedule, res.data);
+  } catch (error) {
+  } finally {
+    isDayLoading.value = false;
+  }
+};
+
+watch(
+  () => selectedDate.value,
+  (val) => {
+    initScheduleDataByDate(val);
+  },
+);
+
+onMounted(() => {
+  seedScheduleList();
+  initScheduleDataByMonth();
+});
 </script>
 
 <template>
@@ -405,17 +319,12 @@ const closeEditor = () => {
     <div class="schedule-main">
       <ScheduleEditor
         v-if="isEditorOpen"
-        :date-label="selectedDateLabel"
-        :available-products="products"
-        :initial-products="editorForm.products"
-        :initial-status="editorForm.status"
-        :initial-start-time="editorForm.startTime"
-        :initial-end-time="editorForm.endTime"
+        :date-label="selectedDate"
         @close="closeEditor"
         @save="closeEditor"
       />
       <!-- 右側：訂單詳情面板 -->
-      <div v-else-if="selectedDateForDetails" class="schedule-right">
+      <div v-else-if="selectedDate" class="schedule-right">
         <div class="detail-header">
           <div class="detail-header-left">
             <el-button
@@ -427,22 +336,14 @@ const closeEditor = () => {
             />
             <div>
               <h3>
-                {{
-                  dayjs(selectedDateForDetails).format("YYYY 年 M 月 DD 日 (ddd)")
-                }}
+                {{ dayjs(selectedDate).format("YYYY 年 M 月 DD 日 (ddd)") }}
               </h3>
-              <p class="detail-stats" v-if="selectedDateStats">
-                共 {{ selectedDateStats.total }} 筆訂單 |
-                <span class="stat-ordered"
-                  >↓ {{ selectedDateStats.ordered }}</span
-                >
-                <span class="stat-completed"
-                  >✓ {{ selectedDateStats.completed }}</span
-                >
-                <span class="stat-cancelled"
-                  >✕ {{ selectedDateStats.cancelled }}</span
-                >
-                | 營收 ${{ selectedDateStats.revenue }}
+              <p class="detail-stats">
+                共 N 筆訂單 |
+                <span class="stat-ordered">↓ N</span>
+                <span class="stat-completed">✓ N</span>
+                <span class="stat-cancelled">✕ N</span>
+                | 營收 $???
               </p>
             </div>
             <el-button
@@ -465,31 +366,32 @@ const closeEditor = () => {
           </div>
         </div>
 
-        <div class="detail-content">
+        <div v-if="isDayLoading" class="detail-loading">
+          資料載入中...
+        </div>
+        <div v-else class="detail-content">
           <!-- 今日出爐商品 -->
-          <div v-if="selectedDateProducts.length > 0" class="products-section">
+          <div v-if="schedule.items.length > 0" class="products-section">
             <div class="section-title">
               <span>今日出爐</span>
-              <span class="count"
-                >{{ selectedDateProducts.length }} 項商品</span
-              >
+              <span class="count">{{ schedule.items.length }} 項商品</span>
             </div>
             <div class="products-grid">
               <div
-                v-for="product in selectedDateProducts"
+                v-for="product in schedule.items"
                 :key="product.id"
                 class="product-card"
-                :class="{ 'out-of-stock': !product.available }"
               >
+                <!-- :class="{ 'out-of-stock': !product.available }" -->
                 <div class="product-info">
-                  <h4 class="product-name">{{ product.name }}</h4>
+                  <h4 class="product-name">{{ product.product_name }}</h4>
                   <p class="product-category">{{ product.category }}</p>
                   <div class="product-footer">
-                    <span class="product-price">${{ product.price }}</span>
-                    <span v-if="product.available" class="product-stock"
+                    <span class="product-price">${{ product.unit_price }}</span>
+                    <!-- <span v-if="product.available" class="product-stock"
                       >{{ product.stock }} 個</span
                     >
-                    <span v-else class="product-sold-out">已售完</span>
+                    <span v-else class="product-sold-out">已售完</span> -->
                   </div>
                 </div>
               </div>
@@ -497,27 +399,25 @@ const closeEditor = () => {
           </div>
 
           <!-- 訂單列表 -->
-          <div v-if="selectedDateOrders.length > 0" class="orders-section">
+          <div class="orders-section">
             <div class="section-title">
               <span>訂單清單</span>
-              <span class="count">{{ selectedDateOrders.length }} 筆</span>
+              <span class="count">{{ schedule.orders.length }} 筆</span>
             </div>
             <div class="orders-list">
               <div
-                v-for="order in selectedDateOrders"
+                v-for="order in schedule.orders"
                 :key="order.id"
                 class="order-row"
                 :style="{ borderLeftColor: getStatusColor(order.status) }"
               >
                 <div class="order-id">{{ order.id }}</div>
                 <div class="order-customer">
-                  <span class="name">{{ order.customerName }}</span>
+                  <span class="name">Customer</span>
                 </div>
-                <div class="order-time">
-                  {{ formatTime(order.pickupTime) }}
-                </div>
-                <div class="order-items">{{ order.items }} 項</div>
-                <div class="order-amount">${{ order.totalAmount }}</div>
+                <div class="order-time">--:--</div>
+                <div class="order-items">0 項</div>
+                <div class="order-amount">$00</div>
                 <div
                   class="order-status"
                   :style="{ background: getStatusColor(order.status) }"
@@ -529,22 +429,22 @@ const closeEditor = () => {
           </div>
 
           <div
-            v-if="
-              selectedDateOrders.length === 0 &&
-              selectedDateProducts.length === 0
-            "
+            v-if="schedule.orders.length === 0 && schedule.items.length === 0"
             class="empty-orders"
           >
             <el-icon><Document /></el-icon>
             <p>該日期暫無訂單及商品</p>
           </div>
         </div>
+
+        <!-- <pre>{{ schedule }}</pre> -->
       </div>
 
       <ScheduleCalendar
         :schedule-list="scheduleList"
-        :selected-date="selectedDateForDetails"
-        @select="selectedDateForDetails = $event"
+        :selected-date="selectedDate"
+        :is-loading="isMonthLoading"
+        @select="selectedDate = $event"
       />
     </div>
   </div>
@@ -710,6 +610,17 @@ const closeEditor = () => {
       background: #94a3b8;
     }
   }
+}
+
+.detail-loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #94a3b8;
+  font-size: 14px;
+  min-height: 280px;
 }
 
 // 商品區塊
