@@ -11,15 +11,6 @@ const currentDate = computed(() => dayjs().format("DD"));
 
 <template>
   <aside>
-    <div
-      class="aside-toggle"
-      aria-label="Toggle aside menu"
-      @click="emit('toggle')"
-    >
-      <div class="icon">
-        <img src="@/assets/images/icons/expand_left.svg" alt="" />
-      </div>
-    </div>
     <div class="date-box">
       <div class="year">{{ currentYear }}</div>
       <div class="month">{{ currentMonth }}</div>
@@ -57,6 +48,15 @@ const currentDate = computed(() => dayjs().format("DD"));
       </div>
       <div class="title">設定</div>
     </router-link>
+    <div
+      class="aside-toggle"
+      aria-label="Toggle aside menu"
+      @click="emit('toggle')"
+    >
+      <div class="icon">
+        <img src="@/assets/images/icons/expand_left.svg" alt="" />
+      </div>
+    </div>
   </aside>
 </template>
 
@@ -153,6 +153,7 @@ aside {
     }
   }
   .aside-toggle {
+    margin-top: auto;
     text-align: center;
     cursor: pointer;
     img {

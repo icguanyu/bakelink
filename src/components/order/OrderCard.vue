@@ -1,6 +1,10 @@
 <script setup>
-import { computed } from "vue";
+import { ref, computed } from "vue";
 import dayjs from "dayjs";
+import OrderDetail from "./OrderDetail.vue";
+
+const orderDetail = ref(null);
+
 const props = defineProps({
   order: {
     type: Object,
@@ -63,13 +67,26 @@ const openOrder = () => {
 const updateStatus = (status) => {
   emit("status-change", props.order, status);
 };
+
+const handleUpdateItems = (updatedItems) => {
+  // 更新訂單中的訂購項目
+  props.order.items = updatedItems;
+  // 重新計算總金額
+  props.order.totalAmount = updatedItems.reduce((sum, item) => {
+    return sum + item.price * item.quantity;
+  }, 0);
+};
 </script>
 
 <template>
-  <div class="order-card" :class="{ 'simple-mode': viewMode === 'simple' }" @click="openOrder">
+  <div
+    class="order-card"
+    :class="{ 'simple-mode': viewMode === 'simple' }"
+    @click="openOrder"
+  >
     <!-- 订单顶部装饰 -->
     <div class="order-ticket-top"></div>
-    
+
     <!-- 訂單頭部 -->
     <div class="order-header">
       <div class="order-id-section">
@@ -81,9 +98,9 @@ const updateStatus = (status) => {
       </div>
       <div
         class="order-status-stamp"
-        :style="{ 
+        :style="{
           borderColor: getStatusColor(order.status),
-          color: getStatusColor(order.status)
+          color: getStatusColor(order.status),
         }"
       >
         <span>{{ getStatusLabel(order.status) }}</span>
@@ -125,13 +142,22 @@ const updateStatus = (status) => {
 
     <!-- 訂購項目 -->
     <div v-if="viewMode === 'detailed'" class="order-items">
-      <div class="items-header">訂購明細</div>
+      <div class="items-header">
+        <span>訂購明細</span>
+        <el-button
+          type="primary"
+          size="small"
+          @click="orderDetail.visible = true"
+          >詳細</el-button
+        >
+      </div>
       <div class="items-list">
         <div v-for="(item, idx) in order.items" :key="idx" class="order-item">
           <span class="item-name">{{ item.name }}</span>
           <span class="item-quantity">× {{ item.quantity }}</span>
           <span class="item-price">${{ item.price * item.quantity }}</span>
         </div>
+        <pre>{{ order.items }}</pre>
       </div>
     </div>
 
@@ -152,7 +178,9 @@ const updateStatus = (status) => {
       <div class="footer-info">
         <div v-if="viewMode === 'detailed'" class="payment-method">
           <span class="label">付款方式</span>
-          <el-tag size="small" type="info">{{ getPaymentLabel(order.payment) }}</el-tag>
+          <el-tag size="small" type="info">{{
+            getPaymentLabel(order.payment)
+          }}</el-tag>
         </div>
       </div>
       <div class="order-total">
@@ -195,6 +223,13 @@ const updateStatus = (status) => {
     <!-- 订单底部装饰 -->
     <div class="order-ticket-bottom"></div>
   </div>
+
+  <!-- 訂購明細模態框 -->
+  <OrderDetail
+    ref="orderDetail"
+    :order="order"
+    @update-items="handleUpdateItems"
+  />
 </template>
 
 <style scoped lang="scss">
@@ -203,7 +238,7 @@ const updateStatus = (status) => {
   background: white;
   border-radius: 0;
   padding: 0;
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.08),
     0 1px 2px rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
@@ -221,7 +256,7 @@ const updateStatus = (status) => {
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 
+    box-shadow:
       0 8px 20px rgba(0, 0, 0, 0.12),
       0 2px 4px rgba(0, 0, 0, 0.06);
   }
@@ -229,16 +264,9 @@ const updateStatus = (status) => {
   // 票据顶部锯齿装饰
   .order-ticket-top {
     height: 8px;
-    background: linear-gradient(
-      -45deg,
-      white 6px,
-      transparent 0
-    ),
-    linear-gradient(
-      45deg,
-      white 6px,
-      transparent 0
-    );
+    background:
+      linear-gradient(-45deg, white 6px, transparent 0),
+      linear-gradient(45deg, white 6px, transparent 0);
     background-repeat: repeat-x;
     background-size: 12px 12px;
     background-position: 0 0;
@@ -248,16 +276,9 @@ const updateStatus = (status) => {
   // 票据底部锯齿装饰
   .order-ticket-bottom {
     height: 8px;
-    background: linear-gradient(
-      135deg,
-      white 6px,
-      transparent 0
-    ),
-    linear-gradient(
-      -135deg,
-      white 6px,
-      transparent 0
-    );
+    background:
+      linear-gradient(135deg, white 6px, transparent 0),
+      linear-gradient(-135deg, white 6px, transparent 0);
     background-repeat: repeat-x;
     background-size: 12px 12px;
     background-position: 0 100%;
@@ -286,16 +307,16 @@ const updateStatus = (status) => {
 
       .order-id {
         font-size: 16px;
-        font-family: 'Courier New', monospace;
+        font-family: "Courier New", monospace;
         display: flex;
         gap: 2px;
         align-items: center;
-        
+
         .id-prefix {
           color: #64748b;
           font-weight: 500;
         }
-        
+
         .id-highlight {
           color: #1e40af;
           font-weight: 700;
@@ -352,7 +373,7 @@ const updateStatus = (status) => {
         text-align: right;
 
         &.pickup-time {
-          font-family: 'Courier New', monospace;
+          font-family: "Courier New", monospace;
           font-size: 15px;
 
           .pickup-date {
@@ -391,6 +412,9 @@ const updateStatus = (status) => {
       letter-spacing: 0.5px;
       margin-bottom: 10px;
       flex-shrink: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .items-list {
@@ -401,7 +425,9 @@ const updateStatus = (status) => {
       overflow-y: auto;
       padding-right: 4px;
       flex-shrink: 0;
-
+      pre {
+        font-size: 12px;
+      }
       &::-webkit-scrollbar {
         width: 4px;
       }
@@ -437,7 +463,7 @@ const updateStatus = (status) => {
         .item-price {
           color: #1e293b;
           font-weight: 700;
-          font-family: 'Courier New', monospace;
+          font-family: "Courier New", monospace;
           min-width: 60px;
           text-align: right;
         }
@@ -521,7 +547,7 @@ const updateStatus = (status) => {
         font-size: 24px;
         font-weight: 700;
         color: #1e293b;
-        font-family: 'Courier New', monospace;
+        font-family: "Courier New", monospace;
         line-height: 1;
       }
     }
