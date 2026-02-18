@@ -3,10 +3,10 @@
  */
 export const scheduleStatusOptions = [
   { label: "草稿", value: "DRAFT" },
-  { label: "預告", value: "ANNOUNCE" },
+  { label: "預告", value: "ANNOUNCED" },
   { label: "收單中", value: "OPEN" },
   { label: "已結單", value: "CLOSED" },
-  { label: "出貨結束", value: "SHIPPED" },
+  { label: "出貨結束", value: "FULFILLED" },
 ];
 
 /**

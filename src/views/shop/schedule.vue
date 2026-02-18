@@ -225,7 +225,7 @@ const getStatusColor = (status) => {
   return map[status] || "#6b7280";
 };
 
-const openEditor = () => {
+const openEditor = (schedule) => {
   isEditorOpen.value = true;
 };
 
@@ -264,6 +264,7 @@ const initScheduleDataByDate = async (date) => {
     console.log("Schedules.GetByDate:", date, res);
     if (res.data === null) {
       Object.assign(schedule, {
+        id: null,
         schedule_date: date,
         status: "DRAFT",
         order_start_at: null,
@@ -303,7 +304,7 @@ onMounted(() => {
           <p class="subtitle">管理每日接單狀況，快速查看訂單資訊</p>
         </div>
         <el-button type="primary" icon="Back" @click="goToday">
-          回到今天
+          今日
         </el-button>
       </div>
 
@@ -319,11 +320,17 @@ onMounted(() => {
     <div class="schedule-main">
       <ScheduleEditor
         v-if="isEditorOpen"
-        :date-label="selectedDate"
+        :schedule="schedule"
         @close="closeEditor"
-        @save="closeEditor"
+        @update="
+          () => {
+            initScheduleDataByMonth(selectedDate);
+            initScheduleDataByDate(selectedDate);
+          }
+        "
       />
-      <!-- 右側：訂單詳情面板 -->
+
+      <!-- 左側：訂單詳情面板 -->
       <div v-else-if="selectedDate" class="schedule-right">
         <div class="detail-header">
           <div class="detail-header-left">
@@ -339,10 +346,9 @@ onMounted(() => {
                 {{ dayjs(selectedDate).format("YYYY 年 M 月 DD 日 (ddd)") }}
               </h3>
               <p class="detail-stats">
-                共 N 筆訂單 |
-                <span class="stat-ordered">↓ N</span>
-                <span class="stat-completed">✓ N</span>
-                <span class="stat-cancelled">✕ N</span>
+                <span class="stat-ordered">↓ O</span>
+                <span class="stat-completed">✓ D</span>
+                <span class="stat-cancelled">✕ C</span>
                 | 營收 $???
               </p>
             </div>
@@ -358,7 +364,9 @@ onMounted(() => {
             <el-button
               class="detail-more"
               circle
-              @click="isEditorOpen ? closeEditor() : openEditor()"
+              plain
+              type="primary"
+              @click="isEditorOpen ? closeEditor() : openEditor(schedule)"
             >
               <el-icon v-if="isEditorOpen"><Close /></el-icon>
               <el-icon v-else><More /></el-icon>
@@ -366,12 +374,10 @@ onMounted(() => {
           </div>
         </div>
 
-        <div v-if="isDayLoading" class="detail-loading">
-          資料載入中...
-        </div>
+        <div v-if="isDayLoading" class="detail-loading">資料載入中...</div>
         <div v-else class="detail-content">
           <!-- 今日出爐商品 -->
-          <div v-if="schedule.items.length > 0" class="products-section">
+          <div class="products-section">
             <div class="section-title">
               <span>今日出爐</span>
               <span class="count">{{ schedule.items.length }} 項商品</span>
@@ -385,7 +391,7 @@ onMounted(() => {
                 <!-- :class="{ 'out-of-stock': !product.available }" -->
                 <div class="product-info">
                   <h4 class="product-name">{{ product.product_name }}</h4>
-                  <p class="product-category">{{ product.category }}</p>
+                  <!-- <p class="product-category">{{ product.category }}</p> -->
                   <div class="product-footer">
                     <span class="product-price">${{ product.unit_price }}</span>
                     <!-- <span v-if="product.available" class="product-stock"
@@ -396,6 +402,10 @@ onMounted(() => {
                 </div>
               </div>
             </div>
+          </div>
+          <div v-if="schedule.items.length === 0" class="empty-orders">
+            <el-icon><ShoppingCart /></el-icon>
+            <p>尚未開單</p>
           </div>
 
           <!-- 訂單列表 -->
@@ -426,14 +436,10 @@ onMounted(() => {
                 </div>
               </div>
             </div>
-          </div>
-
-          <div
-            v-if="schedule.orders.length === 0 && schedule.items.length === 0"
-            class="empty-orders"
-          >
-            <el-icon><Document /></el-icon>
-            <p>該日期暫無訂單及商品</p>
+            <div v-if="schedule.orders.length === 0" class="empty-orders">
+              <el-icon><Document /></el-icon>
+              <p>該日期暫無訂單</p>
+            </div>
           </div>
         </div>
 
@@ -540,7 +546,7 @@ onMounted(() => {
 
   .detail-header-left {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
   }
 
@@ -646,8 +652,8 @@ onMounted(() => {
 }
 
 .products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -689,7 +695,7 @@ onMounted(() => {
   color: #1e293b;
   margin: 0;
   line-height: 1.2;
-  word-break: break-word;
+  white-space: nowrap;
 }
 
 .product-category {
@@ -842,10 +848,35 @@ onMounted(() => {
     min-width: 100%;
     min-height: 300px;
   }
-
-  .products-grid {
-    display: flex;
-    flex-wrap: wrap;
+  .detail-header {
+    padding: 12px;
+    gap: 6px;
+    .detail-header-left {
+      gap: 6px;
+    }
+  }
+  .detail-content {
+    padding: 12px 16px;
+  }
+  .products-section {
+    margin-bottom: 8px;
+    .products-grid {
+      gap: 6px;
+      .product-info {
+        gap: 0;
+        .product-price {
+          display: none;
+        }
+        .product-footer {
+          border-top: none;
+          padding-top: 0;
+          margin: 0;
+        }
+      }
+    }
+  }
+  .orders-section {
+    margin-top: 12px;
   }
 
   .order-row {

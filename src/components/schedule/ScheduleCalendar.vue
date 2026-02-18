@@ -121,7 +121,7 @@ const selectDate = (date) => {
   gap: 6px;
   margin-bottom: 8px;
   padding: 0 0 8px 0;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
 
   .week-day {
     text-align: center;

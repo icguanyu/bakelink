@@ -1,11 +1,19 @@
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
-const isAsideOpen = ref(true);
+// 從 localStorage 讀取狀態，預設為 true
+const isAsideOpen = ref(
+  localStorage.getItem("isAsideOpen") !== "false"
+);
 
 const toggleAside = () => {
   isAsideOpen.value = !isAsideOpen.value;
 };
+
+// 監聽狀態變化並保存到 localStorage
+watch(isAsideOpen, (newValue) => {
+  localStorage.setItem("isAsideOpen", String(newValue));
+});
 </script>
 
 <template>
