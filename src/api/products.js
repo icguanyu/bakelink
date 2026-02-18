@@ -1,5 +1,10 @@
 import request from "./index";
 
+export const UploadFile = {
+  Upload: (formData) => {
+    return request.post("/UploadFile", formData);
+  },
+};
 export const Products = {
   List: (data) => {
     return request.post("/products/list", data);

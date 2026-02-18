@@ -1,6 +1,6 @@
 <script setup>
-import { computed, ref, watch } from "vue";
-import { ElMessage } from "element-plus";
+import { UploadFile } from "@/api/products";
+import imageCompression from "browser-image-compression";
 
 const props = defineProps({
   modelValue: {
@@ -47,6 +47,33 @@ const preview = async (e) => {
   }
 };
 
+const handleImageUpload = async (event) => {
+  const imageFile = event.target.files[0];
+  // console.log(`原始 size ${(imageFile.size / 1024 / 1024).toFixed(2)} MB`);
+  const options = {
+    maxSizeMB: 1,
+  };
+  loading.value = true;
+  try {
+    const compressedFile = await imageCompression(imageFile, options);
+    console.log(
+      `壓縮後 size ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`,
+    ); // smaller than maxSizeMB
+    const formData = new FormData();
+    formData.append("file", compressedFile);
+    const res = await UploadFile.Upload(formData);
+    const url = res.data.url;
+    if (url) {
+      images.value.push(url);
+      emits("update:modelValue", images.value);
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    loading.value = false;
+  }
+};
+
 const handleDelete = (index) => {
   images.value.splice(index, 1);
   emits("delete", index);
@@ -59,15 +86,23 @@ watch(
   (newVal) => {
     images.value = [...newVal];
   },
-  { deep: true }
+  { deep: true },
 );
 
 const canUpload = computed(() => images.value.length < props.max);
+
+defineExpose({
+  loading,
+});
 </script>
 
 <template>
   <div class="images-uploader">
-    <div class="gallery" :class="{ 'has-images': images.length > 0 }">
+    <div
+      class="gallery"
+      :class="{ 'has-images': images.length > 0 }"
+      v-loading="loading"
+    >
       <div v-for="(url, index) in images" :key="index" class="image-item">
         <img :src="url" :alt="`圖片 ${index + 1}`" />
 
@@ -96,7 +131,7 @@ const canUpload = computed(() => images.value.length < props.max);
       id="image-upload"
       accept=".png,.jpg,.jpeg,.webp"
       multiple
-      @change="preview"
+      @change="handleImageUpload"
     />
   </div>
 </template>

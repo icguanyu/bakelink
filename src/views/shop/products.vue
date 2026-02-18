@@ -1,5 +1,4 @@
 <script setup>
-import EditProduct from "@/components/product/EditProduct.vue";
 import { ProductCategory, Products } from "@/api/products";
 import { reactive } from "vue";
 const editCategory = ref();
@@ -76,7 +75,13 @@ onMounted(() => {
     <EditCategory ref="editCategory" />
     <EditProduct ref="editProduct" @update="initProducts" />
     <div class="toolbar">
+      <div
+        v-if="loading && categories.length <= 1"
+        class="toolbar-skeleton"
+        aria-hidden="true"
+      ></div>
       <el-segmented
+        v-else
         v-model="currentCategory"
         :options="categories"
         :props="props"
@@ -98,7 +103,7 @@ onMounted(() => {
         <div class="info">
           <div class="title">
             <span class="text-ellipsis-2">{{ item.name }}</span>
-            <el-icon @click="editProduct.open(item)"><MoreFilled /></el-icon>
+            <el-icon @click="editProduct.open(item.id)"><MoreFilled /></el-icon>
           </div>
           <p class="description text-ellipsis-2">{{ item.description }}</p>
           <span class="price">${{ item.price }}</span>
@@ -176,6 +181,15 @@ onMounted(() => {
   z-index: 10;
   overflow-x: auto;
   @include scrollbar(rgba(170, 160, 160, 0.7));
+  .toolbar-skeleton {
+    flex: 1;
+    height: 36px;
+    margin: 0 8px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%);
+    background-size: 200% 100%;
+    animation: toolbar-shimmer 1.2s ease-in-out infinite;
+  }
   .el-segmented {
     padding: 0 8px;
     background-color: #fff;
@@ -192,6 +206,15 @@ onMounted(() => {
     background-color: #fff;
     border-left: 1px solid #dfdfdf;
     border-radius: 0;
+  }
+}
+
+@keyframes toolbar-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }
 

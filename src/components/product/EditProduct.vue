@@ -1,6 +1,9 @@
 <script setup>
 import { Products } from "@/api/products";
-
+const uploadPhotos = ref(null);
+const uploadPhotosLoading = computed(
+  () => uploadPhotos.value?.loading || false,
+);
 const visible = ref(false);
 const value = ref("基本資訊");
 const emit = defineEmits(["update"]);
@@ -14,7 +17,7 @@ const form = reactive({
   description: "",
   ingredients: "",
   ingredient_details: [],
-  imageUrls: [],
+  image_urls: [],
   is_active: true,
 });
 
@@ -24,21 +27,32 @@ const resetForm = () => {
   });
 };
 
-const open = (product = {}) => {
+const open = (id) => {
   value.value = "基本資訊";
   visible.value = true;
-  if (product?.id) {
-    nextTick(() => {
-      Object.assign(form, product);
-    });
+  if (id) {
+    initProudctById(id);
   } else {
-    form.id = null;
     resetForm();
   }
 };
 
 const close = () => {
   visible.value = false;
+};
+
+const initProudctById = async (id) => {
+  loading.value = true;
+  try {
+    const res = await Products.GetById(id);
+    Object.assign(form, res.data);
+  } catch (err) {
+    console.log("get product by id error", err);
+    ElMessage.error("載入商品資料失敗，請稍後再試");
+    close();
+  } finally {
+    loading.value = false;
+  }
 };
 
 const beforeSave = async (formEl) => {
@@ -220,18 +234,20 @@ defineExpose({ open, close });
         </div>
       </div>
       <div v-if="value === '商品圖片'">
+        <el-form-item label="圖片說明" prop="image_urls"> </el-form-item>
         <UploadPhotos
-          v-model="form.imageUrls"
+          ref="uploadPhotos"
+          v-model="form.image_urls"
           :disabled="false"
           @upload="
             (url) => {
-              form.imageUrls = url;
+              form.image_urls = url;
             }
           "
         />
       </div>
     </el-form>
-
+    <!-- <pre>{{ form }}</pre> -->
     <template #footer>
       <div
         :style="{
@@ -255,8 +271,10 @@ defineExpose({ open, close });
           <el-button
             type="primary"
             @click="beforeSave(formRef)"
-            :loading="loading"
-            >{{ form.id ? "儲存" : "新增" }}</el-button
+            :loading="loading || uploadPhotosLoading"
+            >{{
+              uploadPhotosLoading ? "上傳中..." : form.id ? "儲存" : "新增"
+            }}</el-button
           >
         </div>
       </div>
