@@ -6,7 +6,7 @@ let isShowAlert = false; // 避免顯示太多次 ElMessageBox
 if (token) {
   axios.defaults.headers.common["Authorization"] = "Bearer " + token;
 }
-axios.defaults.baseURL = "http://localhost:3000"; // import.meta.env.VITE_APIURL;
+axios.defaults.baseURL = import.meta.env.VITE_APIURL;
 
 axios.interceptors.response.use(
   (response) => {
