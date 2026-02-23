@@ -1,91 +1,187 @@
 <script setup>
-import { ref, computed } from "vue";
-import SelectProduct from "../select/SelectProduct.vue";
+import { ref, computed, reactive } from "vue";
+import { ElMessageBox, ElMessage, ElNotification } from "element-plus";
+import { Orders } from "@/api/orders";
 
-const showSelectProduct = ref(false);
-const selectProductRef = ref(null);
 const selectedProductId = ref("");
+const deleteLoading = ref(false);
+const updateLoading = ref(false);
 
 const props = defineProps({
   order: {
     type: Object,
     required: true,
   },
+  availableItems: {
+    // 該行程可以下訂的產品
+    type: Array,
+    required: true,
+  },
 });
 
-const emit = defineEmits(["close", "update-items"]);
+const emit = defineEmits(["delete-order", "update-order"]);
 const visible = ref(false);
 
-// 本地狀態管理訂購項目
-const items = ref([]);
+// 訂單資訊和項目字段
+const form = reactive({
+  items: [],
+  customer_name: "",
+  customer_phone: "",
+  pickup_time: "",
+  note: "",
+  payment_method: "",
+});
+const formRef = ref(null);
 
-// 從 order 初始化 items
-const initializeItems = () => {
-  items.value = props.order?.items
+// 表單驗證規則
+const rules = {
+  customer_name: [
+    { required: true, message: "請輸入客戶名稱", trigger: "blur" },
+  ],
+  customer_phone: [
+    { required: true, message: "請輸入客戶電話", trigger: "blur" },
+  ],
+  pickup_time: [
+    { required: true, message: "請選擇取件時間", trigger: "change" },
+  ],
+  payment_method: [
+    { required: true, message: "請選擇付款方式", trigger: "change" },
+  ],
+};
+
+// 從 order 初始化表單數據
+const initializeForm = () => {
+  form.items = props.order?.items
     ? props.order.items.map((item) => ({ ...item }))
     : [];
+  form.customer_name = props.order?.customer_name || "";
+  form.customer_phone = props.order?.customer_phone || "";
+  form.pickup_time = props.order?.pickup_time || "";
+  form.note = props.order?.note || "";
+  form.payment_method = props.order?.payment_method || "";
 };
 
 // 初始化
-if (props.order?.items) {
-  initializeItems();
-}
+initializeForm();
 
 // 編輯數量
 const updateQuantity = (index, newQuantity) => {
   if (newQuantity > 0) {
-    items.value[index].quantity = parseInt(newQuantity);
+    form.items[index].quantity = parseInt(newQuantity);
   }
 };
 
 // 刪除項目
 const deleteItem = (index) => {
-  items.value.splice(index, 1);
+  form.items.splice(index, 1);
 };
 
 // 新增訂購項目
 const addProduct = () => {
-  if (!selectedProductId.value || !selectProductRef.value) return;
+  if (!selectedProductId.value) return;
 
-  const product = selectProductRef.value.getProductById(
-    selectedProductId.value,
+  const product = props.availableItems.find(
+    (item) => item.product_id === selectedProductId.value,
   );
   if (!product) return;
 
-  const existingItem = items.value.find((item) => item.id === product.id);
+  const existingItem = form.value.items.find(
+    (item) => item.product_id === product.product_id,
+  );
 
   if (existingItem) {
     existingItem.quantity += 1;
   } else {
-    items.value.push({
-      id: product.id,
-      name: product.name,
-      price: product.price,
+    form.value.items.push({
+      product_id: product.product_id,
+      product_name: product.product_name,
+      unit_price: product.unit_price,
       quantity: 1,
     });
   }
 
   selectedProductId.value = "";
-  showSelectProduct.value = false;
 };
 
-// 計算總金額
-const totalAmount = computed(() => {
-  return items.value.reduce((sum, item) => {
-    return sum + item.price * item.quantity;
-  }, 0);
+const handleConfirm = async () => {
+  // 驗證表單
+  if (!formRef.value) return;
+
+  try {
+    await formRef.value.validate();
+  } catch (err) {
+    ElMessage.error("請填寫所有必填項");
+    return;
+  }
+
+  // 驗證訂購項目
+  if (!form.items || form.items.length === 0) {
+    ElMessage.error("請至少新增一個訂購項目");
+    return;
+  }
+
+  updateLoading.value = true;
+  try {
+    await Orders.Update(props.order.id, form);
+    ElNotification({
+      title: "成功",
+      message: "訂單已更新",
+      type: "success",
+    });
+    visible.value = false;
+    emit("update-order", form);
+  } catch (err) {
+    console.error("update order error", err);
+    ElNotification({
+      title: "錯誤",
+      message: err.response?.data?.message || "更新訂單失敗，請稍後再試",
+      type: "error",
+    });
+  } finally {
+    updateLoading.value = false;
+  }
+};
+
+// 刪除訂單
+const handleDeleteOrder = async () => {
+  ElMessageBox.confirm(`確定要刪除訂單嗎？此操作無法恢復。`, "刪除確認", {
+    confirmButtonText: "確定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      deleteLoading.value = true;
+      try {
+        await Orders.Delete(props.order.id);
+        ElNotification({
+          title: "成功",
+          message: "訂單已刪除",
+          type: "success",
+        });
+        visible.value = false;
+        emit("delete-order");
+      } catch (err) {
+        console.error("delete order error", err);
+        ElNotification({
+          title: "錯誤",
+          message: err.response?.data?.message || "刪除訂單失敗，請稍後再試",
+          type: "error",
+        });
+      } finally {
+        deleteLoading.value = false;
+      }
+    })
+    .catch(() => {
+      // 用戶取消刪除
+    });
+};
+
+const total_amount = computed(() => {
+  return form.items.reduce(
+    (total, item) => total + item.unit_price * item.quantity,
+    0,
+  );
 });
-
-const handleClose = () => {
-  visible.value = false;
-  emit("close");
-};
-
-const handleConfirm = () => {
-  emit("update-items", items.value);
-  visible.value = false;
-  emit("close");
-};
 
 defineExpose({ visible });
 </script>
@@ -96,30 +192,98 @@ defineExpose({ visible });
     v-model="visible"
     title="訂購明細"
     width="75%"
-    @close="handleClose"
     class="order-detail-dialog"
   >
     <div class="order-detail">
+      <!-- 訂單資訊編輯 -->
+      <div class="order-info-section">
+        <div class="section-header">
+          <h3>訂單資訊</h3>
+        </div>
+        <el-form
+          ref="formRef"
+          :model="form"
+          :rules="rules"
+          label-width="100px"
+          class="form-group"
+          label-position="left"
+        >
+          <div class="form-row">
+            <el-form-item
+              label="客戶名稱"
+              prop="customer_name"
+              class="form-item"
+            >
+              <el-input
+                v-model="form.customer_name"
+                placeholder="請輸入客戶名稱"
+              />
+            </el-form-item>
+            <el-form-item
+              label="客戶電話"
+              prop="customer_phone"
+              class="form-item"
+            >
+              <el-input
+                v-model="form.customer_phone"
+                placeholder="請輸入客戶電話"
+              />
+            </el-form-item>
+          </div>
+          <div class="form-row">
+            <el-form-item label="取件時間" prop="pickup_time" class="form-item">
+              <el-time-select
+                v-model="form.pickup_time"
+                placeholder="選擇時間"
+                start="09:00"
+                step="00:30"
+                end="22:00"
+              />
+            </el-form-item>
+            <el-form-item
+              label="付款方式"
+              prop="payment_method"
+              class="form-item"
+            >
+              <el-select
+                v-model="form.payment_method"
+                placeholder="選擇付款方式"
+              >
+                <el-option label="現金" value="cash" />
+                <el-option label="信用卡" value="credit_card" />
+                <el-option label="轉帳" value="transfer" />
+              </el-select>
+            </el-form-item>
+          </div>
+          <div class="form-row full-width">
+            <el-form-item label="備註" prop="note" class="form-item full-width">
+              <el-input
+                v-model="form.note"
+                type="textarea"
+                :rows="3"
+                placeholder="請輸入備註信息"
+              />
+            </el-form-item>
+          </div>
+        </el-form>
+      </div>
+
       <!-- 訂購項目列表 -->
       <div class="items-section">
         <div class="section-header">
           <h3>訂購項目</h3>
-          <el-button type="success" @click="showSelectProduct = true">
-            新增項目
-          </el-button>
         </div>
 
-        <div v-if="items.length > 0" class="items-table">
-          <div v-for="(item, idx) in items" :key="idx" class="item-card">
-            <div class="item-image-section">
-              <!-- 圖片佔位符 -->
-            </div>
+        <div v-if="form.items.length > 0" class="items-table">
+          <div v-for="(item, idx) in form.items" :key="idx" class="item-card">
+            <!-- <div class="item-image-section"></div> -->
+            <!-- 圖片佔位符 -->
             <div class="item-name-section">
-              {{ item.name }}
+              {{ item.product_name }}
             </div>
             <div class="item-price-section">
               <span class="label">單價:</span>
-              <span class="price">${{ item.price }}</span>
+              <span class="price">${{ item.unit_price }}</span>
             </div>
             <!-- <div class="item-subtotal-section">
               <span class="label">小計:</span>
@@ -151,24 +315,30 @@ defineExpose({ visible });
       <div class="total-section">
         <div class="total-row">
           <span class="label">訂單總計：</span>
-          <span class="amount">${{ totalAmount }}</span>
+          <span class="amount">${{ total_amount }}</span>
         </div>
       </div>
 
       <!-- 新增產品區域 -->
-      <div v-if="showSelectProduct" class="add-product-section">
+      <div class="add-product-section">
         <div class="add-product-header">
           <h4>新增產品</h4>
-          <el-button text @click="showSelectProduct = false">關閉</el-button>
         </div>
         <div class="add-product-row">
-          <SelectProduct
-            ref="selectProductRef"
+          <el-select
             v-model="selectedProductId"
+            placeholder="選擇產品"
             class="flex-1"
-          />
+          >
+            <el-option
+              v-for="item in availableItems"
+              :key="item.product_id"
+              :label="`${item.product_name} - $${item.unit_price}`"
+              :value="item.product_id"
+            />
+          </el-select>
           <el-button
-            type="primary"
+            type="success"
             :disabled="!selectedProductId"
             @click="addProduct"
           >
@@ -180,8 +350,31 @@ defineExpose({ visible });
 
     <!-- 對話框按鈕 -->
     <template #footer>
-      <el-button @click="handleClose">取消</el-button>
-      <el-button type="primary" @click="handleConfirm">確認</el-button>
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        "
+      >
+        <el-button
+          type="danger"
+          plain
+          @click="handleDeleteOrder"
+          :loading="deleteLoading"
+        >
+          刪除訂單
+        </el-button>
+        <div>
+          <el-button @click="visible = false">取消</el-button>
+          <el-button
+            type="primary"
+            @click="handleConfirm"
+            :loading="updateLoading"
+            >確認</el-button
+          >
+        </div>
+      </div>
     </template>
 
     <!-- 選擇商品隐藏 不使用 -->
@@ -194,7 +387,68 @@ defineExpose({ visible });
   flex-direction: column;
   gap: 20px;
 
+  .order-info-section {
+    .section-header {
+      margin-bottom: 15px;
+
+      h3 {
+        margin: 0;
+        font-size: 16px;
+        color: #1e293b;
+        font-weight: 600;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+
+      .form-row {
+        display: flex;
+        gap: 20px;
+
+        &.full-width {
+          width: 100%;
+        }
+
+        .form-item {
+          flex: 1;
+
+          &.full-width {
+            flex: 1;
+          }
+
+          label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #334155;
+          }
+
+          .el-input,
+          .el-date-picker,
+          .el-select,
+          .el-textarea {
+            width: 100%;
+          }
+        }
+      }
+    }
+
+    :deep(.el-form) {
+      .el-form-item {
+        margin-bottom: 12px;
+
+        &__label {
+          color: #334155;
+          font-weight: 500;
+        }
+      }
+    }
+  }
   .items-section {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 15px;
     .section-header {
       display: flex;
       justify-content: space-between;
@@ -356,6 +610,48 @@ defineExpose({ visible });
 @media (max-width: 768px) {
   .order-detail {
     gap: 12px;
+
+    .order-info-section {
+      .section-header {
+        margin-bottom: 10px;
+
+        h3 {
+          font-size: 15px;
+        }
+      }
+
+      .form-group {
+        .form-row {
+          flex-direction: column;
+          gap: 0;
+
+          &.full-width {
+            width: 100%;
+          }
+
+          .form-item {
+            width: 100%;
+          }
+        }
+      }
+
+      :deep(.el-form) {
+        .el-form-item {
+          margin-bottom: 12px;
+
+          &__label {
+            font-size: 13px;
+            padding-bottom: 4px;
+          }
+
+          .el-input__inner,
+          .el-textarea__inner {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+
     .items-section {
       .section-header {
         margin-bottom: 12px;

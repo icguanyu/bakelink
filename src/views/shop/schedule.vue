@@ -183,44 +183,44 @@ const getCurrentMonthLabel = computed(() => {
   return baseDate.value.format("YYYY 年 M 月");
 });
 
-// const selectedDateStats = computed(() => {
-//   if (!selectedDate.value) return null;
-//   const list = Array.isArray(schedule.orders) ? schedule.orders : [];
-//   if (list.length === 0) return null;
+const selectedDateStats = computed(() => {
+  if (!selectedDate.value) return null;
+  const list = Array.isArray(schedule.orders) ? schedule.orders : [];
+  if (list.length === 0) return null;
 
-//   const stats = {
-//     total: list.length,
-//     ordered: 0,
-//     completed: 0,
-//     cancelled: 0,
-//     revenue: 0,
-//   };
+  const stats = {
+    total: list.length,
+    ordered: list.filter((o) => o.status === "PLACED").length || 0,
+    completed: list.filter((o) => o.status === "COMPLETED").length || 0,
+    cancelled: list.filter((o) => o.status === "CANCELLED").length || 0,
+    total_amount: getOrderAmount(schedule.orders) || 0,
+  };
 
-//   list.forEach((order) => {
-//     const status = order?.status;
-//     if (status === "ordered") stats.ordered += 1;
-//     if (status === "completed") stats.completed += 1;
-//     if (status === "cancelled") stats.cancelled += 1;
-//     if (status !== "cancelled") stats.revenue += getOrderAmount(order);
-//   });
+  return stats;
+});
 
-//   return stats;
-// });
+const getOrderAmount = (orders) => {
+  if (!orders || orders.length === 0) return 0;
+  return orders.reduce((total, order) => {
+    const amount = order.total_amount || 0;
+    return total + amount;
+  }, 0);
+};
 
 const getStatusLabel = (status) => {
   const map = {
-    ordered: "已下單",
-    completed: "已完成",
-    cancelled: "已取消",
+    PLACED: "已下單",
+    COMPLETED: "已完成",
+    CANCELLED: "已取消",
   };
   return map[status] || status;
 };
 
 const getStatusColor = (status) => {
   const map = {
-    ordered: "#3b82f6",
-    completed: "#10b981",
-    cancelled: "#ef4444",
+    PLACED: "#3b82f6",
+    COMPLETED: "#10b981",
+    CANCELLED: "#ef4444",
   };
   return map[status] || "#6b7280";
 };
@@ -315,7 +315,6 @@ onMounted(() => {
         <el-button icon="ArrowRight" circle @click="goNextMonth" />
       </div>
     </div>
-
     <!-- 排程列表 + 訂單詳情 -->
     <div class="schedule-main">
       <ScheduleEditor
@@ -345,13 +344,21 @@ onMounted(() => {
               <h3>
                 {{ dayjs(selectedDate).format("YYYY 年 M 月 DD 日 (ddd)") }}
               </h3>
-              <p class="detail-stats">
-                <span class="stat-ordered">↓ O</span>
-                <span class="stat-completed">✓ D</span>
-                <span class="stat-cancelled">✕ C</span>
-                | 營收 $???
+              <p class="detail-stats" v-if="selectedDateStats">
+                {{ selectedDateStats.total }} 筆訂單 |
+                <span class="stat-ordered"
+                  >↓ {{ selectedDateStats?.ordered }}</span
+                >
+                <span class="stat-completed"
+                  >✓ {{ selectedDateStats?.completed }}</span
+                >
+                <span class="stat-cancelled"
+                  >✕ {{ selectedDateStats?.cancelled }}</span
+                >
+                | 營收 {{ $formatPrice(selectedDateStats?.total_amount) }}
               </p>
             </div>
+
             <el-button
               class="day-nav-btn"
               icon="ArrowRight"
@@ -393,7 +400,9 @@ onMounted(() => {
                   <h4 class="product-name">{{ product.product_name }}</h4>
                   <!-- <p class="product-category">{{ product.category }}</p> -->
                   <div class="product-footer">
-                    <span class="product-price">${{ product.unit_price }}</span>
+                    <span class="product-price">{{
+                      $formatPrice(product.unit_price)
+                    }}</span>
                     <!-- <span v-if="product.available" class="product-stock"
                       >{{ product.stock }} 個</span
                     >
@@ -421,13 +430,15 @@ onMounted(() => {
                 class="order-row"
                 :style="{ borderLeftColor: getStatusColor(order.status) }"
               >
-                <div class="order-id">{{ order.id }}</div>
+                <div class="order-id">{{ order.order_no }}</div>
                 <div class="order-customer">
-                  <span class="name">Customer</span>
+                  <span class="name">{{ order.customer_name }}</span>
                 </div>
-                <div class="order-time">--:--</div>
-                <div class="order-items">0 項</div>
-                <div class="order-amount">$00</div>
+                <div class="order-time">{{ order.pickup_time }}</div>
+                <div class="order-items">{{ order.items.length }} 項</div>
+                <div class="order-amount">
+                  {{ $formatPrice(order.total_amount) }}
+                </div>
                 <div
                   class="order-status"
                   :style="{ background: getStatusColor(order.status) }"

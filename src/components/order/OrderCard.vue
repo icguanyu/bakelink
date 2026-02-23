@@ -11,6 +11,11 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  items: {
+    // 該行程可以下訂的產品
+    type: Array,
+    required: true,
+  },
   viewMode: {
     type: String,
     required: true,
@@ -19,13 +24,13 @@ const props = defineProps({
 
 const statusOptions = orderStatusOptions;
 
-const emit = defineEmits(["open", "status-change"]);
+const emit = defineEmits(["status-change", "update"]);
 
 const getStatusLabel = (status) => {
   const map = {
-    ordered: "已下單",
-    completed: "已完成",
-    cancelled: "已取消",
+    PLACED: "已下單",
+    COMPLETED: "已完成",
+    CANCELLED: "已取消",
   };
   return map[status] || status;
 };
@@ -49,37 +54,25 @@ const isToday = (datetime) => {
   return dayjs(datetime).isSame(dayjs(), "day");
 };
 
-const orderIdParts = computed(() => {
-  const id = props.order?.id || "";
+const orderNParts = computed(() => {
+  const id = props.order?.order_no || "";
   const lastThree = id.slice(-3);
   const prefix = id.slice(0, -3);
   return { prefix, lastThree };
 });
 
-const openOrder = () => {
-  emit("open", props.order.id);
-};
-
 const updateStatus = (status) => {
   emit("status-change", props.order, status);
 };
 
-const handleUpdateItems = (updatedItems) => {
-  // 更新訂單中的訂購項目
-  props.order.items = updatedItems;
-  // 重新計算總金額
-  props.order.totalAmount = updatedItems.reduce((sum, item) => {
-    return sum + item.price * item.quantity;
-  }, 0);
+const handleDeleteOrder = () => {
+  console.log("delete order!");
+  emit("update");
 };
 </script>
 
 <template>
-  <div
-    class="order-card"
-    :class="{ 'simple-mode': viewMode === 'simple' }"
-    @click="openOrder"
-  >
+  <div class="order-card" :class="{ 'simple-mode': viewMode === 'simple' }">
     <!-- 订单顶部装饰 -->
     <div class="order-ticket-top"></div>
 
@@ -88,8 +81,8 @@ const handleUpdateItems = (updatedItems) => {
       <div class="order-id-section">
         <div class="order-label">訂單編號</div>
         <div class="order-id">
-          <span class="id-prefix">{{ orderIdParts.prefix }}</span>
-          <span class="id-highlight">{{ orderIdParts.lastThree }}</span>
+          <span class="id-prefix">{{ orderNParts.prefix }}</span>
+          <span class="id-highlight">{{ orderNParts.lastThree }}</span>
         </div>
       </div>
       <div
@@ -110,14 +103,14 @@ const handleUpdateItems = (updatedItems) => {
           <el-icon><User /></el-icon>
           <span>顧客</span>
         </div>
-        <span class="info-value">{{ order.customerName }}</span>
+        <span class="info-value">{{ order.customer_name }}</span>
       </div>
       <div v-if="viewMode === 'detailed'" class="info-row">
         <div class="info-label">
           <el-icon><Phone /></el-icon>
           <span>電話</span>
         </div>
-        <span class="info-value">{{ order.phone }}</span>
+        <span class="info-value">{{ order.customer_phone }}</span>
       </div>
       <div v-if="viewMode === 'detailed'" class="info-row">
         <div class="info-label">
@@ -125,10 +118,7 @@ const handleUpdateItems = (updatedItems) => {
           <span>取貨</span>
         </div>
         <span class="info-value pickup-time">
-          <span v-if="!isToday(order.pickupTime)" class="pickup-date">{{
-            dayjs(order.pickupTime).format("MM/DD")
-          }}</span>
-          {{ dayjs(order.pickupTime).format("HH:mm") }}
+          {{ order.pickup_time }}
         </span>
       </div>
     </div>
@@ -149,11 +139,10 @@ const handleUpdateItems = (updatedItems) => {
       </div>
       <div class="items-list">
         <div v-for="(item, idx) in order.items" :key="idx" class="order-item">
-          <span class="item-name">{{ item.name }}</span>
+          <span class="item-name">{{ item.product_name }}</span>
           <span class="item-quantity">× {{ item.quantity }}</span>
-          <span class="item-price">${{ item.price * item.quantity }}</span>
+          <span class="item-price">{{ $formatPrice(item.line_total) }}</span>
         </div>
-        <pre>{{ order.items }}</pre>
       </div>
     </div>
 
@@ -175,42 +164,42 @@ const handleUpdateItems = (updatedItems) => {
         <div v-if="viewMode === 'detailed'" class="payment-method">
           <span class="label">付款方式</span>
           <el-tag size="small" type="info">{{
-            getPaymentLabel(order.payment)
+            getPaymentLabel(order.payment_method)
           }}</el-tag>
         </div>
       </div>
       <div class="order-total">
         <span class="total-label">總計</span>
-        <span class="total-amount">${{ order.totalAmount }}</span>
+        <span class="total-amount">{{ $formatPrice(order.total_amount) }}</span>
       </div>
     </div>
 
     <!-- 快速操作 -->
     <div class="order-actions" @click.stop>
       <el-button
-        v-if="order.status === 'ordered'"
+        v-if="order.status === 'PLACED'"
         type="danger"
         plain
         size="small"
-        @click="updateStatus('cancelled')"
+        @click="updateStatus('CANCELLED')"
       >
         取消訂單
       </el-button>
       <el-button
-        v-if="order.status === 'ordered'"
+        v-if="order.status === 'PLACED'"
         class="complete"
         type="success"
         size="small"
-        @click="updateStatus('completed')"
+        @click="updateStatus('COMPLETED')"
       >
         完成訂單
       </el-button>
       <el-button
-        v-if="order.status === 'completed' || order.status === 'cancelled'"
+        v-if="order.status === 'COMPLETED' || order.status === 'CANCELLED'"
         type="primary"
         plain
         size="small"
-        @click="updateStatus('ordered')"
+        @click="updateStatus('PLACED')"
       >
         復原為已下單
       </el-button>
@@ -224,7 +213,9 @@ const handleUpdateItems = (updatedItems) => {
   <OrderDetail
     ref="orderDetail"
     :order="order"
-    @update-items="handleUpdateItems"
+    :availableItems="items"
+    @delete-order="handleDeleteOrder"
+    @update-order="emit('update')"
   />
 </template>
 
@@ -417,7 +408,7 @@ const handleUpdateItems = (updatedItems) => {
       display: flex;
       flex-direction: column;
       gap: 6px;
-      height: 160px;
+      max-height: 160px;
       overflow-y: auto;
       padding-right: 4px;
       flex-shrink: 0;

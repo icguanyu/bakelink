@@ -13,6 +13,9 @@ export const Orders = {
   Update: (id, data) => {
     return request.put(`/orders/${id}`, data);
   },
+  UpdateStatus: (id, data) => {
+    return request.put(`/orders/${id}/status`, data);
+  },
   Delete: (id) => {
     return request.delete(`/orders/${id}`);
   },

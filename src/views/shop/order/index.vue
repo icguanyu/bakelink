@@ -1,308 +1,30 @@
 <script setup>
-import {
-  computed,
-  onBeforeUnmount,
-  onMounted,
-  nextTick,
-  ref,
-  watch,
-} from "vue";
 import { useRouter } from "vue-router";
 import dayjs from "dayjs";
 import { orderStatusOptions } from "@/utils/constants";
+import { Schedules } from "@/api/schedules";
+import { Orders } from "@/api/orders";
+import { ElNotification } from "element-plus";
 
 const router = useRouter();
 const scrollContainerRef = ref(null);
+const orderCreate = ref(null);
 // 訂單狀態
 const activeTab = ref("all");
 const searchQuery = ref("");
 const selectedDate = ref(dayjs().format("YYYY-MM-DD"));
 const viewMode = ref("detailed"); // 'detailed' 或 'simple'
+const loading = ref(false);
 const showStats = ref(true); // 控制統計卡片顯示
 
-// 模擬訂單資料
-const orders = ref([
-  // 今天的訂單
-  {
-    id: "ORD-20260216-001",
-    customerName: "陳小美",
-    phone: "0912-345-678",
-    pickupTime: "2026-02-16 14:00",
-    status: "ordered",
-    payment: "cash",
-    items: [
-      { name: "經典牛奶吐司", quantity: 2, price: 120 },
-      { name: "海鹽奶油可頌", quantity: 3, price: 75 },
-    ],
-    totalAmount: 465,
-    note: "請幫我切片",
-    createdAt: "2026-02-16 09:30",
-  },
-  {
-    id: "ORD-20260216-002",
-    customerName: "王大明",
-    phone: "0923-456-789",
-    pickupTime: "2026-02-16 15:30",
-    status: "ordered",
-    payment: "linepay",
-    items: [
-      { name: "巧克力可頌", quantity: 5, price: 85 },
-      { name: "伯爵茶貝果", quantity: 2, price: 90 },
-    ],
-    totalAmount: 605,
-    note: "",
-    createdAt: "2026-02-16 10:15",
-  },
-  {
-    id: "ORD-20260216-003",
-    customerName: "林小華",
-    phone: "0934-567-890",
-    pickupTime: "2026-02-16 16:00",
-    status: "ordered",
-    payment: "card",
-    items: [
-      { name: "小麥酸種", quantity: 1, price: 180 },
-      { name: "蜂蜜核桃雜糧", quantity: 1, price: 150 },
-    ],
-    totalAmount: 330,
-    note: "請協助包裝精美一點，要送人的",
-    createdAt: "2026-02-16 08:45",
-  },
-  {
-    id: "ORD-20260216-004",
-    customerName: "魏志軒",
-    phone: "0912-789-456",
-    pickupTime: "2026-02-16 10:30",
-    status: "ordered",
-    payment: "linepay",
-    items: [
-      { name: "經典牛奶吐司", quantity: 2, price: 120 },
-      { name: "伯爵茶貝果", quantity: 3, price: 90 },
-      { name: "巧克力可頌", quantity: 2, price: 85 },
-      { name: "海鹽奶油可頌", quantity: 4, price: 75 },
-      { name: "蜂蜜核桃雜糧", quantity: 1, price: 150 },
-      { name: "手作波蘿麵包", quantity: 3, price: 65 },
-      { name: "小麥酸種", quantity: 1, price: 180 },
-    ],
-    totalAmount: 1290,
-    note: "公司聚餐用，需要快速準備",
-    createdAt: "2026-02-16 09:00",
-  },
-  {
-    id: "ORD-20260216-005",
-    customerName: "廖佳穎",
-    phone: "0923-654-321",
-    pickupTime: "2026-02-16 11:00",
-    status: "ordered",
-    payment: "cash",
-    items: [{ name: "海鹽奶油可頌", quantity: 4, price: 75 }],
-    totalAmount: 300,
-    note: "",
-    createdAt: "2026-02-16 09:15",
-  },
-  {
-    id: "ORD-20260216-006",
-    customerName: "陳思翰",
-    phone: "0934-123-789",
-    pickupTime: "2026-02-16 12:00",
-    status: "completed",
-    payment: "card",
-    items: [
-      { name: "巧克力可頌", quantity: 2, price: 85 },
-      { name: "手作波蘿麵包", quantity: 2, price: 65 },
-    ],
-    totalAmount: 330,
-    note: "",
-    createdAt: "2026-02-16 09:30",
-  },
-  {
-    id: "ORD-20260216-007",
-    customerName: "何美言",
-    phone: "0945-234-567",
-    pickupTime: "2026-02-16 13:30",
-    status: "ordered",
-    payment: "linepay",
-    items: [
-      { name: "法式厚切吐司", quantity: 1, price: 140 },
-      { name: "起司鹹可頌", quantity: 2, price: 90 },
-    ],
-    totalAmount: 320,
-    note: "要快速取貨",
-    createdAt: "2026-02-16 10:00",
-  },
-  {
-    id: "ORD-20260216-008",
-    customerName: "黃奕謙",
-    phone: "0956-789-012",
-    pickupTime: "2026-02-16 14:30",
-    status: "ordered",
-    payment: "cash",
-    items: [{ name: "經典牛奶吐司", quantity: 3, price: 120 }],
-    totalAmount: 360,
-    note: "請放在一起",
-    createdAt: "2026-02-16 10:45",
-  },
-  {
-    id: "ORD-20260216-009",
-    customerName: "鄒芊芊",
-    phone: "0967-345-678",
-    pickupTime: "2026-02-16 15:00",
-    status: "ordered",
-    payment: "card",
-    items: [
-      { name: "蒜香法棍", quantity: 2, price: 110 },
-      { name: "蜂蜜核桃雜糧", quantity: 1, price: 150 },
-      { name: "經典牛奶吐司", quantity: 2, price: 120 },
-      { name: "海鹽奶油可頌", quantity: 3, price: 75 },
-      { name: "巧克力可頌", quantity: 2, price: 85 },
-    ],
-    totalAmount: 895,
-    note: "公司團購",
-    createdAt: "2026-02-16 11:20",
-  },
-  {
-    id: "ORD-20260216-010",
-    customerName: "簡郁庭",
-    phone: "0978-456-789",
-    pickupTime: "2026-02-16 15:45",
-    status: "ordered",
-    payment: "bank",
-    items: [{ name: "伯爵茶貝果", quantity: 5, price: 90 }],
-    totalAmount: 450,
-    note: "辦公室訂購",
-    createdAt: "2026-02-16 11:50",
-  },
-  {
-    id: "ORD-20260216-011",
-    customerName: "陳俊宇",
-    phone: "0989-567-890",
-    pickupTime: "2026-02-16 16:30",
-    status: "cancelled",
-    payment: "cash",
-    items: [
-      { name: "海鹽奶油可頌", quantity: 2, price: 75 },
-      { name: "巧克力可頌", quantity: 2, price: 85 },
-    ],
-    totalAmount: 320,
-    note: "客戶主動取消",
-    createdAt: "2026-02-16 12:30",
-  },
-  {
-    id: "ORD-20260216-012",
-    customerName: "葉靖雯",
-    phone: "0912-345-012",
-    pickupTime: "2026-02-16 17:00",
-    status: "ordered",
-    payment: "linepay",
-    items: [
-      { name: "小麥酸種", quantity: 2, price: 180 },
-      { name: "桂圓紅棗吐司", quantity: 1, price: 150 },
-    ],
-    totalAmount: 510,
-    note: "送禮用，麻煩精心包裝",
-    createdAt: "2026-02-16 13:00",
-  },
-  {
-    id: "ORD-20260216-013",
-    customerName: "吳昀庭",
-    phone: "0923-678-901",
-    pickupTime: "2026-02-16 17:30",
-    status: "ordered",
-    payment: "card",
-    items: [
-      { name: "手作波蘿麵包", quantity: 6, price: 65 },
-      { name: "經典牛奶吐司", quantity: 4, price: 120 },
-      { name: "巧克力可頌", quantity: 5, price: 85 },
-      { name: "伯爵茶貝果", quantity: 8, price: 90 },
-      { name: "蒜香法棍", quantity: 3, price: 110 },
-      { name: "桂圓紅棗吐司", quantity: 2, price: 150 },
-    ],
-    totalAmount: 2770,
-    note: "派對用 請現場計數 需要分開包裝",
-    createdAt: "2026-02-16 13:45",
-  },
-  // 昨天的訂單
-  {
-    id: "ORD-20260215-015",
-    customerName: "張雅芳",
-    phone: "0945-678-901",
-    pickupTime: "2026-02-15 18:00",
-    status: "completed",
-    payment: "cash",
-    items: [
-      { name: "法式厚切吐司", quantity: 2, price: 140 },
-      { name: "手作波蘿麵包", quantity: 4, price: 65 },
-    ],
-    totalAmount: 540,
-    note: "",
-    createdAt: "2026-02-15 14:20",
-  },
-  {
-    id: "ORD-20260215-014",
-    customerName: "劉建國",
-    phone: "0956-789-012",
-    pickupTime: "2026-02-15 17:30",
-    status: "cancelled",
-    payment: "bank",
-    items: [{ name: "蒜香法棍", quantity: 3, price: 110 }],
-    totalAmount: 330,
-    note: "客戶臨時取消",
-    createdAt: "2026-02-15 12:00",
-  },
-  // 明天的訂單
-  {
-    id: "ORD-20260217-001",
-    customerName: "黃志明",
-    phone: "0967-123-456",
-    pickupTime: "2026-02-17 10:00",
-    status: "ordered",
-    payment: "linepay",
-    items: [
-      { name: "起司鹹可頌", quantity: 4, price: 90 },
-      { name: "手作波蘿麵包", quantity: 3, price: 65 },
-    ],
-    totalAmount: 555,
-    note: "早上要用，麻煩提前準備",
-    createdAt: "2026-02-16 16:20",
-  },
-  {
-    id: "ORD-20260217-002",
-    customerName: "李淑芬",
-    phone: "0978-234-567",
-    pickupTime: "2026-02-17 14:30",
-    status: "ordered",
-    payment: "cash",
-    items: [{ name: "桂圓紅棗吐司", quantity: 2, price: 150 }],
-    totalAmount: 300,
-    note: "",
-    createdAt: "2026-02-16 18:00",
-  },
-  // 後天的訂單
-  {
-    id: "ORD-20260218-001",
-    customerName: "周美玲",
-    phone: "0989-345-678",
-    pickupTime: "2026-02-18 11:00",
-    status: "ordered",
-    payment: "card",
-    items: [
-      { name: "經典牛奶吐司", quantity: 3, price: 120 },
-      { name: "蒜香法棍", quantity: 2, price: 110 },
-    ],
-    totalAmount: 580,
-    note: "公司訂購",
-    createdAt: "2026-02-16 19:30",
-  },
-]);
-
-orders.value.sort((a, b) => {
-  const getNumber = (order) => {
-    const match = order.id.match(/(\d{3})$/);
-    return match ? Number(match[1]) : 0;
-  };
-  const numberDiff = getNumber(a) - getNumber(b);
-  if (numberDiff !== 0) return numberDiff;
-  return a.id.localeCompare(b.id);
+// 當日開單
+const schedule = reactive({
+  schedule_date: "",
+  status: "DRAFT",
+  order_start_at: null,
+  order_end_at: null,
+  items: [],
+  orders: [],
 });
 
 const statusOptions = orderStatusOptions;
@@ -310,8 +32,8 @@ const statusOptions = orderStatusOptions;
 // 計算當前日期各狀態數量
 const statusCounts = computed(() => {
   const counts = {};
-  const dateOrders = orders.value.filter((o) =>
-    o.pickupTime.startsWith(selectedDate.value),
+  const dateOrders = schedule.orders.filter((o) =>
+    o.pickup_time.startsWith(selectedDate.value),
   );
   dateOrders.forEach((order) => {
     counts[order.status] = (counts[order.status] || 0) + 1;
@@ -330,18 +52,14 @@ statusOptions.forEach((option) => {
 
 // 日期統計
 const dateStats = computed(() => {
-  const dateOrders = orders.value.filter((o) =>
-    o.pickupTime.startsWith(selectedDate.value),
-  );
-
   return {
-    total: dateOrders.length,
-    ordered: dateOrders.filter((o) => o.status === "ordered").length,
-    completed: dateOrders.filter((o) => o.status === "completed").length,
-    cancelled: dateOrders.filter((o) => o.status === "cancelled").length,
-    revenue: dateOrders
-      .filter((o) => o.status !== "cancelled")
-      .reduce((sum, o) => sum + o.totalAmount, 0),
+    total: schedule.orders.length,
+    placed: schedule.orders.filter((o) => o.status === "PLACED").length,
+    completed: schedule.orders.filter((o) => o.status === "COMPLETED").length,
+    cancelled: schedule.orders.filter((o) => o.status === "CANCELLED").length,
+    revenue: schedule.orders
+      .filter((o) => o.status !== "CANCELLED")
+      .reduce((sum, o) => sum + o.total_amount, 0),
   };
 });
 
@@ -359,10 +77,7 @@ const dateLabel = computed(() => {
 
 // 篩選訂單
 const filteredOrders = computed(() => {
-  let result = orders.value;
-
-  // 日期篩選
-  result = result.filter((o) => o.pickupTime.startsWith(selectedDate.value));
+  let result = schedule.orders;
 
   // 狀態篩選
   if (activeTab.value !== "all") {
@@ -375,8 +90,8 @@ const filteredOrders = computed(() => {
     result = result.filter(
       (o) =>
         o.id.toLowerCase().includes(query) ||
-        o.customerName.toLowerCase().includes(query) ||
-        o.phone.includes(query),
+        o.customer_name.toLowerCase().includes(query) ||
+        o.customer_phone.includes(query),
     );
   }
 
@@ -394,16 +109,27 @@ const filteredOrders = computed(() => {
 
 const getStatusLabel = (status) => {
   const map = {
-    ordered: "已下單",
-    completed: "已完成",
-    cancelled: "已取消",
+    PLACED: "已下單",
+    COMPLETED: "已完成",
+    CANCELLED: "已取消",
   };
   return map[status] || status;
 };
 
-const updateStatus = (order, newStatus) => {
-  order.status = newStatus;
-  ElMessage.success(`訂單 ${order.id} 已更新為${getStatusLabel(newStatus)}`);
+const updateStatus = async (order, newStatus) => {
+  loading.value = true;
+  try {
+    await Orders.UpdateStatus(order.id, { status: newStatus });
+    ElNotification.success(
+      `訂單 ${order.order_no} 已更新為${getStatusLabel(newStatus)}`,
+    );
+  } catch (error) {
+    console.log("Error updating order status:", error);
+  } finally {
+    loading.value = false;
+    // 重新載入當天的排程資料，以獲得最新的訂單列表
+    await initScheduleDataByDate(selectedDate.value);
+  }
 };
 
 // 快捷日期選擇
@@ -485,6 +211,41 @@ const scrollToOrder = (order) => {
   target.scrollIntoView({ behavior: "smooth", block: "start" });
 };
 
+// 處理訂單建立成功
+const handleOrderCreated = async (newOrder) => {
+  // 重新載入當天的排程資料，以營得最新的訂單列表
+  await initScheduleDataByDate(selectedDate.value);
+};
+
+const initScheduleDataByDate = async (date) => {
+  if (!date) return;
+  loading.value = true;
+  try {
+    const res = await Schedules.GetByDate(date);
+    console.log("Schedules.GetByDate:", date, res);
+    if (res.data === null) {
+      Object.assign(schedule, {
+        id: null,
+        schedule_date: date,
+        status: "DRAFT",
+        order_start_at: null,
+        order_end_at: null,
+        items: [],
+        orders: [],
+      });
+      return;
+    }
+    Object.assign(schedule, res.data);
+  } catch (error) {
+  } finally {
+    loading.value = false;
+  }
+};
+
+const handleOrderDeleted = () => {
+  console.log("test");
+};
+
 onMounted(() => {
   scrollContainerRef.value = document.querySelector(".container");
   if (scrollContainerRef.value) {
@@ -493,6 +254,7 @@ onMounted(() => {
     });
   }
   window.addEventListener("resize", handleScroll, { passive: true });
+  initScheduleDataByDate(selectedDate.value);
 });
 
 onBeforeUnmount(() => {
@@ -511,6 +273,11 @@ watch(
   },
   { immediate: true },
 );
+
+watch(selectedDate, (val) => {
+  console.log("Selected date changed:", val);
+  initScheduleDataByDate(val);
+});
 </script>
 
 <template>
@@ -525,19 +292,29 @@ watch(
         <div class="header-actions">
           <el-button
             :icon="showStats ? 'View' : 'Hide'"
+            :type="showStats ? 'primary' : 'default'"
+            plain
             @click="showStats = !showStats"
           >
             {{ showStats ? "顯示統計" : "隱藏統計" }}
           </el-button>
           <el-button
             :icon="viewMode === 'detailed' ? 'Document' : 'List'"
+            :type="viewMode === 'detailed' ? 'primary' : 'default'"
+            plain
             @click="viewMode = viewMode === 'detailed' ? 'simple' : 'detailed'"
           >
             {{ viewMode === "detailed" ? "詳細模式" : "簡易模式" }}
           </el-button>
 
           <el-button icon="Back" @click="setToday"> 回到今天 </el-button>
-          <el-button type="primary" icon="Plus">新增訂單</el-button>
+          <el-button
+            type="primary"
+            icon="Plus"
+            :disabled="!schedule.id"
+            @click="orderCreate.open(schedule)"
+            >{{ schedule.id ? "新增訂單" : "請先開單" }}</el-button
+          >
         </div>
       </div>
     </div>
@@ -564,7 +341,7 @@ watch(
           <el-icon><Clock /></el-icon>
         </div>
         <div class="stat-content">
-          <div class="stat-value">{{ dateStats.ordered }}</div>
+          <div class="stat-value">{{ dateStats.placed }}</div>
           <div class="stat-label">已下單</div>
         </div>
       </div>
@@ -600,9 +377,7 @@ watch(
           <el-icon><Money /></el-icon>
         </div>
         <div class="stat-content">
-          <div class="stat-value">
-            ${{ dateStats.revenue.toLocaleString() }}
-          </div>
+          <div class="stat-value">{{ $formatPrice(dateStats.revenue) }}</div>
           <div class="stat-label">{{ dateLabel }}營收</div>
         </div>
       </div>
@@ -615,6 +390,7 @@ watch(
           icon="ArrowLeft"
           circle
           size="small"
+          :loading="loading"
           @click="goPreviousDay"
         />
         <el-date-picker
@@ -625,7 +401,13 @@ watch(
           value-format="YYYY-MM-DD"
           style="width: 160px"
         />
-        <el-button icon="ArrowRight" circle size="small" @click="goNextDay" />
+        <el-button
+          icon="ArrowRight"
+          circle
+          size="small"
+          :loading="loading"
+          @click="goNextDay"
+        />
       </div>
       <div style="display: flex; gap: 8px; align-items: center">
         <el-input
@@ -657,7 +439,7 @@ watch(
           class="tab-count"
           :style="{ background: tab.color }"
         >
-          {{ tab.count }}
+          {{ dateStats[tab.value.toLowerCase()] }}
         </span>
         <span v-else class="tab-count-all">{{ dateStats.total }}</span>
       </div>
@@ -673,15 +455,23 @@ watch(
       >
         <OrderCard
           :order="order"
+          :items="schedule.items"
           :view-mode="viewMode"
           @status-change="updateStatus"
+          @update="initScheduleDataByDate(selectedDate)"
         />
       </div>
 
       <!-- 空狀態 -->
       <div v-if="filteredOrders.length === 0" class="empty-state">
         <el-icon class="empty-icon"><Document /></el-icon>
-        <p class="empty-text">目前沒有訂單</p>
+        <p class="empty-text">
+          {{
+            schedule.id
+              ? "當前日期沒有符合條件的訂單"
+              : "尚未設定當前日期的排程，請先建立排程後再新增訂單"
+          }}
+        </p>
       </div>
     </div>
 
@@ -700,6 +490,9 @@ watch(
         {{ getOrderNumberLabel(order) }}
       </button>
     </div>
+
+    <!-- 建立訂單對話框 -->
+    <OrderCreate ref="orderCreate" @created="handleOrderCreated" />
   </div>
 </template>
 

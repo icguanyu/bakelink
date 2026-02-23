@@ -17,6 +17,7 @@ const props = defineProps({
       order_start_at: null,
       order_end_at: null,
       items: [],
+      order_count: 0,
     }),
   },
 });
@@ -46,6 +47,11 @@ const form = reactive({
 const selectedProducts = ref([]);
 const selectedProductId = ref("");
 const selectProductRef = ref(null);
+
+// 檢查是否有訂單，有訂單則不可編輯
+const hasOrders = computed(() => {
+  return (props.schedule?.order_count || 0) > 0;
+});
 
 // 初始化分開的日期和時間
 const initializeDateTimeFields = () => {
@@ -225,12 +231,22 @@ const deleteSchedule = async () => {
           type="primary"
           circle
           :loading="loading"
+          :disabled="hasOrders"
           @click="beforeSave(formRef)"
           icon="Check"
         />
       </div>
     </div>
     <div class="editor-body" v-loading="loading">
+      <!-- 警告提示 -->
+      <el-alert
+        v-if="hasOrders"
+        title="該排程已有訂單，無法編輯"
+        type="warning"
+        :closable="false"
+        show-icon
+      />
+
       <div class="editor-section">
         <div class="section-title">排程資訊</div>
         <el-form
@@ -246,7 +262,11 @@ const deleteSchedule = async () => {
               </div>
             </el-form-item>
             <el-form-item label="開單狀態" class="field" prop="status">
-              <el-select v-model="form.status" placeholder="選擇狀態">
+              <el-select
+                v-model="form.status"
+                placeholder="選擇狀態"
+                :disabled="hasOrders"
+              >
                 <el-option
                   v-for="option in statusOptions"
                   :key="option.value"
@@ -264,6 +284,7 @@ const deleteSchedule = async () => {
                 type="date"
                 placeholder="選擇日期"
                 value-format="YYYY-MM-DD"
+                :disabled="hasOrders"
               />
               <el-time-select
                 v-model="orderStartTime"
@@ -271,6 +292,7 @@ const deleteSchedule = async () => {
                 start="00:00"
                 step="00:30"
                 end="23:30"
+                :disabled="hasOrders"
               />
             </div>
           </el-form-item>
@@ -281,6 +303,7 @@ const deleteSchedule = async () => {
                 type="date"
                 placeholder="選擇日期"
                 value-format="YYYY-MM-DD"
+                :disabled="hasOrders"
               />
               <el-time-select
                 v-model="orderEndTime"
@@ -288,6 +311,7 @@ const deleteSchedule = async () => {
                 start="00:00"
                 step="00:30"
                 end="23:30"
+                :disabled="hasOrders"
               />
             </div>
           </el-form-item>
@@ -303,12 +327,13 @@ const deleteSchedule = async () => {
               v-model="selectedProductId"
               class="product-select"
               :exclude-ids="excludeProductIds"
+              :disabled="hasOrders"
             />
             <el-button
               type="primary"
               icon="plus"
               circle
-              :disabled="!selectedProductId"
+              :disabled="!selectedProductId || hasOrders"
               @click="addProduct"
             />
           </div>
@@ -333,6 +358,7 @@ const deleteSchedule = async () => {
                     v-model="item.sales_limit"
                     :min="0"
                     :max="999"
+                    :disabled="hasOrders"
                   />
                 </div>
               </div>
@@ -341,6 +367,7 @@ const deleteSchedule = async () => {
                 plain
                 icon="delete"
                 size="small"
+                :disabled="hasOrders"
                 @click="removeProduct(item.product_id)"
               />
             </div>
