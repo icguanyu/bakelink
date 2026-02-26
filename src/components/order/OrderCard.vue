@@ -98,28 +98,25 @@ const handleDeleteOrder = () => {
 
     <!-- 客戶資訊 -->
     <div class="order-customer">
-      <div class="info-row">
-        <div class="info-label">
-          <el-icon><User /></el-icon>
-          <span>顧客</span>
-        </div>
-        <span class="info-value">{{ order.customer_name }}</span>
+      <div class="customer-left">
+        <el-icon><User /></el-icon>
+        <div class="customer-name">{{ order.customer_name }}</div>
       </div>
-      <div v-if="viewMode === 'detailed'" class="info-row">
-        <div class="info-label">
-          <el-icon><Phone /></el-icon>
-          <span>電話</span>
+      <div v-if="viewMode === 'detailed'" class="customer-right">
+        <div class="info-row">
+          <div class="info-label">
+            <el-icon><Phone /></el-icon>
+            <span></span>
+          </div>
+          <span class="info-value">{{ order.customer_phone }}</span>
         </div>
-        <span class="info-value">{{ order.customer_phone }}</span>
-      </div>
-      <div v-if="viewMode === 'detailed'" class="info-row">
-        <div class="info-label">
-          <el-icon><AlarmClock /></el-icon>
-          <span>取貨</span>
+        <div class="info-row">
+          <div class="info-label">
+            <el-icon><AlarmClock /></el-icon>
+            <span></span>
+          </div>
+          <span class="info-value pickup-time">{{ order.pickup_time }}</span>
         </div>
-        <span class="info-value pickup-time">
-          {{ order.pickup_time }}
-        </span>
       </div>
     </div>
 
@@ -238,7 +235,7 @@ const handleDeleteOrder = () => {
   height: 100%;
 
   &.simple-mode {
-    min-height: 240px;
+    min-height: initial;
   }
 
   &:hover {
@@ -257,7 +254,7 @@ const handleDeleteOrder = () => {
     background-repeat: repeat-x;
     background-size: 12px 12px;
     background-position: 0 0;
-    background-color: #f1f5f9;
+    background-color: #b0d4f8;
   }
 
   // 票据底部锯齿装饰
@@ -276,16 +273,15 @@ const handleDeleteOrder = () => {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 12px 20px 10px;
+    padding: 10px 20px 0px;
     background: linear-gradient(to bottom, #fafbfc 0%, white 100%);
 
     .order-id-section {
       display: flex;
       flex-direction: column;
-      gap: 4px;
 
       .order-label {
-        font-size: 11px;
+        font-size: 9px;
         color: #94a3b8;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -293,28 +289,27 @@ const handleDeleteOrder = () => {
       }
 
       .order-id {
-        font-size: 16px;
-        font-family: "Courier New", monospace;
+        font-size: 14px;
+        font-family: monospace;
         display: flex;
         gap: 2px;
         align-items: center;
-
         .id-prefix {
           color: #64748b;
           font-weight: 500;
         }
-
         .id-highlight {
           color: #1e40af;
           font-weight: 700;
-          font-size: 18px;
+          font-size: 16px;
         }
       }
     }
 
     .order-status-stamp {
       position: relative;
-      padding: 6px 14px;
+      white-space: nowrap;
+      padding: 6px 8px;
       border: 2.5px solid;
       border-radius: 4px;
       font-weight: 700;
@@ -328,45 +323,67 @@ const handleDeleteOrder = () => {
   }
 
   .order-customer {
-    padding: 12px 20px;
+    padding: 10px 20px;
     display: flex;
-    flex-direction: column;
-    gap: 8px;
-    background: white;
+    .customer-left {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      .el-icon {
+        font-size: 24px;
+        color: #94a3b8;
+        margin-right: 3px;
+      }
+    }
+
+    .customer-right {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      align-items: flex-end;
+    }
 
     .info-row {
       display: flex;
-      justify-content: space-between;
+      gap: 4px;
       align-items: center;
       font-size: 14px;
+      width: 100%;
+    }
 
-      .info-label {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        color: #64748b;
-        font-weight: 500;
-        min-width: 80px;
-
-        .el-icon {
-          font-size: 16px;
-          color: #94a3b8;
-        }
+    .info-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: #64748b;
+      font-weight: 500;
+      white-space: nowrap;
+      .el-icon {
+        font-size: 14px;
+        color: #94a3b8;
       }
+    }
 
-      .info-value {
-        color: #1e293b;
-        font-weight: 600;
-        text-align: right;
+    .customer-name {
+      color: #1e293b;
+      font-weight: 700;
+      font-size: 16px;
+    }
 
-        &.pickup-time {
-          font-family: "Courier New", monospace;
-          font-size: 15px;
+    .info-value {
+      color: #1e293b;
+      font-weight: 600;
+      text-align: right;
+      justify-self: end;
 
-          .pickup-date {
-            color: #64748b;
-            margin-right: 4px;
-          }
+      &.pickup-time {
+        font-family: "Courier New", monospace;
+        font-size: 15px;
+
+        .pickup-date {
+          color: #64748b;
+          margin-right: 4px;
         }
       }
     }
@@ -397,7 +414,7 @@ const handleDeleteOrder = () => {
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
       flex-shrink: 0;
       display: flex;
       justify-content: space-between;
@@ -518,8 +535,7 @@ const handleDeleteOrder = () => {
 
     .order-total {
       display: flex;
-      flex-direction: column;
-      align-items: flex-end;
+      align-items: center;
       gap: 2px;
 
       .total-label {
@@ -549,10 +565,26 @@ const handleDeleteOrder = () => {
 
     .el-button {
       flex: 1;
+      font-size: 16px;
+      padding: 8px 12px !important;
+      height: 36px;
     }
 
     .complete {
       flex: 2;
+    }
+  }
+}
+@media (max-width: 768px) {
+  .orders-grid {
+    display: block;
+    border: 1px solid #000;
+  }
+  .order-card {
+    min-height: 0px;
+    height: initial;
+    .order-items {
+      flex: 0;
     }
   }
 }

@@ -120,9 +120,11 @@ const updateStatus = async (order, newStatus) => {
   loading.value = true;
   try {
     await Orders.UpdateStatus(order.id, { status: newStatus });
-    ElNotification.success(
-      `訂單 ${order.order_no} 已更新為${getStatusLabel(newStatus)}`,
-    );
+    ElNotification({
+      title: "成功",
+      message: `顧客 ${order.customer_name} 的訂單已更新為${getStatusLabel(newStatus)}`,
+      type: "success",
+    });
   } catch (error) {
     console.log("Error updating order status:", error);
   } finally {
@@ -209,7 +211,7 @@ const scrollToOrder = (order) => {
   const anchorId = getOrderAnchorId(order);
   const target = document.getElementById(anchorId);
   if (!target) return;
-  target.scrollIntoView({ behavior: "smooth", block: "start" });
+  target.scrollIntoView({ behavior: "smooth", block: "nearest" });
 };
 
 // 處理訂單建立成功
@@ -337,7 +339,7 @@ watch(selectedDate, (val) => {
       <div class="stat-card">
         <div
           class="stat-icon"
-          style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+          style="background: linear-gradient(135deg, #84d5ff 0%, #4f82f1 100%)"
         >
           <el-icon><Clock /></el-icon>
         </div>
@@ -349,7 +351,7 @@ watch(selectedDate, (val) => {
       <div class="stat-card">
         <div
           class="stat-icon"
-          style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
+          style="background: linear-gradient(135deg, #8fe3ad 0%, #23c52f 100%)"
         >
           <el-icon><CircleCheck /></el-icon>
         </div>
@@ -361,7 +363,7 @@ watch(selectedDate, (val) => {
       <div class="stat-card">
         <div
           class="stat-icon"
-          style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+          style="background: linear-gradient(135deg, #ffb6b6 0%, #ff314d 100%)"
         >
           <el-icon><Warning /></el-icon>
         </div>
@@ -400,7 +402,6 @@ watch(selectedDate, (val) => {
           placeholder="選擇日期"
           format="YYYY/MM/DD"
           value-format="YYYY-MM-DD"
-          style="width: 160px"
         />
         <el-button
           icon="ArrowRight"
@@ -448,32 +449,68 @@ watch(selectedDate, (val) => {
 
     <!-- 訂單列表 -->
     <div class="orders-grid">
-      <div
-        v-for="order in filteredOrders"
-        :key="order.id"
-        class="order-card-anchor"
-        :id="getOrderAnchorId(order)"
-      >
-        <OrderCard
-          :order="order"
-          :items="schedule.items"
-          :view-mode="viewMode"
-          @status-change="updateStatus"
-          @update="initScheduleDataByDate(selectedDate)"
-        />
-      </div>
+      <!-- 讀取中骨架屏 -->
+      <template v-if="loading">
+        <div v-for="i in 6" :key="`skeleton-${i}`" class="order-skeleton">
+          <el-skeleton animated>
+            <template #template>
+              <div class="skeleton-header">
+                <el-skeleton-item variant="text" style="width: 60%" />
+                <el-skeleton-item variant="text" style="width: 30%" />
+              </div>
+              <div class="skeleton-customer">
+                <el-skeleton-item variant="text" style="width: 40%" />
+                <el-skeleton-item variant="text" style="width: 50%" />
+              </div>
+              <div class="skeleton-divider" />
+              <div class="skeleton-items">
+                <el-skeleton-item variant="text" style="width: 100%; height: 20px" />
+                <el-skeleton-item variant="text" style="width: 90%; height: 20px" />
+                <el-skeleton-item variant="text" style="width: 85%; height: 20px" />
+              </div>
+              <div class="skeleton-divider" />
+              <div class="skeleton-footer">
+                <el-skeleton-item variant="text" style="width: 40%" />
+                <el-skeleton-item variant="text" style="width: 35%; height: 30px" />
+              </div>
+              <div class="skeleton-actions">
+                <el-skeleton-item variant="button" style="width: 48%; height: 32px" />
+                <el-skeleton-item variant="button" style="width: 48%; height: 32px" />
+              </div>
+            </template>
+          </el-skeleton>
+        </div>
+      </template>
 
-      <!-- 空狀態 -->
-      <div v-if="filteredOrders.length === 0" class="empty-state">
-        <el-icon class="empty-icon"><Document /></el-icon>
-        <p class="empty-text">
-          {{
-            schedule.id
-              ? "當前日期沒有符合條件的訂單"
-              : "尚未設定當前日期的排程，請先建立排程後再新增訂單"
-          }}
-        </p>
-      </div>
+      <!-- 訂單卡片 -->
+      <template v-else>
+        <div
+          v-for="order in filteredOrders"
+          :key="order.id"
+          class="order-card-anchor"
+          :id="getOrderAnchorId(order)"
+        >
+          <OrderCard
+            :order="order"
+            :items="schedule.items"
+            :view-mode="viewMode"
+            @status-change="updateStatus"
+            @update="initScheduleDataByDate(selectedDate)"
+          />
+        </div>
+
+        <!-- 空狀態 -->
+        <div v-if="filteredOrders.length === 0" class="empty-state">
+          <el-icon class="empty-icon"><Document /></el-icon>
+          <p class="empty-text">
+            {{
+              schedule.id
+                ? "當前日期沒有符合條件的訂單"
+                : "尚未設定當前日期的排程，請先建立排程後再新增訂單"
+            }}
+          </p>
+        </div>
+      </template>
     </div>
 
     <div
@@ -500,13 +537,13 @@ watch(selectedDate, (val) => {
 <style scoped lang="scss">
 @use "@/assets/scss/scrollbar.scss" as *;
 .order-manager {
-  padding: 20px;
+  padding: 12px;
   background: #f8fafc;
   min-height: 100vh;
 }
 
 .order-header {
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 
   .header-top {
     display: flex;
@@ -515,14 +552,14 @@ watch(selectedDate, (val) => {
     gap: 20px;
 
     h2 {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 700;
       color: #1e293b;
       margin: 0 0 8px 0;
     }
 
     .subtitle {
-      font-size: 14px;
+      font-size: 13px;
       color: #64748b;
       margin: 0;
     }
@@ -530,10 +567,14 @@ watch(selectedDate, (val) => {
 
   .header-actions {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex-shrink: 0;
     .el-button {
       margin: 0;
+      height: 40px;
+      padding: 0 14px;
+      font-size: 14px;
+      font-weight: 600;
     }
   }
 }
@@ -542,17 +583,17 @@ watch(selectedDate, (val) => {
 .stats-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .stat-card {
   background: white;
   border-radius: 12px;
-  padding: 16px;
+  padding: 12px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
 
@@ -566,8 +607,8 @@ watch(selectedDate, (val) => {
   }
 
   .stat-icon {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -582,7 +623,7 @@ watch(selectedDate, (val) => {
     min-width: 0;
 
     .stat-value {
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
       color: #1e293b;
       line-height: 1;
@@ -590,7 +631,7 @@ watch(selectedDate, (val) => {
     }
 
     .stat-label {
-      font-size: 13px;
+      font-size: 12px;
       color: #64748b;
       font-weight: 500;
     }
@@ -602,8 +643,8 @@ watch(selectedDate, (val) => {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  margin-bottom: 20px;
-  gap: 16px;
+  margin-bottom: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 
   .date-selector {
@@ -615,6 +656,8 @@ watch(selectedDate, (val) => {
     .el-button[circle] {
       flex-shrink: 0;
       border: 1px solid #e2e8f0;
+      width: 36px;
+      height: 36px;
     }
   }
 }
@@ -622,8 +665,8 @@ watch(selectedDate, (val) => {
 // 狀態標籤
 .status-tabs {
   display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
+  gap: 6px;
+  margin-bottom: 12px;
   overflow-x: auto;
   padding-bottom: 4px;
 
@@ -641,7 +684,7 @@ watch(selectedDate, (val) => {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 8px 14px;
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
@@ -666,7 +709,7 @@ watch(selectedDate, (val) => {
   }
 
   .tab-label {
-    font-size: 1.125rem;
+    font-size: 16px;
     color: #475569;
     font-weight: 500;
   }
@@ -694,13 +737,65 @@ watch(selectedDate, (val) => {
 // 訂單網格
 .orders-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   grid-auto-rows: 1fr;
-  gap: 16px;
+  gap: 10px;
 }
 
 .order-card-anchor {
   scroll-margin-top: 80px;
+}
+
+// 訂單骨架屏
+.order-skeleton {
+  background: white;
+  border-radius: 0;
+  padding: 20px;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+  min-height: 480px;
+
+  .skeleton-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .skeleton-customer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .skeleton-divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 16px 0;
+  }
+
+  .skeleton-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .skeleton-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .skeleton-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
 }
 
 .order-anchor-nav {
@@ -725,14 +820,14 @@ watch(selectedDate, (val) => {
     rgba(133, 133, 133, 0.08)
   );
   .anchor-item {
-    width: 36px;
-    height: 22px;
+    width: 40px;
+    height: 26px;
     flex-shrink: 0;
     border-radius: 4px;
     border: 1px solid #cbd5e1;
     background: #fff;
     color: #334155;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -784,7 +879,7 @@ watch(selectedDate, (val) => {
 // 響應式
 @media (max-width: 768px) {
   .order-manager {
-    padding: 12px;
+    padding: 10px;
   }
 
   .order-header {
@@ -807,6 +902,8 @@ watch(selectedDate, (val) => {
       .el-button {
         flex: 1;
         min-width: calc(50% - 4px);
+        height: 44px;
+        font-size: 15px;
       }
     }
   }
@@ -823,6 +920,7 @@ watch(selectedDate, (val) => {
       flex-wrap: wrap;
 
       .el-date-editor {
+        flex: 1;
         width: 100% !important;
         order: 2;
       }
@@ -846,7 +944,13 @@ watch(selectedDate, (val) => {
   }
 
   .orders-grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .order-skeleton {
+    min-height: 400px;
   }
 
   .order-anchor-nav {
