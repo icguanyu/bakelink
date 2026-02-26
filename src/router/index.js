@@ -15,10 +15,15 @@ const router = createRouter({
       meta: { requireAuth: true },
       component: () => import("../views/shop.vue"),
       children: [
+        // {
+        //   path: "",
+        //   name: "shop-dashboard",
+        //   component: () => import("../views/shop/index.vue"),
+        // },
         {
           path: "",
-          name: "shop-dashboard",
-          component: () => import("../views/shop/index.vue"),
+          name: "shop-schedule",
+          component: () => import("../views/shop/schedule.vue"),
         },
         {
           path: "products",
@@ -29,23 +34,6 @@ const router = createRouter({
           path: "order",
           name: "shop-order",
           component: () => import("../views/shop/order.vue"),
-          children: [
-            {
-              path: "",
-              name: "shop-order-list",
-              component: () => import("../views/shop/order/index.vue"),
-            },
-            {
-              path: ":id",
-              name: "shop-order-details",
-              component: () => import("../views/shop/order/[id].vue"),
-            },
-          ],
-        },
-        {
-          path: "schedule",
-          name: "shop-schedule",
-          component: () => import("../views/shop/schedule.vue"),
         },
         {
           path: "settings",

@@ -16,13 +16,13 @@ const currentDate = computed(() => dayjs().format("DD"));
       <div class="month">{{ currentMonth }}</div>
       <div class="date">{{ currentDate }}</div>
     </div>
-    <router-link class="link" to="/shop">
+    <!-- <router-link class="link" to="/shop">
       <div class="icon">
         <img src="@/assets/images/icons/home.png" alt="" />
       </div>
       <div class="title">總覽</div>
-    </router-link>
-    <router-link class="link" to="/shop/schedule">
+    </router-link> -->
+    <router-link class="link" to="/shop">
       <div class="icon">
         <img src="@/assets/images/icons/calendar.png" alt="" />
       </div>

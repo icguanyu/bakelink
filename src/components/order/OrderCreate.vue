@@ -66,9 +66,9 @@ const rules = {
 const resetForm = () => {
   Object.assign(form, {
     schedule_id: currentSchedule.value?.id || "",
-    customer_name: "",
-    customer_phone: "",
-    pickup_time: "",
+    customer_name: "Nick_Test",
+    customer_phone: "0933895891",
+    pickup_time: "15:00",
     note: "",
     payment_method: "cash",
     items: [
@@ -174,7 +174,6 @@ defineExpose({ open, close });
       :rules="rules"
       label-width="100px"
       label-position="left"
-      v-loading="loading"
     >
       <!-- 顧客資訊 -->
       <el-divider content-position="left">顧客資訊</el-divider>
@@ -289,7 +288,7 @@ defineExpose({ open, close });
       <div class="dialog-footer">
         <el-button @click="close" :disabled="loading">取消</el-button>
         <el-button type="primary" @click="handleSubmit" :loading="loading">
-          建立訂單
+          {{ loading ? "建立中..." : "建立訂單" }}
         </el-button>
       </div>
     </template>

@@ -106,58 +106,17 @@ axios.interceptors.response.use(
 );
 
 const request = {
-  get(url, config) {
-    return new Promise((resolve, reject) => {
-      axios
-        .get(url, config)
-        .then((response) => {
-          resolve(response);
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+  get(url, params) {
+    return axios.get(url, params);
   },
   post(url, data = {}, config) {
-    return new Promise((resolve, reject) => {
-      axios
-        .post(url, data, config)
-        .then(
-          (response) => {
-            resolve(response);
-          },
-          (err) => {
-            reject(err);
-          },
-        )
-        .catch((err) => {
-          reject(err);
-        });
-    });
+    return axios.post(url, data, config);
   },
   delete(url, data = {}) {
-    return new Promise((resolve, reject) => {
-      axios.delete(url, { data }).then(
-        (response) => {
-          resolve(response);
-        },
-        (err) => {
-          reject(err);
-        },
-      );
-    });
+    return axios.delete(url, data);
   },
   put(url, data = {}) {
-    return new Promise((resolve, reject) => {
-      axios.put(url, data).then(
-        (response) => {
-          resolve(response);
-        },
-        (err) => {
-          reject(err);
-        },
-      );
-    });
+    return axios.put(url, data);
   },
 };
 
