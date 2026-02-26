@@ -1,1 +1,0 @@
-import{a1 as t,c as a,o,t as r,g as s}from"./index-DWrQ9K6N.js";const l={__name:"[id]",setup(n){const e=t().params.id;return(i,u)=>(o(),a("div",null,"order detail id: "+r(s(e)),1))}};export{l as default};

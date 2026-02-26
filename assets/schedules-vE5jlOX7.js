@@ -1,1 +1,0 @@
-import{Z as t}from"./index-DWrQ9K6N.js";const u={Create:e=>t.post("/schedules",e),List:e=>t.post("/schedules/list",e),GetByDate:e=>t.get(`/schedules/${e}`),GetByMonth:e=>t.get(`/schedules/month/${e}`),Update:(e,s)=>t.put(`/schedules/${e}`,s),Delete:e=>t.delete(`/schedules/${e}`)};export{u as S};
