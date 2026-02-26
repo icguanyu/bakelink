@@ -453,7 +453,6 @@ const deleteSchedule = async () => {
 }
 
 .field-label {
-  font-size: 12px;
   color: #64748b;
 }
 
@@ -563,7 +562,6 @@ const deleteSchedule = async () => {
       display: flex;
       flex-direction: row;
       align-items: center;
-      justify-content: space-between;
     }
   }
 }

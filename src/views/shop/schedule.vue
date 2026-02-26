@@ -344,19 +344,6 @@ onMounted(() => {
               <h3>
                 {{ dayjs(selectedDate).format("YYYY 年 M 月 DD 日 (ddd)") }}
               </h3>
-              <p class="detail-stats" v-if="selectedDateStats">
-                {{ selectedDateStats.total }} 筆訂單 |
-                <span class="stat-ordered"
-                  >↓ {{ selectedDateStats?.ordered }}</span
-                >
-                <span class="stat-completed"
-                  >✓ {{ selectedDateStats?.completed }}</span
-                >
-                <span class="stat-cancelled"
-                  >✕ {{ selectedDateStats?.cancelled }}</span
-                >
-                | 營收 {{ $formatPrice(selectedDateStats?.total_amount) }}
-              </p>
             </div>
 
             <el-button
@@ -378,6 +365,57 @@ onMounted(() => {
               <el-icon v-if="isEditorOpen"><Close /></el-icon>
               <el-icon v-else><More /></el-icon>
             </el-button>
+          </div>
+        </div>
+
+        <!-- 統計信息卡片 -->
+        <div v-if="selectedDateStats" class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-icon" style="color: #3b82f6">
+              <el-icon><ShoppingCart /></el-icon>
+            </div>
+            <div class="stat-text">
+              <div class="stat-value">{{ selectedDateStats.total }}</div>
+              <div class="stat-label">訂單</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon" style="color: #3b82f6">
+              <el-icon><CircleCheck /></el-icon>
+            </div>
+            <div class="stat-text">
+              <div class="stat-value">{{ selectedDateStats.ordered }}</div>
+              <div class="stat-label">已下單</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon" style="color: #10b981">
+              <el-icon><SuccessFilled /></el-icon>
+            </div>
+            <div class="stat-text">
+              <div class="stat-value">{{ selectedDateStats.completed }}</div>
+              <div class="stat-label">已完成</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon" style="color: #ef4444">
+              <el-icon><Close /></el-icon>
+            </div>
+            <div class="stat-text">
+              <div class="stat-value">{{ selectedDateStats.cancelled }}</div>
+              <div class="stat-label">已取消</div>
+            </div>
+          </div>
+          <div class="stat-item highlight">
+            <div class="stat-icon" style="color: #f59e0b">
+              <el-icon><Money /></el-icon>
+            </div>
+            <div class="stat-text">
+              <div class="stat-value">
+                {{ $formatPrice(selectedDateStats.total_amount) }}
+              </div>
+              <div class="stat-label">營收</div>
+            </div>
           </div>
         </div>
 
@@ -468,33 +506,41 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
+@use "@/assets/scss/scrollbar.scss" as *;
 .schedule-container {
-  padding: 20px;
+  padding: 12px;
   background: #f8fafc;
   min-height: 100vh;
 }
 
 .schedule-header {
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 
   .header-top {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 16px;
-    gap: 20px;
+    margin-bottom: 10px;
+    gap: 12px;
 
     h2 {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 700;
       color: #1e293b;
-      margin: 0 0 8px 0;
+      margin: 0 0 6px 0;
     }
 
     .subtitle {
-      font-size: 14px;
+      font-size: 12px;
       color: #64748b;
       margin: 0;
+    }
+
+    .el-button {
+      height: 40px;
+      padding: 0 12px;
+      font-size: 14px;
+      font-weight: 600;
     }
   }
 
@@ -502,17 +548,23 @@ onMounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 16px;
-    padding: 12px;
+    gap: 10px;
+    padding: 10px 12px;
     background: white;
     border-radius: 8px;
     border: 1px solid #e2e8f0;
+
+    .el-button {
+      width: 36px;
+      height: 36px;
+      border: 1px solid #e2e8f0;
+    }
 
     .month-label {
       font-size: 16px;
       font-weight: 600;
       color: #1e293b;
-      min-width: 120px;
+      min-width: 110px;
       text-align: center;
     }
   }
@@ -521,13 +573,13 @@ onMounted(() => {
 // 左右分割主容器
 .schedule-main {
   display: flex;
-  gap: 16px;
-  min-height: calc(100vh - 280px);
+  gap: 12px;
+  min-height: calc(100vh - 200px);
 }
 
 .schedule-right {
   flex: 1;
-  min-width: 530px;
+  min-width: 500px;
   display: flex;
   flex-direction: column;
   background: white;
@@ -551,30 +603,32 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 16px 20px;
+  padding: 12px 16px;
   border-bottom: 1px solid #e2e8f0;
-  gap: 12px;
+  gap: 8px;
 
   .detail-header-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
   }
 
   .day-nav-btn {
     flex-shrink: 0;
     border: 1px solid #e2e8f0;
+    width: 34px;
+    height: 34px;
   }
 
   h3 {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     color: #1e293b;
-    margin: 0 0 4px 0;
+    margin: 0;
   }
 
   .detail-stats {
-    font-size: 12px;
+    font-size: 11px;
     color: #64748b;
     margin: 0;
 
@@ -605,11 +659,68 @@ onMounted(() => {
 
 .detail-more {
   border: 1px solid #e2e8f0;
+  width: 36px;
+  height: 36px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: 6px;
+  padding: 8px;
+  background: white;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 6px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  min-height: 60px;
+
+  &.highlight {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-color: #fbbf24;
+  }
+
+  .stat-icon {
+    flex-shrink: 0;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .stat-text {
+    min-width: 0;
+    width: 100%;
+
+    .stat-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1e293b;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
+      white-space: nowrap;
+    }
+  }
 }
 
 .detail-content {
   flex: 1;
-  padding: 16px 20px;
+  padding: 12px 16px;
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -634,15 +745,15 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 30px 16px;
   color: #94a3b8;
-  font-size: 14px;
-  min-height: 280px;
+  font-size: 13px;
+  min-height: 200px;
 }
 
 // 商品區塊
 .products-section {
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .section-title {
@@ -651,12 +762,11 @@ onMounted(() => {
   align-items: center;
   font-weight: 600;
   color: #1e293b;
-  margin-bottom: 8px;
-  padding-bottom: 6px;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
   border-bottom: 1px solid #e2e8f0;
-
+  font-size: 15px;
   .count {
-    font-size: 11px;
     color: #94a3b8;
     font-weight: 400;
   }
@@ -665,13 +775,13 @@ onMounted(() => {
 .products-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .product-card {
   background: #f8fafc;
   border-radius: 6px;
-  padding: 8px;
+  padding: 6px 8px;
   text-align: center;
   border: 1px solid #e2e8f0;
   transition: all 0.2s ease;
@@ -680,7 +790,7 @@ onMounted(() => {
   &:hover {
     background: white;
     border-color: #cbd5e1;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     transform: translateY(-1px);
   }
 
@@ -697,16 +807,16 @@ onMounted(() => {
 .product-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .product-name {
-  font-size: 14px;
-  font-weight: 600;
   color: #1e293b;
   margin: 0;
   line-height: 1.2;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .product-category {
@@ -717,17 +827,15 @@ onMounted(() => {
 
 .product-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  font-size: 12px;
-  margin-top: 4px;
-  padding-top: 4px;
+  margin-top: 3px;
+  padding-top: 3px;
   border-top: 1px solid #e2e8f0;
   gap: 2px;
 }
 
 .product-price {
-  font-weight: 700;
   color: #2e3d5f;
   flex-shrink: 0;
 }
@@ -747,7 +855,7 @@ onMounted(() => {
 
 // 訂單區塊
 .orders-section {
-  margin-top: 24px;
+  margin-top: 12px;
 }
 
 .empty-orders {
@@ -755,52 +863,58 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 30px 16px;
   color: #94a3b8;
 
   .el-icon {
-    font-size: 32px;
-    margin-bottom: 8px;
+    font-size: 28px;
+    margin-bottom: 6px;
   }
 
   p {
     margin: 0;
-    font-size: 14px;
+    font-size: 13px;
   }
 }
 
 .orders-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   overflow-x: auto;
+  max-height: 300px;
+  overflow-y: auto;
+  @include scrollbar(
+    rgb(160, 160, 160),
+    rgb(255, 0, 0),
+    rgb(245, 245, 245)
+  );
 }
 
 .order-row {
   display: grid;
-  min-width: 520px;
-  grid-template-columns: 140px 70px 50px 50px 70px 70px;
-  gap: 8px;
+  min-width: 480px;
+  grid-template-columns: 130px 70px 50px 45px 70px 70px;
+  gap: 6px;
   align-items: center;
-  padding: 10px;
+  padding: 8px;
   background: #f8fafc;
-  border-radius: 8px;
+  border-radius: 6px;
   border-left: 4px solid #3b82f6;
-
+  font-size: 14px;
   transition: all 0.2s ease;
-  overflow: hidden;
 
   &:hover {
     background: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   }
 
   .order-id {
-    font-weight: 600;
-    color: #64748b;
+    color: #1e293b;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 13px;
   }
 
   .order-customer {
@@ -814,26 +928,29 @@ onMounted(() => {
   }
 
   .order-time {
-    color: #64748b;
+    color: #475569;
     font-weight: 600;
+    font-size: 13px;
   }
 
   .order-items {
-    color: #94a3b8;
+    color: #64748b;
+    font-weight: 500;
   }
 
   .order-amount {
     font-weight: 700;
     color: #1e293b;
+    font-size: 15px;
   }
 
   .order-status {
     color: white;
-    font-weight: 600;
-    padding: 4px 6px;
+    font-weight: 700;
+    padding: 4px 8px;
     border-radius: 4px;
     text-align: center;
-    font-size: 11px;
+    font-size: 12px;
   }
 }
 
@@ -850,52 +967,51 @@ onMounted(() => {
 
 // 響應式
 @media (max-width: 1024px) {
+  .schedule-container {
+    padding: 10px;
+  }
+
   .schedule-main {
     flex-direction: column;
     min-height: auto;
+    gap: 10px;
   }
 
   .schedule-right {
     min-width: 100%;
-    min-height: 300px;
+    min-height: 280px;
   }
+
   .detail-header {
-    padding: 12px;
+    padding: 10px 12px;
     gap: 6px;
     .detail-header-left {
       gap: 6px;
     }
-  }
-  .detail-content {
-    padding: 12px 16px;
-  }
-  .products-section {
-    margin-bottom: 8px;
-    .products-grid {
-      gap: 6px;
-      .product-info {
-        gap: 0;
-        .product-price {
-          display: none;
-        }
-        .product-footer {
-          border-top: none;
-          padding-top: 0;
-          margin: 0;
-        }
-      }
+    h3 {
+      font-size: 16px;
     }
   }
+
+  .detail-content {
+    padding: 10px 12px;
+  }
+
+  .products-section {
+    margin-bottom: 8px;
+  }
+
   .orders-section {
-    margin-top: 12px;
+    margin-top: 10px;
   }
 
   .order-row {
     grid-template-columns:
-      minmax(80px, 1fr) minmax(80px, 0.8fr)
-      50px 45px 60px 70px;
-    gap: 6px;
-    padding: 8px;
+      minmax(100px, 1fr) minmax(70px, 0.8fr)
+      45px 40px 60px 65px;
+    gap: 5px;
+    padding: 6px;
+    min-width: 420px;
   }
 }
 </style>

@@ -192,7 +192,7 @@ const selectDate = (date) => {
 }
 
 .date-box {
-  background: linear-gradient(135deg, #1c2345 0%, #2e3d5f 100%);
+  background: linear-gradient(135deg, #555c7e 20%, #2e3d5f 100%);
   border-radius: 4px;
   padding: 4px 5px;
   color: white;
@@ -220,7 +220,6 @@ const selectDate = (date) => {
 .mini-stats {
   display: flex;
   gap: 3px;
-  font-size: 10px;
   flex-wrap: wrap;
   justify-content: center;
   min-height: 16px;
@@ -232,7 +231,7 @@ const selectDate = (date) => {
     font-weight: 700;
     color: #1e293b;
     line-height: 1.2;
-
+    font-size: 12px;
     &.ordered {
       background: #dbeafe;
       color: #1e40af;
