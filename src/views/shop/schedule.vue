@@ -434,6 +434,7 @@ onMounted(() => {
                 class="product-card"
               >
                 <!-- :class="{ 'out-of-stock': !product.available }" -->
+                <div class="product-thumb"></div>
                 <div class="product-info">
                   <h4 class="product-name">{{ product.product_name }}</h4>
                   <!-- <p class="product-category">{{ product.category }}</p> -->
@@ -456,7 +457,7 @@ onMounted(() => {
           </div>
 
           <!-- 訂單列表 -->
-          <div class="orders-section">
+          <!-- <div class="orders-section">
             <div class="section-title">
               <span>訂單清單</span>
               <span class="count">{{ schedule.orders.length }} 筆</span>
@@ -489,7 +490,7 @@ onMounted(() => {
               <el-icon><Document /></el-icon>
               <p>該日期暫無訂單</p>
             </div>
-          </div>
+          </div> -->
         </div>
 
         <!-- <pre>{{ schedule }}</pre> -->
@@ -579,7 +580,7 @@ onMounted(() => {
 
 .schedule-right {
   flex: 1;
-  min-width: 500px;
+  min-width: 600px;
   display: flex;
   flex-direction: column;
   background: white;
@@ -604,7 +605,6 @@ onMounted(() => {
   justify-content: space-between;
   align-items: flex-start;
   padding: 12px 16px;
-  border-bottom: 1px solid #e2e8f0;
   gap: 8px;
 
   .detail-header-left {
@@ -702,8 +702,7 @@ onMounted(() => {
     width: 100%;
 
     .stat-value {
-      font-size: 16px;
-      font-weight: 700;
+      font-size: 24px;
       color: #1e293b;
       line-height: 1.2;
       word-break: break-word;
@@ -779,6 +778,7 @@ onMounted(() => {
 }
 
 .product-card {
+  width: 120px;
   background: #f8fafc;
   border-radius: 6px;
   padding: 6px 8px;
@@ -802,6 +802,15 @@ onMounted(() => {
       transform: none;
     }
   }
+}
+
+.product-thumb {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 6px;
 }
 
 .product-info {
@@ -884,11 +893,7 @@ onMounted(() => {
   overflow-x: auto;
   max-height: 300px;
   overflow-y: auto;
-  @include scrollbar(
-    rgb(160, 160, 160),
-    rgb(255, 0, 0),
-    rgb(245, 245, 245)
-  );
+  @include scrollbar(rgb(160, 160, 160), rgb(255, 0, 0), rgb(245, 245, 245));
 }
 
 .order-row {

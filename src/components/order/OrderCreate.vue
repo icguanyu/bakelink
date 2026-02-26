@@ -26,6 +26,10 @@ const availableProducts = computed(() => {
 const findScheduleItemByProductId = (productId) => {
   return availableProducts.value.find((item) => item.product_id === productId);
 };
+
+// 產品數量追蹤（key 為 product_id，value 為數量）
+const productQuantities = ref({});
+
 const form = reactive({
   schedule_id: "",
   customer_name: "",
@@ -33,13 +37,6 @@ const form = reactive({
   pickup_time: "",
   note: "",
   payment_method: "cash",
-  items: [
-    {
-      schedule_item_id: "",
-      product_id: "",
-      quantity: 1,
-    },
-  ],
 });
 
 const paymentOptions = [
@@ -71,13 +68,11 @@ const resetForm = () => {
     pickup_time: "15:00",
     note: "",
     payment_method: "cash",
-    items: [
-      {
-        schedule_item_id: "",
-        product_id: "",
-        quantity: 1,
-      },
-    ],
+  });
+  // 重置所有產品數量為 0
+  productQuantities.value = {};
+  availableProducts.value.forEach((product) => {
+    productQuantities.value[product.product_id] = 0;
   });
   nextTick(() => {
     formRef.value?.clearValidate();
@@ -98,37 +93,57 @@ const close = () => {
   visible.value = false;
 };
 
-// 當選擇產品時，自動設定對應的 schedule_item_id
-const handleProductChange = (index) => {
-  const item = form.items[index];
-  if (item.product_id) {
-    const scheduleItem = findScheduleItemByProductId(item.product_id);
-    if (scheduleItem) {
-      item.schedule_item_id = scheduleItem.schedule_item_id;
+// 增加產品數量
+const incrementQuantity = (productId) => {
+  if (!productQuantities.value[productId]) {
+    productQuantities.value[productId] = 0;
+  }
+  productQuantities.value[productId]++;
+};
+
+// 減少產品數量
+const decrementQuantity = (productId) => {
+  if (productQuantities.value[productId] > 0) {
+    productQuantities.value[productId]--;
+  }
+};
+
+// 獲取產品數量
+const getQuantity = (productId) => {
+  return productQuantities.value[productId] || 0;
+};
+
+// 計算已選產品總數
+const selectedItemsCount = computed(() => {
+  return Object.values(productQuantities.value).reduce(
+    (sum, qty) => sum + qty,
+    0,
+  );
+});
+
+// 計算小計金額
+const totalAmount = computed(() => {
+  let total = 0;
+  Object.keys(productQuantities.value).forEach((productId) => {
+    const quantity = productQuantities.value[productId];
+    if (quantity > 0) {
+      const product = findScheduleItemByProductId(productId);
+      if (product) {
+        total += product.unit_price * quantity;
+      }
     }
-  } else {
-    item.schedule_item_id = "";
-  }
-};
-
-const addItem = () => {
-  form.items.push({
-    schedule_item_id: "",
-    product_id: "",
-    quantity: 1,
   });
-};
-
-const removeItem = (index) => {
-  if (form.items.length > 1) {
-    form.items.splice(index, 1);
-  } else {
-    ElMessage.warning("至少需要一個訂單項目");
-  }
-};
+  return total;
+});
 
 const handleSubmit = async () => {
   if (!formRef.value) return;
+
+  // 檢查是否至少選擇了一個產品
+  if (selectedItemsCount.value === 0) {
+    ElMessage.warning("請至少選擇一個產品");
+    return;
+  }
 
   formRef.value.validate(async (valid) => {
     if (!valid) {
@@ -136,9 +151,32 @@ const handleSubmit = async () => {
       return;
     }
 
+    // 構建訂單項目
+    const items = [];
+    Object.keys(productQuantities.value).forEach((productId) => {
+      const quantity = productQuantities.value[productId];
+      if (quantity > 0) {
+        const product = findScheduleItemByProductId(productId);
+        if (product) {
+          items.push({
+            schedule_item_id: product.schedule_item_id,
+            product_id: productId,
+            quantity: quantity,
+          });
+        }
+      }
+    });
+
+    const submitData = {
+      ...form,
+      items: items,
+    };
+
+    console.log("提交數據:", submitData);
+
     loading.value = true;
     try {
-      const res = await Orders.Create(form);
+      const res = await Orders.Create(submitData);
       ElNotification({
         title: "成功",
         message: "訂單已建立成功",
@@ -176,52 +214,56 @@ defineExpose({ open, close });
       label-position="left"
     >
       <!-- 顧客資訊 -->
-      <el-divider content-position="left">顧客資訊</el-divider>
+      <!-- <el-divider content-position="left">顧客資訊</el-divider> -->
 
-      <el-form-item label="顧客姓名" prop="customer_name">
-        <el-input
-          v-model="form.customer_name"
-          placeholder="請輸入顧客姓名"
-          clearable
-        />
-      </el-form-item>
+      <div class="form-row">
+        <el-form-item label="顧客姓名" prop="customer_name">
+          <el-input
+            v-model="form.customer_name"
+            placeholder="請輸入顧客姓名"
+            clearable
+          />
+        </el-form-item>
 
-      <el-form-item label="顧客電話" prop="customer_phone">
-        <el-input
-          v-model="form.customer_phone"
-          placeholder="例如：0912345678"
-          clearable
-          maxlength="10"
-        />
-      </el-form-item>
+        <el-form-item label="顧客電話" prop="customer_phone">
+          <el-input
+            v-model="form.customer_phone"
+            placeholder="例如：0912345678"
+            clearable
+            maxlength="10"
+          />
+        </el-form-item>
+      </div>
 
       <!-- 取貨資訊 -->
-      <el-divider content-position="left">取貨資訊</el-divider>
+      <!-- <el-divider content-position="left">取貨資訊</el-divider> -->
 
-      <el-form-item label="取貨時間" prop="pickup_time">
-        <el-time-select
-          v-model="form.pickup_time"
-          placeholder="選擇時間"
-          start="09:00"
-          step="00:30"
-          end="22:00"
-        />
-      </el-form-item>
-
-      <el-form-item label="付款方式" prop="payment_method">
-        <el-select
-          v-model="form.payment_method"
-          placeholder="選擇付款方式"
-          style="width: 100%"
-        >
-          <el-option
-            v-for="option in paymentOptions"
-            :key="option.value"
-            :label="option.label"
-            :value="option.value"
+      <div class="form-row">
+        <el-form-item label="取貨時間" prop="pickup_time">
+          <el-time-select
+            v-model="form.pickup_time"
+            placeholder="選擇時間"
+            start="09:00"
+            step="00:30"
+            end="22:00"
           />
-        </el-select>
-      </el-form-item>
+        </el-form-item>
+
+        <el-form-item label="付款方式" prop="payment_method">
+          <el-select
+            v-model="form.payment_method"
+            placeholder="選擇付款方式"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="option in paymentOptions"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
+          </el-select>
+        </el-form-item>
+      </div>
 
       <el-form-item label="訂單備註" prop="note">
         <el-input
@@ -233,55 +275,48 @@ defineExpose({ open, close });
       </el-form-item>
 
       <!-- 訂單項目 -->
-      <el-divider content-position="left">訂單項目</el-divider>
-
-      <div v-for="(item, index) in form.items" :key="index" class="order-item">
-        <el-form-item
-          :prop="'items.' + index + '.product_id'"
-          label="產品"
-          label-width="60px"
-          style="margin-bottom: 0; flex: 1"
-          :rules="[
-            { required: true, message: '請選擇產品', trigger: 'change' },
-          ]"
+      <el-divider content-position="left">
+        訂單項目
+        <span
+          v-if="selectedItemsCount > 0"
+          style="color: #409eff; margin-left: 8px"
         >
-          <div class="item-row">
-            <el-select
-              v-model="item.product_id"
-              placeholder="請選擇產品"
-              clearable
-              @change="handleProductChange(index)"
-            >
-              <el-option
-                v-for="product in availableProducts"
-                :key="product.product_id"
-                :label="`${product.product_name} - $${product.unit_price}`"
-                :value="product.product_id"
-              />
-            </el-select>
-            <el-input-number
-              v-model="item.quantity"
-              :min="1"
-              :max="99"
-              style="width: 100%"
+          (已選 {{ selectedItemsCount }} 項 | 小計
+          {{ $formatPrice(totalAmount) }})
+        </span>
+      </el-divider>
+
+      <div class="products-list">
+        <div
+          v-for="product in availableProducts"
+          :key="product.product_id"
+          class="product-item"
+          :class="{ 'product-selected': getQuantity(product.product_id) > 0 }"
+        >
+          <div class="product-name">{{ product.product_name }}</div>
+          <div class="product-price">
+            {{ $formatPrice(product.unit_price) }}
+          </div>
+          <div class="quantity-control">
+            <el-button
+              :icon="'Minus'"
+              circle
+              :disabled="getQuantity(product.product_id) === 0"
+              @click="decrementQuantity(product.product_id)"
+            />
+            <span class="quantity-display">{{
+              getQuantity(product.product_id)
+            }}</span>
+            <el-button
+              :icon="'Plus'"
+              circle
+              type="primary"
+              plain
+              @click="incrementQuantity(product.product_id)"
             />
           </div>
-          <el-button
-            type="danger"
-            size="small"
-            text
-            @click="removeItem(index)"
-            :disabled="form.items.length === 1"
-            style="margin-left: 12px"
-          >
-            刪除
-          </el-button>
-        </el-form-item>
+        </div>
       </div>
-
-      <el-button type="primary" plain style="width: 100%" @click="addItem">
-        + 新增項目
-      </el-button>
     </el-form>
 
     <template #footer>
@@ -296,15 +331,75 @@ defineExpose({ open, close });
 </template>
 
 <style lang="scss" scoped>
-.order-item {
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.products-list {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 12px;
-  .item-row {
-    display: flex;
-    gap: 12px;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.product-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+  }
+
+  &.product-selected {
+    background: #eff6ff;
+    border-color: #3b82f6;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+  }
+
+  .product-name {
     flex: 1;
+    font-weight: 600;
+    color: #1e293b;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .product-price {
+    font-weight: 700;
+    color: #1c2345;
+    min-width: 70px;
+    text-align: right;
+  }
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+
+  .quantity-display {
+    font-weight: 700;
+    color: #1e293b;
+    min-width: 28px;
+    text-align: center;
   }
 }
 
