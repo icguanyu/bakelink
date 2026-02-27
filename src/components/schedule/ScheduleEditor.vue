@@ -298,10 +298,7 @@ const deleteSchedule = async () => {
               </div>
             </el-form-item>
             <el-form-item label="開單狀態" class="field" prop="status">
-              <el-select
-                v-model="form.status"
-                placeholder="選擇狀態"
-              >
+              <el-select v-model="form.status" placeholder="選擇狀態">
                 <el-option
                   v-for="option in statusOptions"
                   :key="option.value"
@@ -351,6 +348,7 @@ const deleteSchedule = async () => {
 
       <div class="editor-section">
         <div class="section-title">今日出爐產品</div>
+        <div class="section-note">可售為 0 表示不設定上限</div>
         <div class="section-content">
           <div class="field-row add-row">
             <SelectProduct
@@ -383,14 +381,10 @@ const deleteSchedule = async () => {
                       size="small"
                       @click="decrementLimit(item)"
                     />
-                    <el-input-number
-                      v-model="item.sales_limit"
-                      :min="0"
-                      :max="999"
-                      :step="1"
-                      controls-position="right"
-                      size="small"
+                    <el-input
+                      v-model.number="item.sales_limit"
                       class="quantity-input"
+                      inputmode="numeric"
                     />
                     <el-button
                       :icon="'Plus'"
@@ -464,6 +458,12 @@ const deleteSchedule = async () => {
   font-size: 14px;
   font-weight: 700;
   color: #1e293b;
+  margin-bottom: 6px;
+}
+
+.section-note {
+  font-size: 12px;
+  color: #64748b;
   margin-bottom: 12px;
 }
 
@@ -487,6 +487,7 @@ const deleteSchedule = async () => {
 
 .field-label {
   color: #64748b;
+  white-space: nowrap;
 }
 
 .field-value {
@@ -512,13 +513,12 @@ const deleteSchedule = async () => {
 .product-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .product-wrapper {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 12px;
   align-items: center;
 }
 
@@ -551,7 +551,6 @@ const deleteSchedule = async () => {
 
 .product-limit {
   display: flex;
-  flex-direction: row;
   align-items: center;
   gap: 12px;
 }
@@ -560,9 +559,10 @@ const deleteSchedule = async () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   .quantity-input {
-    width: 100px;
+    width: 60px;
+    font-size: 16px;
   }
 }
 
@@ -595,14 +595,13 @@ const deleteSchedule = async () => {
 
   .product-item {
     display: flex;
-    flex-wrap: wrap;
+
     gap: 4px;
     position: relative;
     .product-info {
       width: 100%;
     }
     .product-limit {
-      width: 100%;
       display: flex;
       flex-direction: row;
       align-items: center;

@@ -94,17 +94,7 @@ const filteredOrders = computed(() => {
         o.customer_phone.includes(query),
     );
   }
-
-  // 依訂單號碼排序（由小到大）
-  return result.sort((a, b) => {
-    const getNumber = (order) => {
-      const match = order.id.match(/(\d{3})$/);
-      return match ? Number(match[1]) : 0;
-    };
-    const numberDiff = getNumber(a) - getNumber(b);
-    if (numberDiff !== 0) return numberDiff;
-    return a.id.localeCompare(b.id);
-  });
+  return result;
 });
 
 const getStatusLabel = (status) => {

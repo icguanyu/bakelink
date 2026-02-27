@@ -185,9 +185,6 @@ const handleSubmit = async () => {
       close();
     } catch (err) {
       console.error("create order error", err);
-      ElMessage.error(
-        err.response?.data?.message || "建立訂單失敗，請稍後再試",
-      );
     } finally {
       loading.value = false;
     }

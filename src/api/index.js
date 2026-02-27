@@ -6,7 +6,7 @@ let isShowAlert = false; // 避免顯示太多次 ElMessageBox
 if (token) {
   axios.defaults.headers.common["Authorization"] = "Bearer " + token;
 }
-axios.defaults.baseURL = import.meta.env.VITE_APIURL;
+axios.defaults.baseURL = "http://localhost:3000"; // import.meta.env.VITE_APIURL;
 
 axios.interceptors.response.use(
   (response) => {
@@ -14,90 +14,27 @@ axios.interceptors.response.use(
     return response;
   },
   (err) => {
+    console.log("err.response", err.response);
     if (err && err.response) {
-      switch (err.response.status) {
-        case 400:
-          ElMessage({
-            message:
-              err.response.data.message instanceof Blob
-                ? "尚無資料"
-                : err.response.data.message || "400 error",
-            center: true,
-            iconClass: "el-icon-circle-close",
-            type: "error",
-          });
-          break;
-        case 401:
-          ElMessage({
-            message:
-              err.response.data.message || "授權失敗，請重新登入。(401）",
-            center: true,
-            iconClass: "el-icon-circle-close",
-            type: "error",
-          });
-          break;
-        case 403:
-          ElMessage({
-            message: err.response.data.message || "權限不足。（403）",
-            center: true,
-            iconClass: "el-icon-circle-close",
-            type: "error",
-          });
-          break;
-        case 404:
-          ElMessage({
-            message: err.response.data.message || "404",
-            center: true,
-            iconClass: "el-icon-circle-close",
-            type: "error",
-          });
-          break;
-        case 409:
-          ElMessage({
-            message: "資料重複，請重新輸入。",
-            center: true,
-            iconClass: "el-icon-circle-close",
-            type: "warning",
-          });
+      const errorMessage = err.response.data?.message || "發生錯誤，請重試";
+      const errorType =
+        err.response.status >= 500 ? "error" : "warning";
 
-          break;
-        case 500:
-          ElMessage({
-            message:
-              err.response.data.message +
-                "；若持續出現錯誤，請洽後端工程師。(500)" ||
-              "Something went wrong.(500)",
-            center: true,
-            iconClass: "el-icon-circle-close",
-            type: "error",
-          });
-
-          break;
-        case 503:
-          ElMessage({
-            message:
-              err.response.data.message +
-                "；若持續出現錯誤，請洽後端工程師。" ||
-              "503 Service Unavailable",
-            center: true,
-            iconClass: "el-icon-circle-close",
-            type: "error",
-          });
-          break;
-        default:
-          console.log(`error ${err.response.status}`);
-      }
+      ElMessage({
+        message: errorMessage,
+        center: true,
+        type: errorType,
+      });
     } else {
       if (!isShowAlert) {
         ElMessageBox.alert(
-          "系統更新或維護中，若持續出現此訊息請先聯絡「網路管理員」或「後端工程師」",
-          "CORS",
+          "系統連線異常，若持續出現此訊息請先聯絡「網路管理員」或「後端工程師」",
+          "連線異常",
           {
             confirmButtonText: "了解",
             type: "warning",
           },
         );
-      } else {
         isShowAlert = true;
       }
     }
