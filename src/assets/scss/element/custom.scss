@@ -1,3 +1,45 @@
+// ElMessage 自訂樣式 - 更鮮明的顏色
+.el-message {
+  --el-message-padding: 15px 20px;
+  --el-message-close-size: 18px;
+  
+  &.el-message--success {
+    --el-message-bg-color: #f0f9ff;
+    --el-message-border-color: #22c55e;
+    --el-message-text-color: #15803d;
+    .el-message__icon {
+      color: #22c55e;
+    }
+  }
+  
+  &.el-message--warning {
+    --el-message-bg-color: #fffbeb;
+    --el-message-border-color: #f59e0b;
+    --el-message-text-color: #b45309;
+    .el-message__icon {
+      color: #f59e0b;
+    }
+  }
+  
+  &.el-message--error {
+    --el-message-bg-color: #fef2f2;
+    --el-message-border-color: #ef4444;
+    --el-message-text-color: #b91c1c;
+    .el-message__icon {
+      color: #ef4444;
+    }
+  }
+  
+  &.el-message--info {
+    --el-message-bg-color: #f8fafc;
+    --el-message-border-color: #3b82f6;
+    --el-message-text-color: #1e40af;
+    .el-message__icon {
+      color: #3b82f6;
+    }
+  }
+}
+
 // :root {
 //   --el-menu-item-height: 48px;
 //   --el-disabled-text-color: #222;
@@ -251,8 +293,8 @@
 // }
 @media (max-width: 768px) {
   .el-dialog {
-    width: 90% !important;
-    max-width: 90%;
+    width: 95% !important;
+    max-width: 95%;
     --el-dialog-margin-top: 10vh;
   }
 }

@@ -143,6 +143,20 @@ const removeProduct = (id) => {
   form.items = form.items.filter((item) => item.product_id !== id);
 };
 
+const incrementLimit = (item) => {
+  item.sales_limit++;
+};
+
+const decrementLimit = (item) => {
+  if (item.sales_limit > 0) {
+    item.sales_limit--;
+  }
+  // 當數量降至 0 時自動刪除
+  if (item.sales_limit === 0) {
+    removeProduct(item.product_id);
+  }
+};
+
 const closeEditor = () => {
   resetFormFromSchedule(props.schedule);
   initializeDateTimeFields();
@@ -353,30 +367,42 @@ const deleteSchedule = async () => {
           <div v-else class="product-list">
             <div
               v-for="item in form.items"
-              :key="item.id"
+              :key="item.product_id"
               class="product-wrapper"
             >
               <div class="product-item">
                 <div class="product-info">
                   <div class="product-name">{{ item.product_name }}</div>
-                  <!-- <div class="product-id">{{ item.id }}</div> -->
                 </div>
                 <div class="product-limit">
                   <div class="field-label">可售</div>
-                  <el-input-number
-                    v-model="item.sales_limit"
-                    :min="0"
-                    :max="999"
-                  />
+                  <div class="quantity-control">
+                    <el-button
+                      :icon="'Minus'"
+                      circle
+                      size="small"
+                      @click="decrementLimit(item)"
+                    />
+                    <el-input-number
+                      v-model="item.sales_limit"
+                      :min="0"
+                      :max="999"
+                      :step="1"
+                      controls-position="right"
+                      size="small"
+                      class="quantity-input"
+                    />
+                    <el-button
+                      :icon="'Plus'"
+                      circle
+                      type="primary"
+                      plain
+                      size="small"
+                      @click="incrementLimit(item)"
+                    />
+                  </div>
                 </div>
               </div>
-              <el-button
-                type="danger"
-                plain
-                icon="delete"
-                size="small"
-                @click="removeProduct(item.product_id)"
-              />
             </div>
           </div>
         </div>
@@ -525,8 +551,19 @@ const deleteSchedule = async () => {
 
 .product-limit {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .quantity-input {
+    width: 100px;
+  }
 }
 
 .empty-products {

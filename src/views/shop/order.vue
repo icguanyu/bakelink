@@ -555,7 +555,7 @@ watch(selectedDate, (val) => {
 <style scoped lang="scss">
 @use "@/assets/scss/scrollbar.scss" as *;
 .order-manager {
-  padding: 12px;
+  padding: 16px;
   background: #f8fafc;
   min-height: 100vh;
 }
@@ -570,7 +570,7 @@ watch(selectedDate, (val) => {
     gap: 20px;
 
     h2 {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 700;
       color: #1e293b;
       margin: 0 0 8px 0;

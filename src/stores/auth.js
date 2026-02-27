@@ -1,12 +1,13 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
 import axios from "axios";
-import { Auth } from "@/api/auth";
+import { Auth, Users } from "@/api/auth";
 
 const TOKEN_KEY = "bakelink-token";
 
 export const useAuthStore = defineStore("auth", () => {
   const token = ref(localStorage.getItem(TOKEN_KEY) || "");
+  const user = ref(null);
   const loading = ref(false);
 
   const setToken = (value) => {
@@ -27,22 +28,39 @@ export const useAuthStore = defineStore("auth", () => {
         throw new Error("登入失敗，未取得 token");
       }
       setToken(newToken);
+      
+      // 取得用戶資訊
+      await fetchUser();
+      
       return newToken;
     } finally {
       loading.value = false;
     }
   };
 
+  const fetchUser = async () => {
+    try {
+      const res = await Users.Me();
+      console.log('fetchUser response:', res);
+      user.value = res.data;
+    } catch (error) {
+      console.error("fetch user error:", error);
+    }
+  };
+
   const logout = () => {
     token.value = "";
+    user.value = null;
     localStorage.removeItem(TOKEN_KEY);
     delete axios.defaults.headers.common["Authorization"];
   };
 
   return {
     token,
+    user,
     loading,
     login,
     logout,
+    fetchUser,
   };
 });

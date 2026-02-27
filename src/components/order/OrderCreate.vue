@@ -2,6 +2,7 @@
 import { ref, reactive, computed, nextTick, watch } from "vue";
 import { Orders } from "@/api/orders";
 import { ElMessage, ElNotification } from "element-plus";
+import SelectPaymentMethod from "@/components/select/SelectPaymentMethod.vue";
 
 const visible = ref(false);
 const loading = ref(false);
@@ -40,10 +41,7 @@ const form = reactive({
   payment_method: "cash",
 });
 
-const paymentOptions = [
-  { label: "現金", value: "cash" },
-  { label: "Line Pay", value: "linepay" },
-];
+const paymentOptions = [];
 
 const rules = {
   schedule_id: [{ required: true, message: "請選擇排程", trigger: "change" }],
@@ -251,18 +249,10 @@ defineExpose({ open, close });
         </el-form-item>
 
         <el-form-item label="付款方式" prop="payment_method">
-          <el-select
+          <SelectPaymentMethod
             v-model="form.payment_method"
             placeholder="選擇付款方式"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="option in paymentOptions"
-              :key="option.value"
-              :label="option.label"
-              :value="option.value"
-            />
-          </el-select>
+          />
         </el-form-item>
       </div>
 
@@ -301,9 +291,11 @@ defineExpose({ open, close });
               :alt="product.product_name"
             />
           </div>
-          <div class="product-name">{{ product.product_name }}</div>
-          <div class="product-price">
-            {{ $formatPrice(product.unit_price) }}
+          <div class="product-info">
+            <div class="product-name">{{ product.product_name }}</div>
+            <div class="product-price">
+              {{ $formatPrice(product.unit_price) }}
+            </div>
           </div>
           <div class="quantity-control">
             <el-button
@@ -382,8 +374,8 @@ defineExpose({ open, close });
 
   .product-thumb {
     flex-shrink: 0;
-    width: 40px;
-    height: 40px;
+    width: 60px;
+    height: 60px;
     border-radius: 4px;
     background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
     border: 1px solid #e2e8f0;
@@ -400,7 +392,6 @@ defineExpose({ open, close });
   }
 
   .product-name {
-    flex: 1;
     font-weight: 600;
     color: #1e293b;
     min-width: 0;
@@ -412,8 +403,14 @@ defineExpose({ open, close });
   .product-price {
     font-weight: 700;
     color: #1c2345;
-    min-width: 70px;
-    text-align: right;
+  }
+
+  .product-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
   }
 }
 
@@ -429,12 +426,6 @@ defineExpose({ open, close });
     min-width: 28px;
     text-align: center;
   }
-}
-
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
 }
 
 :deep(.el-divider__text) {

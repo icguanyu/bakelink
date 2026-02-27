@@ -1,5 +1,6 @@
 <script setup>
 import dayjs from "dayjs";
+import "dayjs/locale/zh-tw";
 import { Schedules } from "@/api/schedules";
 import { scheduleStatusOptions } from "@/utils/constants";
 
@@ -19,6 +20,8 @@ const schedule = reactive({
 const isEditorOpen = ref(false);
 const isMonthLoading = ref(false);
 const isDayLoading = ref(false);
+const calendarVisible = ref(true);
+const calendarStorageKey = "schedule-calendar-visible";
 
 const scheduleStatusLabelMap = scheduleStatusOptions.reduce((map, option) => {
   map[option.value] = option.label;
@@ -178,6 +181,10 @@ const goNextDay = () => {
   selectedDate.value = nextDate.format("YYYY-MM-DD");
 };
 
+const toggleCalendarVisible = () => {
+  calendarVisible.value = !calendarVisible.value;
+};
+
 // 獲取當前月份顯示文字
 const getCurrentMonthLabel = computed(() => {
   return baseDate.value.format("YYYY 年 M 月");
@@ -291,8 +298,16 @@ watch(
 );
 
 onMounted(() => {
+  const savedCalendarVisible = localStorage.getItem(calendarStorageKey);
+  if (savedCalendarVisible !== null) {
+    calendarVisible.value = savedCalendarVisible === "true";
+  }
   seedScheduleList();
   initScheduleDataByMonth();
+});
+
+watch(calendarVisible, (val) => {
+  localStorage.setItem(calendarStorageKey, String(val));
 });
 </script>
 
@@ -337,7 +352,11 @@ onMounted(() => {
             />
             <div>
               <h3>
-                {{ dayjs(selectedDate).format("YYYY 年 M 月 DD 日 (ddd)") }}
+                {{
+                  dayjs(selectedDate)
+                    .locale("zh-tw")
+                    .format("YYYY 年 M 月 DD 日 (dd)")
+                }}
               </h3>
             </div>
 
@@ -492,11 +511,39 @@ onMounted(() => {
       <div class="schedule-right">
         <!-- 月份導航 -->
         <div class="month-navigation">
-          <el-button icon="ArrowLeft" circle @click="goPreviousMonth" />
-          <span class="month-label">{{ getCurrentMonthLabel }}</span>
-          <el-button icon="ArrowRight" circle @click="goNextMonth" />
+          <div class="month-navigation-left">
+            <el-button
+              class="month-nav-btn"
+              icon="ArrowLeft"
+              circle
+              size="small"
+              @click="goPreviousMonth"
+            />
+            <span class="month-label">{{ getCurrentMonthLabel }}</span>
+            <el-button
+              class="month-nav-btn"
+              icon="ArrowRight"
+              circle
+              size="small"
+              @click="goNextMonth"
+            />
+          </div>
+          <div class="month-navigation-actions">
+            <el-button
+              class="month-toggle"
+              circle
+              plain
+              type="primary"
+              @click="toggleCalendarVisible"
+              :title="calendarVisible ? '隱藏月曆' : '顯示月曆'"
+            >
+              <el-icon v-if="calendarVisible"><Hide /></el-icon>
+              <el-icon v-else><View /></el-icon>
+            </el-button>
+          </div>
         </div>
         <ScheduleCalendar
+          v-if="calendarVisible"
           :schedule-list="scheduleList"
           :selected-date="selectedDate"
           :is-loading="isMonthLoading"
@@ -510,7 +557,7 @@ onMounted(() => {
 <style scoped lang="scss">
 @use "@/assets/scss/scrollbar.scss" as *;
 .schedule-container {
-  padding: 12px;
+  padding: 16px;
   background: #f8fafc;
   min-height: 100vh;
 }
@@ -526,7 +573,7 @@ onMounted(() => {
     gap: 12px;
 
     h2 {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 700;
       color: #1e293b;
       margin: 0 0 6px 0;
@@ -549,19 +596,13 @@ onMounted(() => {
 
 .month-navigation {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
   background: white;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
-
-  .el-button {
-    width: 36px;
-    height: 36px;
-    border: 1px solid #e2e8f0;
-  }
 
   .month-label {
     font-size: 16px;
@@ -570,6 +611,30 @@ onMounted(() => {
     min-width: 110px;
     text-align: center;
   }
+}
+
+.month-navigation-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.month-nav-btn {
+  flex-shrink: 0;
+  border: 1px solid #e2e8f0;
+  width: 34px;
+  height: 34px;
+}
+
+.month-navigation-actions {
+  display: flex;
+  align-items: flex-start;
+}
+
+.month-toggle {
+  border: 1px solid #e2e8f0;
+  width: 36px;
+  height: 36px;
 }
 
 // 左右分割主容器
@@ -634,30 +699,6 @@ onMounted(() => {
     font-weight: 700;
     color: #1e293b;
     margin: 0;
-  }
-
-  .detail-stats {
-    font-size: 11px;
-    color: #64748b;
-    margin: 0;
-
-    .stat-ordered {
-      color: #3b82f6;
-      font-weight: 600;
-      margin: 0 4px;
-    }
-
-    .stat-completed {
-      color: #10b981;
-      font-weight: 600;
-      margin: 0 4px;
-    }
-
-    .stat-cancelled {
-      color: #ef4444;
-      font-weight: 600;
-      margin: 0 4px;
-    }
   }
 }
 
@@ -782,12 +823,6 @@ onMounted(() => {
   }
 }
 
-.products-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 .items-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -849,101 +884,6 @@ onMounted(() => {
   gap: 2px;
   min-width: 0;
   flex: 1;
-}
-
-.product-card {
-  width: 120px;
-  background: #f8fafc;
-  border-radius: 6px;
-  padding: 6px 8px;
-  text-align: center;
-  border: 1px solid #e2e8f0;
-  transition: all 0.2s ease;
-  cursor: pointer;
-
-  &:hover {
-    background: white;
-    border-color: #cbd5e1;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-    transform: translateY(-1px);
-  }
-
-  &.out-of-stock {
-    opacity: 0.6;
-    background: #f1f5f9;
-
-    &:hover {
-      transform: none;
-    }
-  }
-}
-
-.product-thumb {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 4px;
-  background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
-  border: 1px solid #e2e8f0;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.product-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.product-name {
-  color: #1e293b;
-  margin: 0;
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.product-category {
-  font-size: 12px;
-  color: #94a3b8;
-  margin: 0;
-}
-
-.product-footer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 3px;
-  padding-top: 3px;
-  border-top: 1px solid #e2e8f0;
-  gap: 2px;
-}
-
-.product-price {
-  color: #2e3d5f;
-  flex-shrink: 0;
-}
-
-.product-stock {
-  font-size: 12px;
-  color: #64748b;
-  flex-shrink: 0;
-}
-
-.product-sold-out {
-  font-size: 9px;
-  color: #ef4444;
-  font-weight: 600;
-  flex-shrink: 0;
 }
 
 // 訂單區塊
@@ -1043,17 +983,6 @@ onMounted(() => {
   }
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 // 響應式
 @media (max-width: 1200px) {
   .schedule-main {
@@ -1066,10 +995,6 @@ onMounted(() => {
 }
 
 @media (max-width: 1024px) {
-  .schedule-container {
-    padding: 10px 4%;
-  }
-
   .schedule-main {
     flex-direction: column;
     min-height: auto;
@@ -1084,7 +1009,7 @@ onMounted(() => {
 
 @media (max-width: 768px) {
   .schedule-container {
-    padding: 8px 2%;
+    padding: 10px 4%;
   }
 
   .schedule-main {
@@ -1102,10 +1027,6 @@ onMounted(() => {
 
     .detail-header-left {
       gap: 6px;
-
-      h3 {
-        font-size: 14px;
-      }
     }
   }
 

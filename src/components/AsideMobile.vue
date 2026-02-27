@@ -42,12 +42,12 @@
   width: 100%;
   height: auto;
   background-color: #1c2345;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  // border-top: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   justify-content: space-around;
   align-items: center;
   padding-bottom: max(6px, env(safe-area-inset-bottom));
-  padding-top: 6px;
+  padding-top: 0px;
   z-index: 10;
   gap: 4px;
 
@@ -87,6 +87,7 @@
     }
 
     .label {
+      user-select: none;
       font-size: 12px;
       font-weight: 600;
       white-space: nowrap;
@@ -115,7 +116,7 @@
       top: 0;
       left: 50%;
       transform: translateX(-50%);
-      width: 20px;
+      width: 30px;
       height: 3px;
       background-color: #ffd700;
       border-radius: 0 0 4px 4px;

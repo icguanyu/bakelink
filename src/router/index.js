@@ -43,9 +43,12 @@ const router = createRouter({
       ],
     },
   ],
-  scrollBehavior(_to, _from, savedPosition) {
-    if (savedPosition) {
-      return savedPosition;
+  scrollBehavior() {
+    if (typeof window !== "undefined") {
+      const container = document.querySelector(".container");
+      if (container) {
+        container.scrollTop = 0;
+      }
     }
     return { top: 0 };
   },

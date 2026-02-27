@@ -132,7 +132,7 @@ onMounted(() => {
 @use "@/assets/scss/scrollbar.scss" as *;
 
 .products-manager {
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;

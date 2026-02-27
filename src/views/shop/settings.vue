@@ -133,6 +133,8 @@ const handleSave = async () => {
       businessHours: normalizeBusinessHours(form.businessHours),
     };
     await Users.Put(payload);
+    // 儲存成功後，更新 authStore 中的使用者資訊
+    await authStore.fetchUser();
     ElMessage.success("設定已儲存");
   } catch (error) {
     ElMessage.error("儲存設定失敗");
@@ -185,7 +187,7 @@ onMounted(() => {
         ]"
       />
     </div>
-    <el-form label-width="80px" label-position="left" v-loading="isLoading">
+    <el-form label-width="80px" label-position="left">
       <div class="flex flex-col gap-2">
         <el-card class="card" shadow="never" v-show="segment === 'basic'">
           <div class="panel">
@@ -464,7 +466,9 @@ onMounted(() => {
 
     <el-card class="actions" shadow="never">
       <el-button @click="$router.go(-1)">取消</el-button>
-      <el-button type="primary" @click="handleSave"> 儲存設定 </el-button>
+      <el-button type="primary" @click="handleSave" :loading="isLoading">
+        {{ isLoading ? "儲存中..." : "儲存設定" }}
+      </el-button>
     </el-card>
   </div>
 </template>
