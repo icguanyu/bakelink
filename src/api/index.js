@@ -6,7 +6,7 @@ let isShowAlert = false; // 避免顯示太多次 ElMessageBox
 if (token) {
   axios.defaults.headers.common["Authorization"] = "Bearer " + token;
 }
-axios.defaults.baseURL = "http://localhost:3000"; // import.meta.env.VITE_APIURL;
+axios.defaults.baseURL = import.meta.env.VITE_APIURL;
 
 axios.interceptors.response.use(
   (response) => {
@@ -17,8 +17,7 @@ axios.interceptors.response.use(
     console.log("err.response", err.response);
     if (err && err.response) {
       const errorMessage = err.response.data?.message || "發生錯誤，請重試";
-      const errorType =
-        err.response.status >= 500 ? "error" : "warning";
+      const errorType = err.response.status >= 500 ? "error" : "warning";
 
       ElMessage({
         message: errorMessage,
