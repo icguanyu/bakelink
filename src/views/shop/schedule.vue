@@ -434,7 +434,9 @@ onMounted(() => {
                 class="product-card"
               >
                 <!-- :class="{ 'out-of-stock': !product.available }" -->
-                <div class="product-thumb"></div>
+                <div class="product-thumb">
+                  <img v-if="product.image_url" :src="product.image_url" :alt="product.product_name" />
+                </div>
                 <div class="product-info">
                   <h4 class="product-name">{{ product.product_name }}</h4>
                   <!-- <p class="product-category">{{ product.category }}</p> -->
@@ -664,8 +666,8 @@ onMounted(() => {
 }
 
 .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   padding: 8px;
   background: white;
@@ -674,11 +676,13 @@ onMounted(() => {
 }
 
 .stat-item {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
+  min-width: 80px;
   padding: 8px 6px;
   background: #f8fafc;
   border-radius: 6px;
@@ -811,6 +815,16 @@ onMounted(() => {
   background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
   border: 1px solid #e2e8f0;
   margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .product-info {
@@ -973,7 +987,7 @@ onMounted(() => {
 // 響應式
 @media (max-width: 1024px) {
   .schedule-container {
-    padding: 10px;
+    padding: 10px 4%;
   }
 
   .schedule-main {

@@ -1,10 +1,16 @@
 <script setup>
 import { ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import Aside from "@/components/Aside.vue";
+import AsideMobile from "@/components/AsideMobile.vue";
 
 // 從 localStorage 讀取狀態，預設為 true
 const isAsideOpen = ref(
   localStorage.getItem("isAsideOpen") !== "false"
 );
+
+const route = useRoute();
+const isMobile = ref(window.innerWidth <= 640);
 
 const toggleAside = () => {
   isAsideOpen.value = !isAsideOpen.value;
@@ -14,18 +20,39 @@ const toggleAside = () => {
 watch(isAsideOpen, (newValue) => {
   localStorage.setItem("isAsideOpen", String(newValue));
 });
+
+// 路由變化時，手機版自動隱藏側邊欄
+watch(() => route.path, () => {
+  if (isMobile.value && isAsideOpen.value) {
+    isAsideOpen.value = false;
+  }
+});
+
+// 監聽視窗大小變化
+watch(() => isMobile.value, () => {
+  if (!isMobile.value && !isAsideOpen.value) {
+    isAsideOpen.value = true;
+  }
+});
+
+if (typeof window !== "undefined") {
+  window.addEventListener("resize", () => {
+    isMobile.value = window.innerWidth <= 640;
+  });
+}
 </script>
 
 <template>
   <div class="shop">
     <Aside
+      v-if="!isMobile"
       :class="{ 'is-collapsed': !isAsideOpen }"
       :aria-hidden="!isAsideOpen"
       @toggle="toggleAside"
     />
-    <main>
+    <main class="main-content" :class="{ 'is-mobile': isMobile }">
       <button
-        v-if="!isAsideOpen"
+        v-if="!isMobile && !isAsideOpen"
         class="aside-toggle-tag"
         type="button"
         aria-label="Open aside menu"
@@ -36,9 +63,9 @@ watch(isAsideOpen, (newValue) => {
         <span class="bar"></span>
       </button>
       <div class="container">
-        <!-- <header>Header Content</header> -->
         <router-view></router-view>
       </div>
+      <AsideMobile v-if="isMobile" />
     </main>
   </div>
 </template>
@@ -56,6 +83,17 @@ watch(isAsideOpen, (newValue) => {
     flex: 1;
     height: 100dvh;
     overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
+
+    &.is-mobile {
+      .container {
+        padding-bottom: max(
+          90px,
+          calc(60px + env(safe-area-inset-bottom))
+        );
+      }
+    }
 
     .aside-toggle-tag {
       position: fixed;
@@ -87,7 +125,7 @@ watch(isAsideOpen, (newValue) => {
 
     .container {
       background-color: #f8fafc;
-      height: 100%;
+      flex: 1;
       overflow: auto;
       @include scrollbar(
         rgba(80, 80, 80, 0.7),
@@ -97,12 +135,12 @@ watch(isAsideOpen, (newValue) => {
     }
   }
 }
+
 @media (max-width: 640px) {
   .shop {
     main {
       .container {
         border-radius: 0;
-        // padding-bottom: 80px;
       }
     }
   }

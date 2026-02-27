@@ -464,18 +464,36 @@ watch(selectedDate, (val) => {
               </div>
               <div class="skeleton-divider" />
               <div class="skeleton-items">
-                <el-skeleton-item variant="text" style="width: 100%; height: 20px" />
-                <el-skeleton-item variant="text" style="width: 90%; height: 20px" />
-                <el-skeleton-item variant="text" style="width: 85%; height: 20px" />
+                <el-skeleton-item
+                  variant="text"
+                  style="width: 100%; height: 20px"
+                />
+                <el-skeleton-item
+                  variant="text"
+                  style="width: 90%; height: 20px"
+                />
+                <el-skeleton-item
+                  variant="text"
+                  style="width: 85%; height: 20px"
+                />
               </div>
               <div class="skeleton-divider" />
               <div class="skeleton-footer">
                 <el-skeleton-item variant="text" style="width: 40%" />
-                <el-skeleton-item variant="text" style="width: 35%; height: 30px" />
+                <el-skeleton-item
+                  variant="text"
+                  style="width: 35%; height: 30px"
+                />
               </div>
               <div class="skeleton-actions">
-                <el-skeleton-item variant="button" style="width: 48%; height: 32px" />
-                <el-skeleton-item variant="button" style="width: 48%; height: 32px" />
+                <el-skeleton-item
+                  variant="button"
+                  style="width: 48%; height: 32px"
+                />
+                <el-skeleton-item
+                  variant="button"
+                  style="width: 48%; height: 32px"
+                />
               </div>
             </template>
           </el-skeleton>
@@ -879,7 +897,7 @@ watch(selectedDate, (val) => {
 // 響應式
 @media (max-width: 768px) {
   .order-manager {
-    padding: 10px;
+    padding: 10px 4%;
   }
 
   .order-header {

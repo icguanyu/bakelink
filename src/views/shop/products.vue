@@ -342,7 +342,7 @@ onMounted(() => {
 
 @media (max-width: 640px) {
   .products-manager {
-    padding: 12px;
+    padding: 10px 4%;
   }
 
   .page-header {

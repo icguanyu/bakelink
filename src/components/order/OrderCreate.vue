@@ -19,6 +19,7 @@ const availableProducts = computed(() => {
     product_name: item.product_name,
     unit_price: item.unit_price,
     sales_limit: item.sales_limit,
+    image_url: item.image_url,
   }));
 });
 
@@ -293,6 +294,13 @@ defineExpose({ open, close });
           class="product-item"
           :class="{ 'product-selected': getQuantity(product.product_id) > 0 }"
         >
+          <div class="product-thumb">
+            <img
+              v-if="product.image_url"
+              :src="product.image_url"
+              :alt="product.product_name"
+            />
+          </div>
           <div class="product-name">{{ product.product_name }}</div>
           <div class="product-price">
             {{ $formatPrice(product.unit_price) }}
@@ -338,6 +346,7 @@ defineExpose({ open, close });
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
+    gap: 0px;
   }
 }
 
@@ -369,6 +378,25 @@ defineExpose({ open, close });
     background: #eff6ff;
     border-color: #3b82f6;
     box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+  }
+
+  .product-thumb {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
   }
 
   .product-name {

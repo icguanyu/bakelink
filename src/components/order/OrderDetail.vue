@@ -3,7 +3,6 @@ import { ref, computed, reactive } from "vue";
 import { ElMessageBox, ElMessage, ElNotification } from "element-plus";
 import { Orders } from "@/api/orders";
 
-const selectedProductId = ref("");
 const deleteLoading = ref(false);
 const updateLoading = ref(false);
 
@@ -64,47 +63,57 @@ const initializeForm = () => {
 // 初始化
 initializeForm();
 
-// 編輯數量
-const updateQuantity = (index, newQuantity) => {
+// 按 productId 取得數量
+const getItemQuantity = (productId) => {
+  return form.items.find((item) => item.product_id === productId)?.quantity || 0;
+};
+
+// 按 productId 更新數量
+const updateProductQuantity = (productId, delta) => {
+  const item = form.items.find((item) => item.product_id === productId);
+  if (!item) return;
+  
+  const newQuantity = item.quantity + delta;
   if (newQuantity > 0) {
-    form.items[index].quantity = parseInt(newQuantity);
+    item.quantity = newQuantity;
+  } else if (newQuantity === 0) {
+    deleteProductByID(productId);
   }
 };
 
-// 刪除項目
-const deleteItem = (index) => {
-  form.items.splice(index, 1);
+// 按 productId 刪除產品
+const deleteProductByID = (productId) => {
+  const index = form.items.findIndex((item) => item.product_id === productId);
+  if (index > -1) {
+    form.items.splice(index, 1);
+  }
 };
 
-// 新增訂購項目
-const addProduct = () => {
-  if (!selectedProductId.value) return;
-
+// 按 productId 新增或更新產品
+const toggleProduct = (productId) => {
   const product = props.availableItems.find(
-    (item) => item.product_id === selectedProductId.value,
+    (item) => item.product_id === productId,
   );
   if (!product) return;
 
-  const existingItem = form.value.items.find(
-    (item) => item.product_id === product.product_id,
+  const existingItem = form.items.find(
+    (item) => item.product_id === productId,
   );
 
   if (existingItem) {
     existingItem.quantity += 1;
   } else {
-    form.value.items.push({
+    form.items.push({
       product_id: product.product_id,
       product_name: product.product_name,
       unit_price: product.unit_price,
+      image_url: product.image_url,
       quantity: 1,
     });
   }
-
-  selectedProductId.value = "";
 };
 
 const handleConfirm = async () => {
-  // 驗證表單
   if (!formRef.value) return;
 
   try {
@@ -114,9 +123,8 @@ const handleConfirm = async () => {
     return;
   }
 
-  // 驗證訂購項目
-  if (!form.items || form.items.length === 0) {
-    ElMessage.error("請至少新增一個訂購項目");
+  if (!form.items.some((item) => item.quantity > 0)) {
+    ElMessage.error("請至少選擇一個產品");
     return;
   }
 
@@ -195,10 +203,10 @@ defineExpose({ visible });
     class="order-detail-dialog"
   >
     <div class="order-detail">
-      <!-- 訂單資訊編輯 -->
+      <!-- 客戶資訊編輯 -->
       <div class="order-info-section">
         <div class="section-header">
-          <h3>訂單資訊</h3>
+          <h3>客戶資訊</h3>
         </div>
         <el-form
           ref="formRef"
@@ -261,7 +269,7 @@ defineExpose({ visible });
                 v-model="form.note"
                 type="textarea"
                 :rows="3"
-                placeholder="請輸入備註信息"
+                placeholder="請輸入備註"
               />
             </el-form-item>
           </div>
@@ -271,44 +279,62 @@ defineExpose({ visible });
       <!-- 訂購項目列表 -->
       <div class="items-section">
         <div class="section-header">
-          <h3>訂購項目</h3>
+          <h3>請選擇當天出爐產品</h3>
         </div>
 
-        <div v-if="form.items.length > 0" class="items-table">
-          <div v-for="(item, idx) in form.items" :key="idx" class="item-card">
-            <!-- <div class="item-image-section"></div> -->
-            <!-- 圖片佔位符 -->
-            <div class="item-name-section">
-              {{ item.product_name }}
+        <div class="items-list">
+          <div
+            v-for="product in availableItems"
+            :key="product.product_id"
+            class="item-card"
+            :class="{ 'not-selected': !getItemQuantity(product.product_id) }"
+          >
+            <div class="item-thumb">
+              <img v-if="product.image_url" :src="product.image_url" :alt="product.product_name" />
             </div>
-            <div class="item-price-section">
-              <span class="label">單價:</span>
-              <span class="price">${{ item.unit_price }}</span>
-            </div>
-            <!-- <div class="item-subtotal-section">
-              <span class="label">小計:</span>
-              <span class="subtotal">${{ item.price * item.quantity }}</span>
-            </div> -->
-            <div class="item-quantity-section">
-              <span class="quantity-label">數量:</span>
-              <el-input-number
-                v-model="item.quantity"
-                :min="1"
-                :max="999"
-                @change="(val) => updateQuantity(idx, val)"
+            <div class="item-name">{{ product.product_name }}</div>
+            <div class="item-price">{{ $formatPrice(product.unit_price) }}</div>
+            
+            <template v-if="getItemQuantity(product.product_id) > 0">
+              <div class="quantity-control">
+                <el-button
+                  :icon="'Minus'"
+                  circle
+                  size="small"
+                  :disabled="getItemQuantity(product.product_id) === 1"
+                  @click="updateProductQuantity(product.product_id, -1)"
+                />
+                <span class="quantity-display">{{ getItemQuantity(product.product_id) }}</span>
+                <el-button
+                  :icon="'Plus'"
+                  circle
+                  size="small"
+                  type="primary"
+                  plain
+                  @click="updateProductQuantity(product.product_id, 1)"
+                />
+              </div>
+              <el-button
+                circle
+                size="small"
+                icon="delete"
+                type="danger"
+                plain
+                @click="deleteProductByID(product.product_id)"
               />
-            </div>
+            </template>
             <el-button
+              v-else
+              type="primary"
               size="small"
-              icon="delete"
-              type="danger"
-              plain
-              @click="deleteItem(idx)"
-            />
+              @click="toggleProduct(product.product_id)"
+            >
+              新增
+            </el-button>
           </div>
         </div>
 
-        <div v-else class="no-items">沒有訂購項目</div>
+        <div v-if="availableItems.length === 0" class="no-items">沒有可訂購的產品</div>
       </div>
 
       <!-- 總金額 -->
@@ -316,34 +342,6 @@ defineExpose({ visible });
         <div class="total-row">
           <span class="label">訂單總計：</span>
           <span class="amount">${{ total_amount }}</span>
-        </div>
-      </div>
-
-      <!-- 新增產品區域 -->
-      <div class="add-product-section">
-        <div class="add-product-header">
-          <h4>新增產品</h4>
-        </div>
-        <div class="add-product-row">
-          <el-select
-            v-model="selectedProductId"
-            placeholder="選擇產品"
-            class="flex-1"
-          >
-            <el-option
-              v-for="item in availableItems"
-              :key="item.product_id"
-              :label="`${item.product_name} - $${item.unit_price}`"
-              :value="item.product_id"
-            />
-          </el-select>
-          <el-button
-            type="success"
-            :disabled="!selectedProductId"
-            @click="addProduct"
-          >
-            新增
-          </el-button>
         </div>
       </div>
     </div>
@@ -463,85 +461,85 @@ defineExpose({ visible });
       }
     }
 
-    .items-table {
+    .items-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
 
       .item-card {
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 12px;
-        background: white;
+        padding: 8px 12px;
+        background: #f8fafc;
         border: 1px solid #e2e8f0;
-        border-radius: 4px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
 
-        .item-image-section {
-          flex-shrink: 0;
-          width: 50px;
-          height: 50px;
+        &:hover {
           background: #f1f5f9;
-          border: 1px solid #e2e8f0;
+          border-color: #cbd5e1;
+        }
+
+        &.not-selected {
+          opacity: 0.6;
+          background: #f1f5f9;
+
+          &:hover {
+            opacity: 0.8;
+            background: #e0e7ff;
+            border-color: #a5b4fc;
+          }
+        }
+
+        .item-thumb {
+          flex-shrink: 0;
+          width: 40px;
+          height: 40px;
           border-radius: 4px;
+          background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
+          border: 1px solid #e2e8f0;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #cbd5e1;
-          font-size: 12px;
+          overflow: hidden;
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
         }
 
-        .item-name-section {
+        .item-name {
           flex: 1;
-          font-size: 16px;
-          font-weight: 500;
-          color: #334155;
+          font-weight: 600;
+          color: #1e293b;
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
-        .item-price-section {
+        .item-price {
+          font-weight: 700;
+          color: #1c2345;
+          min-width: 70px;
+          text-align: right;
+        }
+
+        .quantity-control {
           display: flex;
           align-items: center;
-          gap: 6px;
-          font-size: 14px;
-
-          .label {
-            color: #64748b;
-          }
-
-          .price {
-            color: #1e293b;
-            font-weight: 500;
-          }
-        }
-
-        .item-subtotal-section {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-
-          .label {
-            color: #64748b;
-          }
-
-          .subtotal {
-            color: #1e293b;
-            font-weight: 600;
-          }
-        }
-
-        .item-quantity-section {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-
-          .quantity-label {
-            color: #64748b;
-            white-space: nowrap;
-          }
-        }
-
-        .el-button {
+          gap: 8px;
           flex-shrink: 0;
+
+          .quantity-display {
+            font-weight: 700;
+            color: #1e293b;
+            min-width: 28px;
+            text-align: center;
+          }
         }
       }
     }
@@ -574,34 +572,6 @@ defineExpose({ visible });
         color: #1e293b;
         font-weight: 600;
         font-size: 20px;
-      }
-    }
-  }
-
-  .add-product-section {
-    border-top: 1px solid #e2e8f0;
-    padding-top: 15px;
-
-    .add-product-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-
-      h4 {
-        margin: 0;
-        font-size: 14px;
-        color: #1e293b;
-        font-weight: 600;
-      }
-    }
-
-    .add-product-row {
-      display: flex;
-      gap: 10px;
-
-      .el-select {
-        flex: 1;
       }
     }
   }
@@ -657,43 +627,42 @@ defineExpose({ visible });
         margin-bottom: 12px;
       }
 
-      .items-table {
+      .items-list {
         gap: 6px;
 
         .item-card {
-          flex-wrap: wrap;
-          gap: 6px;
-          padding: 10px;
+          padding: 8px 12px;
 
-          .item-image-section {
-            display: none;
+          .item-thumb {
+            width: 36px;
+            height: 36px;
           }
 
-          .item-name-section {
-            flex: 1;
-            min-width: 100%;
+          .item-name {
+            font-size: 14px;
           }
 
-          .item-price-section {
-            order: 1;
+          .item-price {
+            min-width: 60px;
+            font-size: 14px;
           }
 
-          .item-subtotal-section {
-            display: none;
-          }
+          .quantity-control {
+            gap: 6px;
 
-          .item-quantity-section {
-            order: 2;
-            margin-left: auto;
+            .el-button {
+              width: 28px;
+              height: 28px;
+              padding: 0 !important;
+            }
 
-            .quantity-label {
-              display: none;
+            .quantity-display {
+              min-width: 24px;
+              font-size: 14px;
             }
           }
 
           .el-button {
-            order: 3;
-
             padding: 4px 8px;
           }
         }
@@ -709,27 +678,6 @@ defineExpose({ visible });
 
       .total-row {
         gap: 10px;
-      }
-    }
-
-    .add-product-section {
-      padding-top: 12px;
-
-      .add-product-header {
-        margin-bottom: 10px;
-
-        h4 {
-          font-size: 13px;
-        }
-      }
-
-      .add-product-row {
-        gap: 8px;
-        flex-direction: column;
-
-        .el-button {
-          width: 100%;
-        }
       }
     }
   }

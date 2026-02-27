@@ -339,7 +339,7 @@ const handleDeleteOrder = () => {
     .customer-right {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
       flex: 1;
       align-items: flex-end;
     }
@@ -585,6 +585,16 @@ const handleDeleteOrder = () => {
     height: initial;
     .order-items {
       flex: 0;
+    }
+    .order-customer {
+      .customer-right {
+        flex-direction: row;
+        justify-content: flex-end;
+      }
+      .info-row {
+        width: initial;
+        gap: 2px;
+      }
     }
   }
 }

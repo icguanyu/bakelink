@@ -522,7 +522,7 @@ h2 {
 
 @media (max-width: 640px) {
   .settings-manager {
-    padding: 12px;
+    padding: 10px 4%;
   }
 
   .page-header {
