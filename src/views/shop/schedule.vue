@@ -435,9 +435,11 @@ onMounted(() => {
                     :alt="product.product_name"
                   />
                 </div>
-                <div class="item-name">{{ product.product_name }}</div>
-                <div class="item-price">
-                  {{ $formatPrice(product.unit_price) }}
+                <div class="item-info">
+                  <div class="item-name">{{ product.product_name }}</div>
+                  <div class="item-price">
+                    {{ $formatPrice(product.unit_price) }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -590,7 +592,7 @@ onMounted(() => {
 
 .schedule-right {
   flex: 0 0 auto;
- 
+
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -787,8 +789,8 @@ onMounted(() => {
 }
 
 .items-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -796,7 +798,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 12px;
+  padding: 6px 8px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
@@ -810,8 +812,8 @@ onMounted(() => {
 
 .item-thumb {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   border-radius: 4px;
   background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
   border: 1px solid #e2e8f0;
@@ -828,7 +830,6 @@ onMounted(() => {
 }
 
 .item-name {
-  flex: 1;
   font-weight: 600;
   color: #1e293b;
   min-width: 0;
@@ -840,8 +841,14 @@ onMounted(() => {
 .item-price {
   font-weight: 700;
   color: #1c2345;
-  min-width: 70px;
-  text-align: right;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
 }
 
 .product-card {
@@ -1072,7 +1079,6 @@ onMounted(() => {
   .schedule-left {
     min-width: 100%;
     min-height: 300px;
-    max-height: 50vh;
   }
 }
 
@@ -1088,7 +1094,6 @@ onMounted(() => {
 
   .schedule-left {
     min-height: 250px;
-    max-height: 45vh;
   }
 
   .detail-header {
@@ -1113,16 +1118,17 @@ onMounted(() => {
   }
 
   .items-list {
+    grid-template-columns: 1fr;
     gap: 6px;
   }
 
   .item-card {
-    padding: 6px 10px;
+    padding: 3px 6px;
     gap: 10px;
 
     .item-thumb {
-      width: 36px;
-      height: 36px;
+      width: 50px;
+      height: 50px;
     }
 
     .item-name {
