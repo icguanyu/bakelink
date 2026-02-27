@@ -62,9 +62,9 @@ const rules = {
 const resetForm = () => {
   Object.assign(form, {
     schedule_id: currentSchedule.value?.id || "",
-    customer_name: "Nick_Test",
-    customer_phone: "0933895891",
-    pickup_time: "15:00",
+    customer_name: "",
+    customer_phone: "",
+    pickup_time: "",
     note: "",
     payment_method: "cash",
   });
@@ -206,14 +206,13 @@ defineExpose({ open, close });
       ref="formRef"
       :model="form"
       :rules="rules"
-      label-width="100px"
-      label-position="left"
+      label-width="80px"
     >
       <!-- 顧客資訊 -->
       <!-- <el-divider content-position="left">顧客資訊</el-divider> -->
 
       <div class="form-row">
-        <el-form-item label="顧客姓名" prop="customer_name">
+        <el-form-item label="姓名" prop="customer_name">
           <el-input
             v-model="form.customer_name"
             placeholder="請輸入顧客姓名"
@@ -221,12 +220,13 @@ defineExpose({ open, close });
           />
         </el-form-item>
 
-        <el-form-item label="顧客電話" prop="customer_phone">
+        <el-form-item label="電話" prop="customer_phone">
           <el-input
             v-model="form.customer_phone"
-            placeholder="例如：0912345678"
+            placeholder="顧客電話，例如：0912345678"
             clearable
             maxlength="10"
+            inputmode="numeric"
           />
         </el-form-item>
       </div>

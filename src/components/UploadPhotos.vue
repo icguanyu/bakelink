@@ -10,7 +10,7 @@ const props = defineProps({
   disabled: Boolean,
   max: {
     type: Number,
-    default: 4,
+    default: 3,
   },
 });
 
@@ -51,7 +51,7 @@ const handleImageUpload = async (event) => {
   const imageFile = event.target.files[0];
   // console.log(`原始 size ${(imageFile.size / 1024 / 1024).toFixed(2)} MB`);
   const options = {
-    maxSizeMB: 0.6,
+    maxSizeMB: 0.2,
   };
   loading.value = true;
   try {
@@ -66,6 +66,7 @@ const handleImageUpload = async (event) => {
     if (url) {
       images.value.push(url);
       emits("update:modelValue", images.value);
+      emits("upload", images.value);
     }
   } catch (error) {
     console.log(error);
@@ -124,7 +125,7 @@ defineExpose({
       </label>
     </div>
     <small class="hint"
-      >建議尺寸 600x400，檔案小於 1MB，最多 {{ max }} 張</small
+      >第一張圖片即為封面圖；建議尺寸 600x400，檔案小於 1MB，最多 {{ max }} 張</small
     >
     <input
       type="file"
@@ -143,7 +144,7 @@ defineExpose({
   }
   .gallery {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
   }
   .image-item {

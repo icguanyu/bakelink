@@ -1,12 +1,36 @@
 <script setup>
-import { computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 import dayjs from "dayjs";
+import { Schedules } from "@/api/schedules";
 
 const emit = defineEmits(["toggle"]);
 
 const currentYear = computed(() => dayjs().format("YYYY"));
 const currentMonth = computed(() => dayjs().format("MMM").toUpperCase());
 const currentDate = computed(() => dayjs().format("DD"));
+const todayOrderCount = ref(0);
+
+const loadTodayOrderCount = async () => {
+  const today = dayjs().format("YYYY-MM-DD");
+  try {
+    const res = await Schedules.GetByDate(today);
+    if (!res?.data) {
+      todayOrderCount.value = 0;
+      return;
+    }
+    const count =
+      res.data.order_count ??
+      (Array.isArray(res.data.orders) ? res.data.orders.length : 0);
+    todayOrderCount.value = Number.isFinite(count) ? count : 0;
+  } catch (error) {
+    console.log("load today order count error", error);
+    todayOrderCount.value = 0;
+  }
+};
+
+onMounted(() => {
+  loadTodayOrderCount();
+});
 </script>
 
 <template>
@@ -29,7 +53,7 @@ const currentDate = computed(() => dayjs().format("DD"));
       <div class="title">接單</div>
     </router-link>
     <router-link class="link" to="/shop/order">
-      <el-badge :value="100" :max="99" :offset="[-10, 4]">
+      <el-badge :value="todayOrderCount" :max="99" :offset="[-10, 4]">
         <div class="icon">
           <img src="@/assets/images/icons/receipt.png" alt="" />
         </div>

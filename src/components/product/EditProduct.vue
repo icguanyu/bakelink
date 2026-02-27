@@ -65,6 +65,14 @@ const beforeSave = async (formEl) => {
   });
 };
 
+const handleUpload = (urls) => {
+  form.image_urls = urls;
+  // if (loading.value || uploadPhotosLoading.value) return;
+  if (formRef.value?.validate) {
+    beforeSave(formRef.value);
+  }
+};
+
 const save = async () => {
   loading.value = true;
   try {
@@ -80,7 +88,6 @@ const save = async () => {
       message: `商品已${form.id ? "更新" : "新增"}成功`,
       type: "success",
     });
-    close();
     emit("update");
   } catch (err) {
     console.log("save product error", err);
@@ -134,7 +141,7 @@ defineExpose({ open, close });
   >
     <el-segmented
       v-model="value"
-      :options="['基本資訊', '商品圖片', '詳細成分']"
+      :options="['基本資訊', '商品圖片', /* '詳細成分' */]"
       block
     />
     <br />
@@ -183,7 +190,7 @@ defineExpose({ open, close });
           />
         </el-form-item>
       </div>
-      <div v-if="value === '詳細成分'">
+      <!-- <div v-if="value === '詳細成分'">
         <div class="ing-table">
           <small class="hint"
             >輸入成分與份量，可協助統計訂單所需原料。非必填欄位。</small
@@ -232,18 +239,14 @@ defineExpose({ open, close });
             新增
           </el-button>
         </div>
-      </div>
+      </div> -->
       <div v-if="value === '商品圖片'">
         <el-form-item label="圖片說明" prop="image_urls"> </el-form-item>
         <UploadPhotos
           ref="uploadPhotos"
           v-model="form.image_urls"
           :disabled="false"
-          @upload="
-            (url) => {
-              form.image_urls = url;
-            }
-          "
+          @upload="handleUpload"
         />
       </div>
     </el-form>
