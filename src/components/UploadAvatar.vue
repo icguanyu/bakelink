@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from "vue";
-import { ElMessage } from "element-plus";
+import { Users } from "@/api/auth";
+import imageCompression from "browser-image-compression";
 
 const props = defineProps({
   modelValue: {
@@ -14,22 +15,43 @@ const emits = defineEmits(["upload", "delete", "update:modelValue"]);
 const loading = ref(false);
 const image = ref(props.modelValue || "");
 
-const preview = async (e) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
+const handleImageUpload = async (event) => {
+  const imageFile = event.target.files?.[0];
+  if (!imageFile) return;
 
-  const previewUrl = URL.createObjectURL(file);
-  image.value = previewUrl;
-  emits("upload", previewUrl);
-  emits("update:modelValue", previewUrl);
-
-  // 清空 input 以便重複上傳
-  e.target.value = "";
+  const options = {
+    maxSizeMB: 1,
+  };
+  
+  loading.value = true;
+  try {
+    const compressedFile = await imageCompression(imageFile, options);
+    console.log(
+      `壓縮後 size ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`
+    );
+    
+    const formData = new FormData();
+    formData.append("file", compressedFile);
+    const res = await Users.UploadAvatar(formData);
+    const url = res.data.url;
+    
+    if (url) {
+      image.value = url;
+      emits("update:modelValue", url);
+      emits("upload", url);
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    loading.value = false;
+    // 清空 input 以便重複上傳
+    event.target.value = "";
+  }
 };
 
-const handleDelete = (index) => {
+const handleDelete = () => {
   image.value = "";
-  emits("delete", index);
+  emits("delete", 0);
   emits("update:modelValue", "");
 };
 
@@ -45,10 +67,10 @@ watch(
 
 <template>
   <div class="images-uploader">
-    <div class="gallery" :class="{ 'has-image': !!image }">
+    <div class="gallery" :class="{ 'has-image': !!image }" v-loading="loading">
       <div v-if="image" class="image-item">
         <img :src="image" alt="已上傳圖片" />
-        <el-icon class="delete-btn" @click="handleDelete(0)">
+        <el-icon class="delete-btn" @click="handleDelete">
           <Delete />
         </el-icon>
       </div>
@@ -69,7 +91,7 @@ watch(
       type="file"
       id="image-upload"
       accept=".png,.jpg,.jpeg,.webp"
-      @change="preview"
+      @change="handleImageUpload"
     />
   </div>
 </template>

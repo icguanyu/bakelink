@@ -75,15 +75,35 @@ const initializeDateTimeFields = () => {
   }
 };
 
+const resetFormFromSchedule = (schedule) => {
+  form.id = schedule?.id || null;
+  form.schedule_date = schedule?.schedule_date || "";
+  form.status = schedule?.status || "DRAFT";
+  form.order_start_at = schedule?.order_start_at || null;
+  form.order_end_at = schedule?.order_end_at || null;
+  form.items = Array.isArray(schedule?.items)
+    ? schedule.items.map((item) => ({
+        product_id: item.product_id,
+        product_name: item.product_name,
+        sales_limit: item.sales_limit,
+      }))
+    : [];
+};
+
 watch(
   () => props.schedule,
   (val) => {
     console.log("schedule change:", val);
-    Object.assign(form, val);
+    resetFormFromSchedule(val);
     initializeDateTimeFields();
   },
   { immediate: true, deep: true },
 );
+
+watch(selectedProductId, (val) => {
+  if (!val) return;
+  addProduct();
+});
 
 // 監聽截止日期變化，若時間未填則預設為 00:00
 watch(orderEndDate, (newDate) => {
@@ -124,6 +144,9 @@ const removeProduct = (id) => {
 };
 
 const closeEditor = () => {
+  resetFormFromSchedule(props.schedule);
+  initializeDateTimeFields();
+  selectedProductId.value = "";
   emit("close");
 };
 
@@ -231,7 +254,6 @@ const deleteSchedule = async () => {
           type="primary"
           circle
           :loading="loading"
-          :disabled="hasOrders"
           @click="beforeSave(formRef)"
           icon="Check"
         />
@@ -241,7 +263,7 @@ const deleteSchedule = async () => {
       <!-- 警告提示 -->
       <el-alert
         v-if="hasOrders"
-        title="該排程已有訂單，無法編輯"
+        title="此排程已有訂單，請確認調整內容是否會影響現有訂單。"
         type="warning"
         :closable="false"
         show-icon
@@ -265,7 +287,6 @@ const deleteSchedule = async () => {
               <el-select
                 v-model="form.status"
                 placeholder="選擇狀態"
-                :disabled="hasOrders"
               >
                 <el-option
                   v-for="option in statusOptions"
@@ -284,7 +305,6 @@ const deleteSchedule = async () => {
                 type="date"
                 placeholder="選擇日期"
                 value-format="YYYY-MM-DD"
-                :disabled="hasOrders"
               />
               <el-time-select
                 v-model="orderStartTime"
@@ -292,7 +312,6 @@ const deleteSchedule = async () => {
                 start="00:00"
                 step="00:30"
                 end="23:30"
-                :disabled="hasOrders"
               />
             </div>
           </el-form-item>
@@ -303,7 +322,6 @@ const deleteSchedule = async () => {
                 type="date"
                 placeholder="選擇日期"
                 value-format="YYYY-MM-DD"
-                :disabled="hasOrders"
               />
               <el-time-select
                 v-model="orderEndTime"
@@ -311,7 +329,6 @@ const deleteSchedule = async () => {
                 start="00:00"
                 step="00:30"
                 end="23:30"
-                :disabled="hasOrders"
               />
             </div>
           </el-form-item>
@@ -327,14 +344,6 @@ const deleteSchedule = async () => {
               v-model="selectedProductId"
               class="product-select"
               :exclude-ids="excludeProductIds"
-              :disabled="hasOrders"
-            />
-            <el-button
-              type="primary"
-              icon="plus"
-              circle
-              :disabled="!selectedProductId || hasOrders"
-              @click="addProduct"
             />
           </div>
 
@@ -358,7 +367,6 @@ const deleteSchedule = async () => {
                     v-model="item.sales_limit"
                     :min="0"
                     :max="999"
-                    :disabled="hasOrders"
                   />
                 </div>
               </div>
@@ -367,7 +375,6 @@ const deleteSchedule = async () => {
                 plain
                 icon="delete"
                 size="small"
-                :disabled="hasOrders"
                 @click="removeProduct(item.product_id)"
               />
             </div>

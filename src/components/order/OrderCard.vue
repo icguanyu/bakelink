@@ -99,8 +99,16 @@ const handleDeleteOrder = () => {
     <!-- 客戶資訊 -->
     <div class="order-customer">
       <div class="customer-left">
-        <el-icon><User /></el-icon>
-        <div class="customer-name">{{ order.customer_name }}</div>
+        <div class="user-info">
+          <el-icon><User /></el-icon>
+          <div class="customer-name">{{ order.customer_name }}</div>
+        </div>
+        <div v-if="viewMode === 'detailed'" class="payment-method">
+          <el-icon><CreditCard /></el-icon>
+          <el-tag size="small" type="info">{{
+            getPaymentLabel(order.payment_method)
+          }}</el-tag>
+        </div>
       </div>
       <div v-if="viewMode === 'detailed'" class="customer-right">
         <div class="info-row">
@@ -157,14 +165,6 @@ const handleDeleteOrder = () => {
 
     <!-- 訂單底部 -->
     <div class="order-footer">
-      <div class="footer-info">
-        <div v-if="viewMode === 'detailed'" class="payment-method">
-          <span class="label">付款方式</span>
-          <el-tag size="small" type="info">{{
-            getPaymentLabel(order.payment_method)
-          }}</el-tag>
-        </div>
-      </div>
       <div class="order-total">
         <span class="total-label">總計</span>
         <span class="total-amount">{{ $formatPrice(order.total_amount) }}</span>
@@ -325,14 +325,43 @@ const handleDeleteOrder = () => {
   .order-customer {
     padding: 10px 20px;
     display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
     .customer-left {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
+      gap: 6px;
       flex: 1;
+      flex-direction: column;
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
       .el-icon {
-        font-size: 24px;
+        font-size: 16px;
         color: #94a3b8;
-        margin-right: 3px;
+        flex-shrink: 0;
+      }
+
+      .customer-name {
+        color: #1e293b;
+        font-weight: 700;
+      }
+
+      .payment-method {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        .el-icon {
+          font-size: 16px;
+          color: #94a3b8;
+          flex-shrink: 0;
+        }
       }
     }
 
@@ -363,12 +392,6 @@ const handleDeleteOrder = () => {
         font-size: 14px;
         color: #94a3b8;
       }
-    }
-
-    .customer-name {
-      color: #1e293b;
-      font-weight: 700;
-      font-size: 16px;
     }
 
     .info-value {
@@ -510,28 +533,10 @@ const handleDeleteOrder = () => {
 
   .order-footer {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     padding: 10px 20px;
     background: linear-gradient(to bottom, white 0%, #fafbfc 100%);
-
-    .footer-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-
-      .payment-method {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 12px;
-
-        .label {
-          color: #64748b;
-          font-weight: 500;
-        }
-      }
-    }
 
     .order-total {
       display: flex;
@@ -595,6 +600,12 @@ const handleDeleteOrder = () => {
         width: initial;
         gap: 2px;
       }
+    }
+    .order-footer {
+      justify-content: flex-start;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
     }
   }
 }

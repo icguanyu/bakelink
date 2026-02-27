@@ -1,10 +1,13 @@
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { Users } from "@/api/auth";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 const router = useRouter();
 const authStore = useAuthStore();
+const isLoading = ref(false);
 
 const paymentOptions = [
   { label: "現金", value: "cash" },
@@ -20,13 +23,15 @@ const pickupOptions = [
   { label: "宅配", value: "delivery" },
 ];
 
-const businessHours = ref(
-  ["一", "二", "三", "四", "五", "六", "日"].map((d) => ({
-    day: d,
-    enabled: !["六", "日"].includes(d) ? true : false,
-    time: ["09:00", "18:00"],
-  })),
-);
+const defaultBusinessHours = [
+  { day: 0, enabled: false, time: ["10:00", "16:00"] },
+  { day: 1, enabled: false, time: ["09:00", "18:00"] },
+  { day: 2, enabled: false, time: ["09:00", "18:00"] },
+  { day: 3, enabled: false, time: ["09:00", "18:00"] },
+  { day: 4, enabled: false, time: ["09:00", "18:00"] },
+  { day: 5, enabled: false, time: ["09:00", "18:00"] },
+  { day: 6, enabled: false, time: ["10:00", "16:00"] },
+];
 
 const form = reactive({
   avatar: "",
@@ -50,25 +55,91 @@ const form = reactive({
     ecoDiscount: 10,
     note: "歡迎自備容器，享環保折扣。",
   },
+  businessHours: [...defaultBusinessHours],
 });
 
-const segment = ref("brand");
+const segment = ref("basic");
+
+const dayLabelMap = {
+  0: "日",
+  1: "一",
+  2: "二",
+  3: "三",
+  4: "四",
+  5: "五",
+  6: "六",
+};
+
+const dayNumberMap = {
+  日: 0,
+  一: 1,
+  二: 2,
+  三: 3,
+  四: 4,
+  五: 5,
+  六: 6,
+};
+
+const normalizeBusinessHours = (hours) => {
+  if (!Array.isArray(hours) || hours.length === 0) {
+    return [...defaultBusinessHours];
+  }
+  return hours.map((row) => {
+    const numericDay =
+      typeof row.day === "number" ? row.day : dayNumberMap[row.day];
+    const normalizedDay =
+      Number.isInteger(numericDay) && numericDay >= 0 && numericDay <= 6
+        ? numericDay
+        : 0;
+    return {
+      ...row,
+      day: normalizedDay,
+    };
+  });
+};
+
+const formatDayLabel = (day) => dayLabelMap[day] ?? day;
+
+// 獲取用戶資訊
+const fetchUserData = async () => {
+  isLoading.value = true;
+  try {
+    const res = await Users.Me();
+    console.log("user data:", res.data);
+    if (res.data) {
+      Object.assign(form, res.data);
+      form.businessHours = normalizeBusinessHours(res.data.businessHours);
+    }
+  } catch (error) {
+    ElMessage.error("無法載入用戶資訊");
+    console.error("fetch user error:", error);
+  } finally {
+    isLoading.value = false;
+  }
+};
 
 const toggleAllWeekday = (enabled) => {
-  businessHours.value = businessHours.value.map((i) => ({
+  form.businessHours = form.businessHours.map((i) => ({
     ...i,
     enabled,
   }));
 };
 
-const handleSave = () => {
-  const payload = {
-    ...form,
-    businessHours: businessHours.value,
-  };
-  console.log("儲存商家設定：", payload);
-  ElMessage.success("設定已儲存");
-  // TODO: 呼叫 API 儲存
+const handleSave = async () => {
+  isLoading.value = true;
+  try {
+    const payload = {
+      ...form,
+      businessHours: normalizeBusinessHours(form.businessHours),
+    };
+    await Users.Put(payload);
+    ElMessage.success("設定已儲存");
+  } catch (error) {
+    ElMessage.error("儲存設定失敗");
+    console.error("save user error:", error);
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const handleLogout = () => {
@@ -84,6 +155,10 @@ const handleLogout = () => {
     })
     .catch(() => {});
 };
+
+onMounted(() => {
+  fetchUserData();
+});
 </script>
 
 <template>
@@ -103,16 +178,16 @@ const handleLogout = () => {
       <el-segmented
         v-model="segment"
         :options="[
-          { label: '01 基本', value: 'brand' },
+          { label: '01 基本', value: 'basic' },
           { label: '02 取貨付款', value: 'pay' },
           { label: '03 營業時間', value: 'hours' },
           { label: '04 包裝', value: 'pack' },
         ]"
       />
     </div>
-    <el-form label-width="80px" label-position="left">
+    <el-form label-width="80px" label-position="left" v-loading="isLoading">
       <div class="flex flex-col gap-2">
-        <el-card class="card" shadow="never" v-show="segment === 'brand'">
+        <el-card class="card" shadow="never" v-show="segment === 'basic'">
           <div class="panel">
             <div class="panel__header">
               <span class="badge">01</span>
@@ -125,7 +200,7 @@ const handleLogout = () => {
           </div>
 
           <div class="card__subtitle">標誌/LOGO</div>
-          <UploadPhoto
+          <UploadAvatar
             v-model="form.avatar"
             :disabled="false"
             @upload="
@@ -133,23 +208,53 @@ const handleLogout = () => {
                 form.avatar = url;
               }
             "
+            @delete="
+              () => {
+                form.avatar = '';
+              }
+            "
           />
           <br />
           <div class="card__subtitle">基本資訊</div>
           <el-form-item label="店名">
-            <el-input v-model="form.shopName" placeholder="輸入店名" />
+            <el-input
+              v-model="form.shopName"
+              placeholder="輸入店名"
+              maxlength="20"
+              show-word-limit
+            />
           </el-form-item>
           <el-form-item label="負責人">
-            <el-input v-model="form.owner" placeholder="負責人姓名" />
+            <el-input
+              v-model="form.owner"
+              placeholder="負責人姓名"
+              maxlength="20"
+              show-word-limit
+            />
           </el-form-item>
           <el-form-item label="電話">
-            <el-input v-model="form.phone" placeholder="聯絡電話" />
+            <el-input
+              v-model="form.phone"
+              placeholder="聯絡電話"
+              maxlength="10"
+              show-word-limit
+            />
           </el-form-item>
           <el-form-item label="Email">
-            <el-input v-model="form.email" placeholder="聯絡信箱" />
+            <el-input
+              v-model="form.email"
+              placeholder="聯絡信箱"
+              maxlength="50"
+              show-word-limit
+            />
           </el-form-item>
           <el-form-item label="地址">
-            <el-input v-model="form.address" placeholder="門市地址" />
+            <el-input
+              v-model="form.address"
+              placeholder="門市地址"
+              maxlength="100"
+              show-word-limit
+            />
           </el-form-item>
 
           <el-form-item label="介紹">
@@ -158,6 +263,8 @@ const handleLogout = () => {
               type="textarea"
               :rows="3"
               placeholder="品牌故事、主打品項"
+              maxlength="200"
+              show-word-limit
             />
           </el-form-item>
 
@@ -280,12 +387,12 @@ const handleLogout = () => {
           </div>
           <div class="hours">
             <div
-              v-for="(row, idx) in businessHours"
+              v-for="(row, idx) in form.businessHours"
               :key="row.day"
               class="hour-row"
             >
               <el-switch v-model="row.enabled" />
-              <span class="day">週{{ row.day }}</span>
+              <span class="day">週{{ formatDayLabel(row.day) }}</span>
               <el-time-select
                 v-model="row.time[0]"
                 :disabled="!row.enabled"

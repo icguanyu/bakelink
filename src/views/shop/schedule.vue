@@ -271,6 +271,8 @@ const initScheduleDataByDate = async (date) => {
         order_end_at: null,
         items: [],
         orders: [],
+        order_count: 0,
+        item_count: 0,
       });
       return;
     }
@@ -307,13 +309,6 @@ onMounted(() => {
           今日
         </el-button>
       </div>
-
-      <!-- 月份導航 -->
-      <div class="month-navigation">
-        <el-button icon="ArrowLeft" circle @click="goPreviousMonth" />
-        <span class="month-label">{{ getCurrentMonthLabel }}</span>
-        <el-button icon="ArrowRight" circle @click="goNextMonth" />
-      </div>
     </div>
     <!-- 排程列表 + 訂單詳情 -->
     <div class="schedule-main">
@@ -330,7 +325,7 @@ onMounted(() => {
       />
 
       <!-- 左側：訂單詳情面板 -->
-      <div v-else-if="selectedDate" class="schedule-right">
+      <div v-else-if="selectedDate" class="schedule-left">
         <div class="detail-header">
           <div class="detail-header-left">
             <el-button
@@ -427,28 +422,22 @@ onMounted(() => {
               <span>今日出爐</span>
               <span class="count">{{ schedule.items.length }} 項商品</span>
             </div>
-            <div class="products-grid">
+            <div class="items-list">
               <div
                 v-for="product in schedule.items"
                 :key="product.id"
-                class="product-card"
+                class="item-card"
               >
-                <!-- :class="{ 'out-of-stock': !product.available }" -->
-                <div class="product-thumb">
-                  <img v-if="product.image_url" :src="product.image_url" :alt="product.product_name" />
+                <div class="item-thumb">
+                  <img
+                    v-if="product.image_url"
+                    :src="product.image_url"
+                    :alt="product.product_name"
+                  />
                 </div>
-                <div class="product-info">
-                  <h4 class="product-name">{{ product.product_name }}</h4>
-                  <!-- <p class="product-category">{{ product.category }}</p> -->
-                  <div class="product-footer">
-                    <span class="product-price">{{
-                      $formatPrice(product.unit_price)
-                    }}</span>
-                    <!-- <span v-if="product.available" class="product-stock"
-                      >{{ product.stock }} 個</span
-                    >
-                    <span v-else class="product-sold-out">已售完</span> -->
-                  </div>
+                <div class="item-name">{{ product.product_name }}</div>
+                <div class="item-price">
+                  {{ $formatPrice(product.unit_price) }}
                 </div>
               </div>
             </div>
@@ -498,12 +487,20 @@ onMounted(() => {
         <!-- <pre>{{ schedule }}</pre> -->
       </div>
 
-      <ScheduleCalendar
-        :schedule-list="scheduleList"
-        :selected-date="selectedDate"
-        :is-loading="isMonthLoading"
-        @select="selectedDate = $event"
-      />
+      <div class="schedule-right">
+        <!-- 月份導航 -->
+        <div class="month-navigation">
+          <el-button icon="ArrowLeft" circle @click="goPreviousMonth" />
+          <span class="month-label">{{ getCurrentMonthLabel }}</span>
+          <el-button icon="ArrowRight" circle @click="goNextMonth" />
+        </div>
+        <ScheduleCalendar
+          :schedule-list="scheduleList"
+          :selected-date="selectedDate"
+          :is-loading="isMonthLoading"
+          @select="selectedDate = $event"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -546,30 +543,30 @@ onMounted(() => {
       font-weight: 600;
     }
   }
+}
 
-  .month-navigation {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    background: white;
-    border-radius: 8px;
+.month-navigation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+
+  .el-button {
+    width: 36px;
+    height: 36px;
     border: 1px solid #e2e8f0;
+  }
 
-    .el-button {
-      width: 36px;
-      height: 36px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .month-label {
-      font-size: 16px;
-      font-weight: 600;
-      color: #1e293b;
-      min-width: 110px;
-      text-align: center;
-    }
+  .month-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    min-width: 110px;
+    text-align: center;
   }
 }
 
@@ -580,15 +577,23 @@ onMounted(() => {
   min-height: calc(100vh - 200px);
 }
 
-.schedule-right {
+.schedule-left {
   flex: 1;
-  min-width: 600px;
+  min-width: 400px;
   display: flex;
   flex-direction: column;
   background: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   animation: slideInRight 0.3s ease;
+}
+
+.schedule-right {
+  flex: 0 0 auto;
+ 
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 @keyframes slideInRight {
@@ -777,8 +782,66 @@ onMounted(() => {
 
 .products-grid {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+  }
+}
+
+.item-thumb {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.item-name {
+  flex: 1;
+  font-weight: 600;
+  color: #1e293b;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-price {
+  font-weight: 700;
+  color: #1c2345;
+  min-width: 70px;
+  text-align: right;
 }
 
 .product-card {
@@ -985,6 +1048,16 @@ onMounted(() => {
 }
 
 // 響應式
+@media (max-width: 1200px) {
+  .schedule-main {
+    min-height: auto;
+  }
+
+  .schedule-left {
+    min-width: 350px;
+  }
+}
+
 @media (max-width: 1024px) {
   .schedule-container {
     padding: 10px 4%;
@@ -996,41 +1069,91 @@ onMounted(() => {
     gap: 10px;
   }
 
-  .schedule-right {
+  .schedule-left {
     min-width: 100%;
-    min-height: 280px;
+    min-height: 300px;
+    max-height: 50vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .schedule-container {
+    padding: 8px 2%;
+  }
+
+  .schedule-main {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .schedule-left {
+    min-height: 250px;
+    max-height: 45vh;
   }
 
   .detail-header {
-    padding: 10px 12px;
+    padding: 8px 10px;
     gap: 6px;
+
     .detail-header-left {
       gap: 6px;
-    }
-    h3 {
-      font-size: 16px;
+
+      h3 {
+        font-size: 14px;
+      }
     }
   }
 
   .detail-content {
-    padding: 10px 12px;
+    padding: 8px 10px;
   }
 
   .products-section {
     margin-bottom: 8px;
   }
 
-  .orders-section {
-    margin-top: 10px;
+  .items-list {
+    gap: 6px;
   }
 
-  .order-row {
-    grid-template-columns:
-      minmax(100px, 1fr) minmax(70px, 0.8fr)
-      45px 40px 60px 65px;
-    gap: 5px;
+  .item-card {
+    padding: 6px 10px;
+    gap: 10px;
+
+    .item-thumb {
+      width: 36px;
+      height: 36px;
+    }
+
+    .item-name {
+      font-size: 14px;
+    }
+
+    .item-price {
+      font-size: 14px;
+      min-width: 60px;
+    }
+  }
+
+  .stats-grid {
+    gap: 4px;
     padding: 6px;
-    min-width: 420px;
+  }
+
+  .stat-item {
+    min-width: 70px;
+    padding: 6px 4px;
+    min-height: 50px;
+
+    .stat-text {
+      .stat-value {
+        font-size: 20px;
+      }
+
+      .stat-label {
+        font-size: 11px;
+      }
+    }
   }
 }
 </style>

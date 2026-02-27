@@ -301,7 +301,6 @@ defineExpose({ visible });
                   :icon="'Minus'"
                   circle
                   size="small"
-                  :disabled="getItemQuantity(product.product_id) === 1"
                   @click="updateProductQuantity(product.product_id, -1)"
                 />
                 <span class="quantity-display">{{ getItemQuantity(product.product_id) }}</span>
@@ -314,14 +313,6 @@ defineExpose({ visible });
                   @click="updateProductQuantity(product.product_id, 1)"
                 />
               </div>
-              <el-button
-                circle
-                size="small"
-                icon="delete"
-                type="danger"
-                plain
-                @click="deleteProductByID(product.product_id)"
-              />
             </template>
             <el-button
               v-else

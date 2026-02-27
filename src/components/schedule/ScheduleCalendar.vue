@@ -22,7 +22,7 @@ const selectDate = (date) => {
 </script>
 
 <template>
-  <div class="schedule-left">
+  <div class="schedule-right-body">
     <div class="schedule-week-header">
       <div class="week-day">日</div>
       <div class="week-day">一</div>
@@ -83,12 +83,15 @@ const selectDate = (date) => {
 </template>
 
 <style scoped lang="scss">
-.schedule-left {
+.schedule-right-body {
   flex: 0 0 auto;
   width: 100%;
-  max-width: 800px;
+  max-width: 600px;
   overflow-y: auto;
-  padding-right: 12px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 12px;
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -111,14 +114,14 @@ const selectDate = (date) => {
 .schedule-list {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: 4px;
   margin-bottom: 12px;
 }
 
 .schedule-week-header {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: 4px;
   margin-bottom: 8px;
   padding: 0 0 8px 0;
   border-bottom: 1px solid #e2e8f0;
@@ -143,7 +146,7 @@ const selectDate = (date) => {
   display: flex;
   flex-direction: column;
   border: 2px solid transparent;
-  min-height: 100px;
+  min-height: 110px;
   position: relative;
 
   &:hover {
@@ -166,8 +169,8 @@ const selectDate = (date) => {
 .schedule-header-row {
   display: flex;
   flex-direction: column;
-  padding: 6px;
-  gap: 6px;
+  padding: 2px;
+  gap: 4px;
   flex: 1;
   background: white;
   transition: all 0.2s ease;
@@ -270,16 +273,46 @@ const selectDate = (date) => {
 }
 
 @media (max-width: 1024px) {
-  .schedule-left {
+  .schedule-right-body {
     width: 100%;
     max-width: 100%;
+    min-width: 0;
+  }
+
+  .schedule-list {
+    gap: 4px;
+  }
+
+  .schedule-item {
+    min-height: 80px;
+  }
+
+  .date-box {
+    .date-value {
+      font-size: 20px;
+    }
+  }
+
+  .mini-stats {
+    font-size: 11px;
+    display: flex;
+
+    .stat-badge {
+      padding: 2px 5px;
+      font-size: 11px;
+    }
+  }
+
+  .schedule-header-row {
+    padding: 5px;
   }
 }
 
 @media (max-width: 768px) {
-  .schedule-left {
+  .schedule-right-body {
     width: 100%;
     max-width: 100%;
+    padding: 8px;
   }
 
   .schedule-list {
@@ -288,11 +321,11 @@ const selectDate = (date) => {
   }
 
   .schedule-item {
-    min-height: 40px;
+    min-height: 50px;
   }
 
   .item-selected {
-    border-width: 1px;
+    border-width: 2px;
   }
 
   .date-section {
@@ -305,17 +338,18 @@ const selectDate = (date) => {
     height: 100%;
 
     .date-value {
-      font-size: 14px;
+      font-size: 16px;
     }
   }
 
   .mini-stats {
     display: none;
-    font-size: 10px;
-    gap: 3px;
+    font-size: 9px;
+    gap: 1px;
 
     .stat-badge {
-      padding: 1px 4px;
+      padding: 1px 3px;
+      font-size: 9px;
     }
   }
 
@@ -325,8 +359,8 @@ const selectDate = (date) => {
 
   .schedule-header-row {
     flex-direction: column;
-    align-items: flex-start;
-    padding: 3px;
+    align-items: center;
+    padding: 2px;
     gap: 0;
   }
 }

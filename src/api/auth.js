@@ -8,3 +8,15 @@ export const Auth = {
     return request.get("/auth/me");
   },
 };
+
+export const Users = {
+  Me: () => {
+    return request.get("/users/me");
+  },
+  Put: (data) => {
+    return request.put("/users/me", data);
+  },
+  UploadAvatar: (formData) => {
+    return request.post("/UploadAvatar", formData);
+  },
+};
