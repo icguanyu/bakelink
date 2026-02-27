@@ -51,7 +51,7 @@ const handleImageUpload = async (event) => {
   const imageFile = event.target.files[0];
   // console.log(`原始 size ${(imageFile.size / 1024 / 1024).toFixed(2)} MB`);
   const options = {
-    maxSizeMB: 1,
+    maxSizeMB: 0.6,
   };
   loading.value = true;
   try {
