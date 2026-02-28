@@ -212,7 +212,7 @@ defineExpose({ visible });
     center
     v-model="visible"
     title="訂購明細"
-    width="75%"
+    width="70%"
     class="order-detail-dialog"
   >
     <div class="order-detail">
@@ -283,7 +283,11 @@ defineExpose({ visible });
                 placeholder="請選擇取貨方式"
               />
             </el-form-item>
-            <el-form-item label="自備購物袋" prop="bring_own_bag" class="form-item">
+            <el-form-item
+              label="自備購物袋"
+              prop="bring_own_bag"
+              class="form-item"
+            >
               <el-switch v-model="form.bring_own_bag" />
             </el-form-item>
           </div>
@@ -335,10 +339,21 @@ defineExpose({ visible });
                 :alt="product.product_name"
               />
             </div>
-            <div class="item-name">{{ product.product_name }}</div>
-            <div class="item-price">{{ $formatPrice(product.unit_price) }}</div>
+            <div class="item-info">
+              <div class="item-name">{{ product.product_name }}</div>
+              <div class="item-price">
+                {{ $formatPrice(product.unit_price) }}
+              </div>
+            </div>
 
             <template v-if="getItemQuantity(product.product_id) > 0">
+              <div class="slice-control">
+                <span>切</span>
+                <el-switch
+                  v-model="getItemByProductId(product.product_id).is_sliced"
+                  size="small"
+                />
+              </div>
               <div class="quantity-control">
                 <el-button
                   :icon="'Minus'"
@@ -354,13 +369,6 @@ defineExpose({ visible });
                   type="primary"
                   plain
                   @click="updateProductQuantity(product.product_id, 1)"
-                />
-              </div>
-              <div class="slice-control">
-                <span>切片</span>
-                <el-switch
-                  v-model="getItemByProductId(product.product_id).is_sliced"
-                  size="small"
                 />
               </div>
             </template>
@@ -554,22 +562,25 @@ defineExpose({ visible });
             object-fit: cover;
           }
         }
-
-        .item-name {
+        .item-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
           flex: 1;
-          font-weight: 600;
-          color: #1e293b;
-          min-width: 0;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
+          .item-name {
+            flex: 1;
+            font-weight: 600;
+            color: #1e293b;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
 
-        .item-price {
-          font-weight: 700;
-          color: #1c2345;
-          min-width: 70px;
-          text-align: right;
+          .item-price {
+            font-weight: 700;
+            color: #1c2345;
+          }
         }
 
         .quantity-control {
@@ -685,11 +696,10 @@ defineExpose({ visible });
         gap: 6px;
 
         .item-card {
-          padding: 8px 12px;
-
+          padding: 8px;
+          gap: 4px;
           .item-thumb {
-            width: 36px;
-            height: 36px;
+            display: none;
           }
 
           .item-name {
@@ -702,11 +712,11 @@ defineExpose({ visible });
           }
 
           .quantity-control {
-            gap: 6px;
+            gap: 0px;
 
             .el-button {
-              width: 28px;
-              height: 28px;
+              width: 30px;
+              height: 30px;
               padding: 0 !important;
             }
 

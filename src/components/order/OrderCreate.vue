@@ -228,11 +228,11 @@ defineExpose({ open, close });
   <el-dialog
     v-model="visible"
     title="建立訂單"
-    width="700px"
+    width="70%"
     append-to-body
     :close-on-click-modal="false"
   >
-    <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+    <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
       <!-- 顧客資訊 -->
       <!-- <el-divider content-position="left">顧客資訊</el-divider> -->
 
@@ -342,6 +342,13 @@ defineExpose({ open, close });
               {{ $formatPrice(product.unit_price) }}
             </div>
           </div>
+          <div v-if="getQuantity(product.product_id) > 0" class="slice-control">
+            <span>切</span>
+            <el-switch
+              v-model="productIsSliced[product.product_id]"
+              size="small"
+            />
+          </div>
           <div class="quantity-control">
             <el-button
               :icon="'Minus'"
@@ -358,13 +365,6 @@ defineExpose({ open, close });
               type="primary"
               plain
               @click="incrementQuantity(product.product_id)"
-            />
-          </div>
-          <div v-if="getQuantity(product.product_id) > 0" class="slice-control">
-            <span>切片</span>
-            <el-switch
-              v-model="productIsSliced[product.product_id]"
-              size="small"
             />
           </div>
         </div>
@@ -493,5 +493,21 @@ defineExpose({ open, close });
 :deep(.el-divider__text) {
   font-weight: 500;
   color: #409eff;
+}
+@media (max-width: 768px) {
+  .product-item {
+    gap: 6px;
+    .product-thumb {
+      display: none;
+    }
+    .quantity-control {
+      gap: 0px;
+      .el-button {
+        width: 30px;
+        height: 30px;
+        padding: 0 !important;
+      }
+    }
+  }
 }
 </style>
