@@ -285,7 +285,7 @@ defineExpose({ open, close });
             placeholder="請選擇取貨方式"
           />
         </el-form-item>
-        <el-form-item label="自備袋" prop="bring_own_bag">
+        <el-form-item label="自備購物袋" prop="bring_own_bag">
           <el-switch v-model="form.bring_own_bag" />
         </el-form-item>
       </div>

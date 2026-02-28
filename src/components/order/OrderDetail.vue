@@ -266,14 +266,10 @@ defineExpose({ visible });
               prop="payment_method"
               class="form-item"
             >
-              <el-select
+              <SelectPaymentMethod
                 v-model="form.payment_method"
-                placeholder="選擇付款方式"
-              >
-                <el-option label="現金" value="cash" />
-                <el-option label="信用卡" value="credit_card" />
-                <el-option label="轉帳" value="transfer" />
-              </el-select>
+                placeholder="請選擇付款方式"
+              />
             </el-form-item>
           </div>
           <div class="form-row full-width">
@@ -287,7 +283,7 @@ defineExpose({ visible });
                 placeholder="請選擇取貨方式"
               />
             </el-form-item>
-            <el-form-item label="自備袋" prop="bring_own_bag" class="form-item">
+            <el-form-item label="自備購物袋" prop="bring_own_bag" class="form-item">
               <el-switch v-model="form.bring_own_bag" />
             </el-form-item>
           </div>

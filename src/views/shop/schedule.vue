@@ -467,6 +467,7 @@ watch(calendarVisible, (val) => {
                   </div>
                 </div>
               </div>
+              <div class="order-note">※數字表示已下單數量</div>
             </div>
           </div>
           <div v-if="schedule.items.length === 0" class="empty-orders">
@@ -833,6 +834,11 @@ watch(calendarVisible, (val) => {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+  .order-note {
+    font-size: 14px;
+    color: #64748b;
+    margin-top: 4px;
+  }
 }
 
 .item-card {

@@ -79,7 +79,7 @@ const handleDeleteOrder = () => {
     <!-- 訂單頭部 -->
     <div class="order-header">
       <div class="order-id-section">
-        <div class="order-label">訂單編號</div>
+        <div class="order-label">編號</div>
         <div class="order-id">
           <span class="id-prefix">{{ orderNParts.prefix }}</span>
           <span class="id-highlight">{{ orderNParts.lastThree }}</span>
@@ -138,7 +138,9 @@ const handleDeleteOrder = () => {
             <el-icon><AlarmClock /></el-icon>
             <span></span>
           </div>
-          <span class="info-value pickup-time">{{ order.pickup_time }}</span>
+          <el-tag size="small">
+            {{ order.pickup_time }}
+          </el-tag>
         </div>
       </div>
     </div>
@@ -185,7 +187,8 @@ const handleDeleteOrder = () => {
     <div class="order-footer">
       <div class="bring-bag" v-if="order.bring_own_bag">
         <el-icon class="bag-icon"><ShoppingBag /></el-icon>
-        自備
+
+        <el-tag size="small">自備</el-tag>
       </div>
       <div class="order-total">
         <span class="total-label">總計</span>
@@ -202,7 +205,7 @@ const handleDeleteOrder = () => {
         size="small"
         @click="updateStatus('CANCELLED')"
       >
-        取消訂單
+        取消
       </el-button>
       <el-button
         v-if="order.status === 'PLACED'"
@@ -211,7 +214,7 @@ const handleDeleteOrder = () => {
         size="small"
         @click="updateStatus('COMPLETED')"
       >
-        完成訂單
+        完成
       </el-button>
       <el-button
         v-if="order.status === 'COMPLETED' || order.status === 'CANCELLED'"
@@ -252,7 +255,7 @@ const handleDeleteOrder = () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  // cursor: pointer;
+  //cursor: pointer;
   min-height: 480px;
   height: 100%;
 
@@ -383,13 +386,6 @@ const handleDeleteOrder = () => {
           font-size: 16px;
           color: #94a3b8;
           flex-shrink: 0;
-        }
-
-        .bag-icon {
-          margin-right: 2px;
-          color: currentColor;
-          font-size: 12px;
-          vertical-align: -1px;
         }
       }
     }
@@ -531,29 +527,24 @@ const handleDeleteOrder = () => {
   }
 
   .order-note {
-    padding: 10px 20px;
+    padding: 10px;
     background: #fffbeb;
     border-left: 3px solid #fbbf24;
     margin: 0 20px;
     border-radius: 0 4px 4px 0;
-    min-height: 60px;
+
     display: flex;
     flex-direction: column;
 
     .note-label {
       display: flex;
+      font-size: 12px;
       align-items: center;
-      gap: 6px;
-      font-size: 11px;
+      gap: 4px;
       color: #92400e;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 4px;
-
-      .el-icon {
-        font-size: 14px;
-      }
     }
 
     .note-content {
@@ -597,7 +588,7 @@ const handleDeleteOrder = () => {
       flex-wrap: nowrap;
       align-items: center;
       gap: 2px;
-      font-size: 12px;
+
       justify-content: flex-end;
     }
   }
@@ -611,9 +602,9 @@ const handleDeleteOrder = () => {
 
     .el-button {
       flex: 1;
-      font-size: 16px;
-      padding: 8px 12px !important;
-      height: 36px;
+      font-size: 14px;
+      padding: 6px 12px !important;
+      height: 32px;
     }
 
     .complete {
