@@ -31,12 +31,16 @@ const findScheduleItemByProductId = (productId) => {
 
 // 產品數量追蹤（key 為 product_id，value 為數量）
 const productQuantities = ref({});
+const productIsSliced = ref({});
 
 const form = reactive({
   schedule_id: "",
   customer_name: "",
   customer_phone: "",
+  customer_address: "",
   pickup_time: "",
+  pickup_method: "pickup",
+  bring_own_bag: false,
   note: "",
   payment_method: "cash",
 });
@@ -51,8 +55,25 @@ const rules = {
   customer_phone: [
     { required: true, message: "請輸入顧客電話", trigger: "blur" },
   ],
+  customer_address: [
+    {
+      required: true,
+      message: "請輸入宅配地址",
+      trigger: "blur",
+      validator: (rule, value, callback) => {
+        if (form.pickup_method === "delivery" && !value) {
+          callback(new Error("請輸入宅配地址"));
+        } else {
+          callback();
+        }
+      },
+    },
+  ],
   pickup_time: [
     { required: true, message: "請選擇取貨時間", trigger: "change" },
+  ],
+  pickup_method: [
+    { required: true, message: "請選擇取貨方式", trigger: "change" },
   ],
   payment_method: [
     { required: true, message: "請選擇付款方式", trigger: "change" },
@@ -65,13 +86,17 @@ const resetForm = () => {
     customer_name: "",
     customer_phone: "",
     pickup_time: "",
+    pickup_method: "pickup",
+    bring_own_bag: false,
     note: "",
     payment_method: "cash",
   });
   // 重置所有產品數量為 0
   productQuantities.value = {};
+  productIsSliced.value = {};
   availableProducts.value.forEach((product) => {
     productQuantities.value[product.product_id] = 0;
+    productIsSliced.value[product.product_id] = false;
   });
   nextTick(() => {
     formRef.value?.clearValidate();
@@ -110,6 +135,10 @@ const decrementQuantity = (productId) => {
 // 獲取產品數量
 const getQuantity = (productId) => {
   return productQuantities.value[productId] || 0;
+};
+
+const getIsSliced = (productId) => {
+  return Boolean(productIsSliced.value[productId]);
 };
 
 // 計算已選產品總數
@@ -161,6 +190,7 @@ const handleSubmit = async () => {
             schedule_item_id: product.schedule_item_id,
             product_id: productId,
             quantity: quantity,
+            is_sliced: getIsSliced(productId),
           });
         }
       }
@@ -202,12 +232,7 @@ defineExpose({ open, close });
     append-to-body
     :close-on-click-modal="false"
   >
-    <el-form
-      ref="formRef"
-      :model="form"
-      :rules="rules"
-      label-width="80px"
-    >
+    <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
       <!-- 顧客資訊 -->
       <!-- <el-divider content-position="left">顧客資訊</el-divider> -->
 
@@ -252,6 +277,29 @@ defineExpose({ open, close });
           />
         </el-form-item>
       </div>
+
+      <div class="form-row">
+        <el-form-item label="取貨方式" prop="pickup_method">
+          <SelectPickupMethod
+            v-model="form.pickup_method"
+            placeholder="請選擇取貨方式"
+          />
+        </el-form-item>
+        <el-form-item label="自備袋" prop="bring_own_bag">
+          <el-switch v-model="form.bring_own_bag" />
+        </el-form-item>
+      </div>
+
+      <el-form-item
+        label="宅配地址"
+        prop="customer_address"
+        v-if="form.pickup_method === 'DELIVERY'"
+      >
+        <el-input
+          v-model="form.customer_address"
+          placeholder="請輸入宅配地址"
+        />
+      </el-form-item>
 
       <el-form-item label="訂單備註" prop="note">
         <el-input
@@ -310,6 +358,13 @@ defineExpose({ open, close });
               type="primary"
               plain
               @click="incrementQuantity(product.product_id)"
+            />
+          </div>
+          <div v-if="getQuantity(product.product_id) > 0" class="slice-control">
+            <span>切片</span>
+            <el-switch
+              v-model="productIsSliced[product.product_id]"
+              size="small"
             />
           </div>
         </div>
@@ -423,6 +478,16 @@ defineExpose({ open, close });
     min-width: 28px;
     text-align: center;
   }
+}
+
+.slice-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+  color: #64748b;
+  font-size: 12px;
+  flex-shrink: 0;
 }
 
 :deep(.el-divider__text) {

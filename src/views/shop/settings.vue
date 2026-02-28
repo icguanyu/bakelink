@@ -248,6 +248,7 @@ onMounted(() => {
               placeholder="聯絡信箱"
               maxlength="50"
               show-word-limit
+              disabled
             />
           </el-form-item>
           <el-form-item label="地址">

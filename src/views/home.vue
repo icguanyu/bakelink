@@ -45,9 +45,7 @@ const handleLogin = async () => {
 <template>
   <div class="login">
     <div class="login__card">
-      <!-- <div class="login__brand">
-        <img src="@/assets/images/image.jpg" alt="Bakelink" />
-      </div> -->
+      <div class="login__brand"></div>
       <div class="login__title">登入</div>
       <div class="login__subtitle">請使用你的帳號與密碼</div>
       <el-form
@@ -84,9 +82,9 @@ const handleLogin = async () => {
         >
           登入
         </el-button>
-        <el-button class="login__ghost" type="default" size="large">
+        <!-- <el-button class="login__ghost" type="default" size="large">
           忘記密碼
-        </el-button>
+        </el-button> -->
       </el-form>
     </div>
   </div>
@@ -123,13 +121,13 @@ const handleLogin = async () => {
 .login__brand {
   display: flex;
   justify-content: center;
-  margin-bottom: 16px;
-  img {
-    width: 140px;
-    height: 140px;
-    object-fit: cover;
-    border-radius: 18px;
-  }
+  margin: 0 auto;
+  background-image: url("@/assets/images/logo.png");
+  background-size: 140%;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 80px;
+  height: 80px;
 }
 
 .login__title {

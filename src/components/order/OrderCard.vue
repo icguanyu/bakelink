@@ -108,6 +108,21 @@ const handleDeleteOrder = () => {
           <el-tag size="small" type="info">{{
             getPaymentLabel(order.payment_method)
           }}</el-tag>
+
+          <el-tag
+            size="small"
+            type="success"
+            v-if="order.pickup_method === 'pickup'"
+          >
+            自取
+          </el-tag>
+          <el-tag
+            size="small"
+            type="warning"
+            v-if="order.pickup_method === 'delivery'"
+          >
+            宅配
+          </el-tag>
         </div>
       </div>
       <div v-if="viewMode === 'detailed'" class="customer-right">
@@ -144,7 +159,10 @@ const handleDeleteOrder = () => {
       </div>
       <div class="items-list">
         <div v-for="(item, idx) in order.items" :key="idx" class="order-item">
-          <span class="item-name">{{ item.product_name }}</span>
+          <span class="item-name">
+            {{ item.product_name }}
+            <el-tag v-if="item.is_sliced" size="small">切</el-tag>
+          </span>
           <span class="item-quantity">× {{ item.quantity }}</span>
           <span class="item-price">{{ $formatPrice(item.line_total) }}</span>
         </div>
@@ -165,6 +183,10 @@ const handleDeleteOrder = () => {
 
     <!-- 訂單底部 -->
     <div class="order-footer">
+      <div class="bring-bag" v-if="order.bring_own_bag">
+        <el-icon class="bag-icon"><ShoppingBag /></el-icon>
+        自備
+      </div>
       <div class="order-total">
         <span class="total-label">總計</span>
         <span class="total-amount">{{ $formatPrice(order.total_amount) }}</span>
@@ -230,7 +252,7 @@ const handleDeleteOrder = () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  cursor: pointer;
+  // cursor: pointer;
   min-height: 480px;
   height: 100%;
 
@@ -362,6 +384,13 @@ const handleDeleteOrder = () => {
           color: #94a3b8;
           flex-shrink: 0;
         }
+
+        .bag-icon {
+          margin-right: 2px;
+          color: currentColor;
+          font-size: 12px;
+          vertical-align: -1px;
+        }
       }
     }
 
@@ -478,6 +507,9 @@ const handleDeleteOrder = () => {
         .item-name {
           color: #334155;
           font-weight: 500;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
         }
 
         .item-quantity {
@@ -533,12 +565,13 @@ const handleDeleteOrder = () => {
 
   .order-footer {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
     background: linear-gradient(to bottom, white 0%, #fafbfc 100%);
 
     .order-total {
+      margin-left: auto;
       display: flex;
       align-items: center;
       gap: 2px;
@@ -558,6 +591,14 @@ const handleDeleteOrder = () => {
         font-family: "Courier New", monospace;
         line-height: 1;
       }
+    }
+    .bring-bag {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 2px;
+      font-size: 12px;
+      justify-content: flex-end;
     }
   }
 
@@ -600,12 +641,6 @@ const handleDeleteOrder = () => {
         width: initial;
         gap: 2px;
       }
-    }
-    .order-footer {
-      justify-content: flex-start;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
     }
   }
 }

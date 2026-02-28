@@ -297,7 +297,7 @@ watch(selectedDate, (val) => {
             plain
             @click="viewMode = viewMode === 'detailed' ? 'simple' : 'detailed'"
           >
-            {{ viewMode === "detailed" ? "詳細模式" : "簡易模式" }}
+            {{ viewMode === "detailed" ? "簡易模式" : "詳細模式" }}
           </el-button>
 
           <el-button icon="Back" @click="setToday"> 回到今天 </el-button>

@@ -4,16 +4,34 @@ import axios from "axios";
 import { Auth, Users } from "@/api/auth";
 
 const TOKEN_KEY = "bakelink-token";
+const USER_KEY = "bakelink-user";
 
 export const useAuthStore = defineStore("auth", () => {
   const token = ref(localStorage.getItem(TOKEN_KEY) || "");
-  const user = ref(null);
+  const user = ref(
+    (() => {
+      try {
+        return JSON.parse(localStorage.getItem(USER_KEY)) || null;
+      } catch {
+        return null;
+      }
+    })()
+  );
   const loading = ref(false);
 
   const setToken = (value) => {
     token.value = value;
     localStorage.setItem(TOKEN_KEY, value);
     axios.defaults.headers.common["Authorization"] = `Bearer ${value}`;
+  };
+
+  const setUser = (userObj) => {
+    user.value = userObj;
+    if (userObj) {
+      localStorage.setItem(USER_KEY, JSON.stringify(userObj));
+    } else {
+      localStorage.removeItem(USER_KEY);
+    }
   };
 
   const login = async ({ email, password }) => {
@@ -28,10 +46,8 @@ export const useAuthStore = defineStore("auth", () => {
         throw new Error("登入失敗，未取得 token");
       }
       setToken(newToken);
-      
       // 取得用戶資訊
       await fetchUser();
-      
       return newToken;
     } finally {
       loading.value = false;
@@ -41,16 +57,16 @@ export const useAuthStore = defineStore("auth", () => {
   const fetchUser = async () => {
     try {
       const res = await Users.Me();
-      console.log('fetchUser response:', res);
-      user.value = res.data;
+      setUser(res.data);
     } catch (error) {
+      setUser(null);
       console.error("fetch user error:", error);
     }
   };
 
   const logout = () => {
     token.value = "";
-    user.value = null;
+    setUser(null);
     localStorage.removeItem(TOKEN_KEY);
     delete axios.defaults.headers.common["Authorization"];
   };
@@ -62,5 +78,6 @@ export const useAuthStore = defineStore("auth", () => {
     login,
     logout,
     fetchUser,
+    setUser,
   };
 });

@@ -35,11 +35,11 @@ onMounted(() => {
 
 <template>
   <aside>
-    <div class="date-box">
+    <!-- <div class="date-box">
       <div class="year">{{ currentYear }}</div>
       <div class="month">{{ currentMonth }}</div>
       <div class="date">{{ currentDate }}</div>
-    </div>
+    </div> -->
     <!-- <router-link class="link" to="/shop">
       <div class="icon">
         <img src="@/assets/images/icons/home.png" alt="" />
@@ -95,7 +95,7 @@ aside {
   background-color: #1c2345;
   display: flex;
   flex-direction: column;
-  padding: 8px 0;
+
   gap: 8px;
   overflow: hidden;
   transition:
@@ -134,7 +134,6 @@ aside {
       color: #fff;
     }
   }
-
   .link {
     position: relative;
     display: flex;
@@ -180,6 +179,7 @@ aside {
     margin-top: auto;
     text-align: center;
     cursor: pointer;
+    padding: 8px 16px;
     img {
       width: 36px;
       height: 36px;

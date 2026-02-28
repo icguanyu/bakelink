@@ -428,7 +428,7 @@ watch(calendarVisible, (val) => {
               <div class="stat-value">
                 {{ $formatPrice(selectedDateStats.total_amount) }}
               </div>
-              <div class="stat-label">營收</div>
+              <div class="stat-label">總額</div>
             </div>
           </div>
         </div>
@@ -447,13 +447,19 @@ watch(calendarVisible, (val) => {
                 :key="product.id"
                 class="item-card"
               >
-                <div class="item-thumb">
-                  <img
-                    v-if="product.image_url"
-                    :src="product.image_url"
-                    :alt="product.product_name"
-                  />
-                </div>
+                <el-badge
+                  :hidden="(product.ordered_quantity ?? 0) === 0"
+                  :value="`${product.ordered_quantity ?? 0}`"
+                  class="item-demand-badge"
+                >
+                  <div class="item-thumb">
+                    <img
+                      v-if="product.image_url"
+                      :src="product.image_url"
+                      :alt="product.product_name"
+                    />
+                  </div>
+                </el-badge>
                 <div class="item-info">
                   <div class="item-name">{{ product.product_name }}</div>
                   <div class="item-price">
@@ -864,6 +870,19 @@ watch(calendarVisible, (val) => {
   }
 }
 
+.item-demand-badge {
+  flex-shrink: 0;
+
+  :deep(.el-badge__content) {
+    border: none;
+    font-weight: 600;
+    padding: 0 6px;
+    min-width: auto;
+    height: 18px;
+    line-height: 18px;
+  }
+}
+
 .item-name {
   font-weight: 600;
   color: #1e293b;
@@ -884,6 +903,9 @@ watch(calendarVisible, (val) => {
   gap: 2px;
   min-width: 0;
   flex: 1;
+}
+.item-ordered-quantity {
+  display: none;
 }
 
 // 訂單區塊

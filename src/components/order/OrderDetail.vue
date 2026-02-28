@@ -1,5 +1,6 @@
-<script setup>
+﻿<script setup>
 import { ref, computed, reactive } from "vue";
+import SelectPickupMethod from "@/components/select/SelectPickupMethod.vue";
 import { ElMessageBox, ElMessage, ElNotification } from "element-plus";
 import { Orders } from "@/api/orders";
 
@@ -26,7 +27,10 @@ const form = reactive({
   items: [],
   customer_name: "",
   customer_phone: "",
+  customer_address: "",
   pickup_time: "",
+  pickup_method: "pickup",
+  bring_own_bag: false,
   note: "",
   payment_method: "",
 });
@@ -55,7 +59,10 @@ const initializeForm = () => {
     : [];
   form.customer_name = props.order?.customer_name || "";
   form.customer_phone = props.order?.customer_phone || "";
+  form.customer_address = props.order?.customer_address || "";
   form.pickup_time = props.order?.pickup_time || "";
+  form.pickup_method = props.order?.pickup_method || "pickup";
+  form.bring_own_bag = Boolean(props.order?.bring_own_bag);
   form.note = props.order?.note || "";
   form.payment_method = props.order?.payment_method || "";
 };
@@ -65,14 +72,21 @@ initializeForm();
 
 // 按 productId 取得數量
 const getItemQuantity = (productId) => {
-  return form.items.find((item) => item.product_id === productId)?.quantity || 0;
+  return (
+    form.items.find((item) => item.product_id === productId)?.quantity || 0
+  );
 };
+
+// 取得產品項目物件
+function getItemByProductId(productId) {
+  return form.items.find((item) => item.product_id === productId) || {};
+}
 
 // 按 productId 更新數量
 const updateProductQuantity = (productId, delta) => {
   const item = form.items.find((item) => item.product_id === productId);
   if (!item) return;
-  
+
   const newQuantity = item.quantity + delta;
   if (newQuantity > 0) {
     item.quantity = newQuantity;
@@ -96,9 +110,7 @@ const toggleProduct = (productId) => {
   );
   if (!product) return;
 
-  const existingItem = form.items.find(
-    (item) => item.product_id === productId,
-  );
+  const existingItem = form.items.find((item) => item.product_id === productId);
 
   if (existingItem) {
     existingItem.quantity += 1;
@@ -109,6 +121,7 @@ const toggleProduct = (productId) => {
       unit_price: product.unit_price,
       image_url: product.image_url,
       quantity: 1,
+      is_sliced: false,
     });
   }
 };
@@ -264,6 +277,36 @@ defineExpose({ visible });
             </el-form-item>
           </div>
           <div class="form-row full-width">
+            <el-form-item
+              label="取貨方式"
+              prop="pickup_method"
+              class="form-item"
+            >
+              <SelectPickupMethod
+                v-model="form.pickup_method"
+                placeholder="請選擇取貨方式"
+              />
+            </el-form-item>
+            <el-form-item label="自備袋" prop="bring_own_bag" class="form-item">
+              <el-switch v-model="form.bring_own_bag" />
+            </el-form-item>
+          </div>
+          <div
+            class="form-row full-width"
+            v-if="form.pickup_method === 'delivery'"
+          >
+            <el-form-item
+              label="宅配地址"
+              prop="customer_address"
+              class="form-item full-width"
+            >
+              <el-input
+                v-model="form.customer_address"
+                placeholder="請輸入宅配地址"
+              />
+            </el-form-item>
+          </div>
+          <div class="form-row full-width">
             <el-form-item label="備註" prop="note" class="form-item full-width">
               <el-input
                 v-model="form.note"
@@ -290,30 +333,42 @@ defineExpose({ visible });
             :class="{ 'not-selected': !getItemQuantity(product.product_id) }"
           >
             <div class="item-thumb">
-              <img v-if="product.image_url" :src="product.image_url" :alt="product.product_name" />
+              <img
+                v-if="product.image_url"
+                :src="product.image_url"
+                :alt="product.product_name"
+              />
             </div>
             <div class="item-name">{{ product.product_name }}</div>
             <div class="item-price">{{ $formatPrice(product.unit_price) }}</div>
-            
+
             <template v-if="getItemQuantity(product.product_id) > 0">
               <div class="quantity-control">
                 <el-button
                   :icon="'Minus'"
                   circle
-                  size="small"
                   @click="updateProductQuantity(product.product_id, -1)"
                 />
-                <span class="quantity-display">{{ getItemQuantity(product.product_id) }}</span>
+                <span class="quantity-display">{{
+                  getItemQuantity(product.product_id)
+                }}</span>
                 <el-button
                   :icon="'Plus'"
                   circle
-                  size="small"
                   type="primary"
                   plain
                   @click="updateProductQuantity(product.product_id, 1)"
                 />
               </div>
+              <div class="slice-control">
+                <span>切片</span>
+                <el-switch
+                  v-model="getItemByProductId(product.product_id).is_sliced"
+                  size="small"
+                />
+              </div>
             </template>
+
             <el-button
               v-else
               type="primary"
@@ -325,7 +380,9 @@ defineExpose({ visible });
           </div>
         </div>
 
-        <div v-if="availableItems.length === 0" class="no-items">沒有可訂購的產品</div>
+        <div v-if="availableItems.length === 0" class="no-items">
+          沒有可訂購的產品
+        </div>
       </div>
 
       <!-- 總金額 -->
@@ -485,8 +542,8 @@ defineExpose({ visible });
 
         .item-thumb {
           flex-shrink: 0;
-          width: 40px;
-          height: 40px;
+          width: 60px;
+          height: 60px;
           border-radius: 4px;
           background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
           border: 1px solid #e2e8f0;
@@ -531,6 +588,16 @@ defineExpose({ visible });
             min-width: 28px;
             text-align: center;
           }
+        }
+
+        .slice-control {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-left: 6px;
+          color: #64748b;
+          font-size: 12px;
+          flex-shrink: 0;
         }
       }
     }
