@@ -63,6 +63,10 @@ const dateStats = computed(() => {
   };
 });
 
+// 日期星期顯示
+const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+const dayName = computed(() => `週${dayNames[dayjs(selectedDate.value).day()]}`);
+
 // 日期顯示標籤
 const dateLabel = computed(() => {
   const today = dayjs().format("YYYY-MM-DD");
@@ -283,24 +287,27 @@ watch(selectedDate, (val) => {
           <p class="subtitle">查看與管理每日訂單，追蹤訂單狀態</p>
         </div>
         <div class="header-actions">
-          <el-button
-            :icon="showStats ? 'View' : 'Hide'"
-            :type="showStats ? 'primary' : 'default'"
-            plain
-            @click="showStats = !showStats"
-          >
-            {{ showStats ? "顯示統計" : "隱藏統計" }}
-          </el-button>
-          <el-button
-            :icon="viewMode === 'detailed' ? 'Document' : 'List'"
-            :type="viewMode === 'detailed' ? 'primary' : 'default'"
-            plain
-            @click="viewMode = viewMode === 'detailed' ? 'simple' : 'detailed'"
-          >
-            {{ viewMode === "detailed" ? "簡易模式" : "詳細模式" }}
-          </el-button>
-
-          <el-button icon="Back" @click="setToday"> 回到今天 </el-button>
+          <div class="view-toggles">
+            <button
+              class="toggle-btn"
+              :class="{ active: showStats }"
+              @click="showStats = !showStats"
+              :title="showStats ? '隱藏統計' : '顯示統計'"
+            >
+              <el-icon><DataLine /></el-icon>
+              <span>統計</span>
+            </button>
+            <button
+              class="toggle-btn"
+              :class="{ active: viewMode === 'detailed' }"
+              @click="viewMode = viewMode === 'detailed' ? 'simple' : 'detailed'"
+              :title="viewMode === 'detailed' ? '切換簡易' : '切換詳細'"
+            >
+              <el-icon><Document /></el-icon>
+              <span>詳細</span>
+            </button>
+          </div>
+          <el-button size="small" @click="setToday">回今天</el-button>
           <el-button
             type="primary"
             icon="Plus"
@@ -317,7 +324,7 @@ watch(selectedDate, (val) => {
       <div class="stat-card">
         <div
           class="stat-icon"
-          style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+          style="background: #764ba2"
         >
           <el-icon><Calendar /></el-icon>
         </div>
@@ -329,7 +336,7 @@ watch(selectedDate, (val) => {
       <div class="stat-card">
         <div
           class="stat-icon"
-          style="background: linear-gradient(135deg, #84d5ff 0%, #4f82f1 100%)"
+          style="background: #4f82f1"
         >
           <el-icon><Clock /></el-icon>
         </div>
@@ -341,7 +348,7 @@ watch(selectedDate, (val) => {
       <div class="stat-card">
         <div
           class="stat-icon"
-          style="background: linear-gradient(135deg, #8fe3ad 0%, #23c52f 100%)"
+          style="background: #22a94a"
         >
           <el-icon><CircleCheck /></el-icon>
         </div>
@@ -353,7 +360,7 @@ watch(selectedDate, (val) => {
       <div class="stat-card">
         <div
           class="stat-icon"
-          style="background: linear-gradient(135deg, #ffb6b6 0%, #ff314d 100%)"
+          style="background: #f43f5e"
         >
           <el-icon><Warning /></el-icon>
         </div>
@@ -365,7 +372,7 @@ watch(selectedDate, (val) => {
       <div class="stat-card highlight">
         <div
           class="stat-icon"
-          style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%)"
+          style="background: #fa709a"
         >
           <el-icon><Money /></el-icon>
         </div>
@@ -378,7 +385,7 @@ watch(selectedDate, (val) => {
 
     <!-- 日期選擇與搜尋 -->
     <div class="toolbar">
-      <div class="date-selector">
+      <div class="date-nav">
         <el-button
           icon="ArrowLeft"
           circle
@@ -386,13 +393,17 @@ watch(selectedDate, (val) => {
           :loading="loading"
           @click="goPreviousDay"
         />
-        <el-date-picker
-          v-model="selectedDate"
-          type="date"
-          placeholder="選擇日期"
-          format="YYYY/MM/DD"
-          value-format="YYYY-MM-DD"
-        />
+        <div class="date-picker-wrap">
+          <span class="weekday-label">{{ dayName }}</span>
+          <el-date-picker
+            v-model="selectedDate"
+            type="date"
+            placeholder="選擇日期"
+            format="YYYY/MM/DD"
+            value-format="YYYY-MM-DD"
+            :clearable="false"
+          />
+        </div>
         <el-button
           icon="ArrowRight"
           circle
@@ -401,19 +412,14 @@ watch(selectedDate, (val) => {
           @click="goNextDay"
         />
       </div>
-      <div style="display: flex; gap: 8px; align-items: center">
-        <el-input
-          v-model="searchQuery"
-          placeholder="搜尋編號、姓名、電話..."
-          prefix-icon="Search"
-          style="max-width: 280px"
-        />
-        <el-button
-          icon="Refresh"
-          @click="clearSearch"
-          :disabled="!searchQuery"
-        />
-      </div>
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜尋姓名、電話、編號"
+        prefix-icon="Search"
+        clearable
+        style="max-width: 260px"
+        @clear="clearSearch"
+      />
     </div>
 
     <!-- 狀態分類標籤 -->
@@ -544,12 +550,23 @@ watch(selectedDate, (val) => {
 
 <style scoped lang="scss">
 @use "@/assets/scss/scrollbar.scss" as *;
+
+// ── 色彩變數 ──────────────────────────────────────────────
+$accent:        #3b82f6;
+$accent-light:  #eff6ff;
+$text-primary:  #1e293b;
+$text-secondary:#64748b;
+$border:        #e2e8f0;
+$bg-page:       #f8fafc;
+$bg-card:       #ffffff;
+
 .order-manager {
   padding: 16px;
-  background: #f8fafc;
+  background: $bg-page;
   min-height: 100vh;
 }
 
+// ── 頂部標題 ────────────────────────────────────────────
 .order-header {
   margin-bottom: 12px;
 
@@ -560,54 +577,93 @@ watch(selectedDate, (val) => {
     gap: 20px;
 
     h2 {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 700;
-      color: #1e293b;
-      margin: 0 0 8px 0;
+      color: $text-primary;
+      margin: 0 0 4px 0;
+      letter-spacing: -0.3px;
     }
 
     .subtitle {
       font-size: 13px;
-      color: #64748b;
+      color: $text-secondary;
       margin: 0;
     }
   }
 
   .header-actions {
     display: flex;
-    gap: 6px;
+    align-items: center;
+    gap: 8px;
     flex-shrink: 0;
+
     .el-button {
       margin: 0;
-      height: 40px;
-      padding: 0 14px;
-      font-size: 14px;
-      font-weight: 600;
+    }
+
+    .view-toggles {
+      display: flex;
+      border: 1px solid $border;
+      border-radius: 8px;
+      overflow: hidden;
+      background: $bg-card;
+    }
+
+    .toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      color: $text-secondary;
+      transition: all 0.15s;
+
+      & + .toggle-btn {
+        border-left: 1px solid $border;
+      }
+
+      &:hover {
+        background: #f8fafc;
+        color: $text-primary;
+      }
+
+      &.active {
+        background: $accent-light;
+        color: $accent;
+        font-weight: 600;
+      }
+
+      .el-icon {
+        font-size: 14px;
+      }
     }
   }
 }
 
-// 統計卡片
+// ── 統計卡片 ────────────────────────────────────────────
 .stats-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 12px;
 }
 
 .stat-card {
-  background: white;
-  border-radius: 12px;
+  background: $bg-card;
+  border-radius: 10px;
   padding: 12px;
   display: flex;
   align-items: center;
   gap: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  border: 1px solid $border;
+  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.06);
+  transition: box-shadow 0.2s ease;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 3px 8px rgba(28, 25, 23, 0.1);
   }
 
   &.highlight {
@@ -615,14 +671,14 @@ watch(selectedDate, (val) => {
   }
 
   .stat-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 24px;
+    font-size: 20px;
     flex-shrink: 0;
   }
 
@@ -631,46 +687,79 @@ watch(selectedDate, (val) => {
     min-width: 0;
 
     .stat-value {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 700;
-      color: #1e293b;
+      color: $text-primary;
       line-height: 1;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
     .stat-label {
       font-size: 12px;
-      color: #64748b;
+      color: $text-secondary;
       font-weight: 500;
     }
   }
 }
 
-// 工具列
+// ── 工具列 ──────────────────────────────────────────────
 .toolbar {
   display: flex;
-  justify-content: flex-start;
   align-items: center;
   margin-bottom: 12px;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 
-  .date-selector {
+  .date-nav {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 12px;
+    gap: 6px;
 
     .el-button[circle] {
       flex-shrink: 0;
-      border: 1px solid #e2e8f0;
-      width: 36px;
-      height: 36px;
+      border: 1px solid $border;
+      width: 32px;
+      height: 32px;
+    }
+
+    .date-picker-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: $bg-card;
+      border: 1px solid $border;
+      border-radius: 8px;
+      overflow: hidden;
+
+      .weekday-label {
+        padding: 0 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: $accent;
+        white-space: nowrap;
+        border-right: 1px solid $border;
+        height: 32px;
+        display: flex;
+        align-items: center;
+      }
+
+      :deep(.el-date-editor.el-input) {
+        border: none;
+        box-shadow: none;
+        border-radius: 0;
+        width: 130px;
+
+        .el-input__wrapper {
+          box-shadow: none !important;
+          border-radius: 0;
+          padding: 0 8px;
+        }
+      }
     }
   }
 }
 
-// 狀態標籤
+// ── 狀態標籤 ────────────────────────────────────────────
 .status-tabs {
   display: flex;
   gap: 6px;
@@ -679,12 +768,12 @@ watch(selectedDate, (val) => {
   padding-bottom: 4px;
 
   &::-webkit-scrollbar {
-    height: 6px;
+    height: 4px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
+    background: $border;
+    border-radius: 2px;
   }
 }
 
@@ -692,57 +781,59 @@ watch(selectedDate, (val) => {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  padding: 7px 14px;
+  background: $bg-card;
+  border: 1px solid $border;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   white-space: nowrap;
   flex-shrink: 0;
 
   &:hover {
-    border-color: #cbd5e1;
-    background: #f8fafc;
+    background: #fafaf9;
+    border-color: #d6d3d1;
   }
 
   &.active {
-    border-color: #3b82f6;
-    background: #eff6ff;
+    border-color: $accent;
+    background: $accent-light;
 
     .tab-label {
-      color: #3b82f6;
+      color: $accent;
       font-weight: 600;
     }
   }
 
   .tab-label {
-    font-size: 16px;
-    color: #475569;
+    font-size: 14px;
+    color: $text-secondary;
     font-weight: 500;
   }
 
   .tab-count {
-    padding: 2px 8px;
+    padding: 1px 7px;
     border-radius: 10px;
     color: white;
+    font-size: 12px;
     font-weight: 700;
-    min-width: 24px;
+    min-width: 22px;
     text-align: center;
   }
 
   .tab-count-all {
-    padding: 2px 8px;
+    padding: 1px 7px;
     border-radius: 10px;
-    background: #e2e8f0;
-    color: #475569;
+    background: #e7e5e4;
+    color: $text-secondary;
+    font-size: 12px;
     font-weight: 700;
-    min-width: 24px;
+    min-width: 22px;
     text-align: center;
   }
 }
 
-// 訂單網格
+// ── 訂單網格 ────────────────────────────────────────────
 .orders-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -754,15 +845,13 @@ watch(selectedDate, (val) => {
   scroll-margin-top: 80px;
 }
 
-// 訂單骨架屏
+// ── 訂單骨架屏 ──────────────────────────────────────────
 .order-skeleton {
-  background: white;
+  background: $bg-card;
   border-radius: 0;
   padding: 20px;
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.08),
-    0 1px 2px rgba(0, 0, 0, 0.04);
-  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(28, 25, 23, 0.08);
+  border: 1px solid $border;
   min-height: 480px;
 
   .skeleton-header {
@@ -781,7 +870,7 @@ watch(selectedDate, (val) => {
 
   .skeleton-divider {
     height: 1px;
-    background: #e2e8f0;
+    background: $border;
     margin: 16px 0;
   }
 
@@ -806,6 +895,7 @@ watch(selectedDate, (val) => {
   }
 }
 
+// ── 快速錨點導覽 ────────────────────────────────────────
 .order-anchor-nav {
   position: fixed;
   right: 8px;
@@ -819,8 +909,9 @@ watch(selectedDate, (val) => {
   align-items: center;
   gap: 3px;
   padding: 6px 4px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid $border;
   border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(6px);
   @include scrollbar(
     rgba(192, 192, 192, 0.7),
@@ -828,32 +919,33 @@ watch(selectedDate, (val) => {
     rgba(133, 133, 133, 0.08)
   );
   .anchor-item {
-    width: 40px;
-    height: 26px;
+    width: 38px;
+    height: 24px;
     flex-shrink: 0;
     border-radius: 4px;
-    border: 1px solid #cbd5e1;
-    background: #fff;
-    color: #334155;
-    font-size: 13px;
+    border: 1px solid $border;
+    background: $bg-card;
+    color: $text-secondary;
+    font-size: 12px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
   }
 
   .anchor-item:hover {
-    border-color: #3b82f6;
-    color: #1d4ed8;
+    border-color: $accent;
+    color: $accent;
+    background: $accent-light;
   }
 
   .anchor-ellipsis {
     font-size: 12px;
-    color: #94a3b8;
+    color: #a8a29e;
     line-height: 1;
   }
 }
 
-// 空狀態
+// ── 空狀態 ──────────────────────────────────────────────
 .empty-state {
   grid-column: 1 / -1;
   display: flex;
@@ -863,28 +955,21 @@ watch(selectedDate, (val) => {
   padding: 60px 20px;
 
   .empty-icon {
-    font-size: 64px;
-    color: #cbd5e1;
-    margin-bottom: 16px;
+    font-size: 56px;
+    color: #d6d3d1;
+    margin-bottom: 14px;
   }
 
   .empty-text {
-    font-size: 16px;
-    color: #94a3b8;
+    font-size: 15px;
+    color: #a8a29e;
+    text-align: center;
+    max-width: 320px;
+    line-height: 1.6;
   }
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.85;
-  }
-}
-
-// 響應式
+// ── 響應式 ──────────────────────────────────────────────
 @media (max-width: 768px) {
   .order-manager {
     padding: 10px 4%;
@@ -972,16 +1057,16 @@ watch(selectedDate, (val) => {
   }
 
   .stat-card {
-    padding: 16px;
+    padding: 14px;
 
     .stat-icon {
-      width: 48px;
-      height: 48px;
-      font-size: 20px;
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
     }
 
     .stat-content .stat-value {
-      font-size: 24px;
+      font-size: 22px;
     }
   }
 }

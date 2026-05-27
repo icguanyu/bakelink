@@ -374,62 +374,40 @@ watch(calendarVisible, (val) => {
               circle
               plain
               type="primary"
+              :title="isEditorOpen ? '關閉編輯' : '編輯排程'"
               @click="isEditorOpen ? closeEditor() : openEditor(schedule)"
             >
               <el-icon v-if="isEditorOpen"><Close /></el-icon>
-              <el-icon v-else><More /></el-icon>
+              <el-icon v-else><Edit /></el-icon>
             </el-button>
           </div>
         </div>
 
-        <!-- 統計信息卡片 -->
-        <div v-if="selectedDateStats" class="stats-grid">
-          <div class="stat-item">
-            <div class="stat-icon" style="color: #3b82f6">
-              <el-icon><ShoppingCart /></el-icon>
-            </div>
-            <div class="stat-text">
-              <div class="stat-value">{{ selectedDateStats.total }}</div>
-              <div class="stat-label">訂單</div>
-            </div>
+        <!-- 統計列 -->
+        <div v-if="selectedDateStats" class="stats-row">
+          <div class="stat-pill">
+            <span class="pill-num">{{ selectedDateStats.total }}</span>
+            <span class="pill-label">訂單</span>
           </div>
-          <div class="stat-item">
-            <div class="stat-icon" style="color: #3b82f6">
-              <el-icon><CircleCheck /></el-icon>
-            </div>
-            <div class="stat-text">
-              <div class="stat-value">{{ selectedDateStats.ordered }}</div>
-              <div class="stat-label">已下單</div>
-            </div>
+          <div class="pill-divider"></div>
+          <div class="stat-pill">
+            <span class="pill-num blue">{{ selectedDateStats.ordered }}</span>
+            <span class="pill-label">已下單</span>
           </div>
-          <div class="stat-item">
-            <div class="stat-icon" style="color: #10b981">
-              <el-icon><SuccessFilled /></el-icon>
-            </div>
-            <div class="stat-text">
-              <div class="stat-value">{{ selectedDateStats.completed }}</div>
-              <div class="stat-label">已完成</div>
-            </div>
+          <div class="pill-divider"></div>
+          <div class="stat-pill">
+            <span class="pill-num green">{{ selectedDateStats.completed }}</span>
+            <span class="pill-label">已完成</span>
           </div>
-          <div class="stat-item">
-            <div class="stat-icon" style="color: #ef4444">
-              <el-icon><Close /></el-icon>
-            </div>
-            <div class="stat-text">
-              <div class="stat-value">{{ selectedDateStats.cancelled }}</div>
-              <div class="stat-label">已取消</div>
-            </div>
+          <div class="pill-divider"></div>
+          <div class="stat-pill">
+            <span class="pill-num red">{{ selectedDateStats.cancelled }}</span>
+            <span class="pill-label">已取消</span>
           </div>
-          <div class="stat-item highlight">
-            <div class="stat-icon" style="color: #f59e0b">
-              <el-icon><Money /></el-icon>
-            </div>
-            <div class="stat-text">
-              <div class="stat-value">
-                {{ $formatPrice(selectedDateStats.total_amount) }}
-              </div>
-              <div class="stat-label">總額</div>
-            </div>
+          <div class="pill-divider"></div>
+          <div class="stat-pill">
+            <span class="pill-num amber">{{ $formatPrice(selectedDateStats.total_amount) }}</span>
+            <span class="pill-label">營收</span>
           </div>
         </div>
 
@@ -720,60 +698,52 @@ watch(calendarVisible, (val) => {
   height: 36px;
 }
 
-.stats-grid {
+.stats-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 8px;
-  background: white;
+  align-items: center;
+  padding: 10px 16px;
+  background: #f8fafc;
   border-top: 1px solid #e2e8f0;
   border-bottom: 1px solid #e2e8f0;
 }
 
-.stat-item {
+.stat-pill {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-width: 80px;
-  padding: 8px 6px;
-  background: #f8fafc;
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
-  text-align: center;
-  min-height: 60px;
+  gap: 2px;
+  min-width: 0;
 
-  &.highlight {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border-color: #fbbf24;
-  }
-
-  .stat-icon {
-    flex-shrink: 0;
-    font-size: 18px;
+  .pill-num {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
     line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+
+    &.blue  { color: #2563eb; }
+    &.green { color: #16a34a; }
+    &.red   { color: #dc2626; }
+    &.amber { color: #d97706; font-size: 14px; }
   }
 
-  .stat-text {
-    min-width: 0;
-    width: 100%;
-
-    .stat-value {
-      font-size: 24px;
-      color: #1e293b;
-      line-height: 1.2;
-      word-break: break-word;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: #64748b;
-      margin-top: 2px;
-      white-space: nowrap;
-    }
+  .pill-label {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 500;
   }
+}
+
+.pill-divider {
+  width: 1px;
+  height: 28px;
+  background: #e2e8f0;
+  flex-shrink: 0;
+  margin: 0 2px;
 }
 
 .detail-content {
@@ -844,25 +814,25 @@ watch(calendarVisible, (val) => {
 .item-card {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   padding: 6px 8px;
-  background: #f8fafc;
+  background: white;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
-  transition: all 0.2s ease;
+  transition: border-color 0.15s, box-shadow 0.15s;
 
   &:hover {
-    background: #f1f5f9;
     border-color: #cbd5e1;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   }
 }
 
 .item-thumb {
   flex-shrink: 0;
-  width: 60px;
-  height: 60px;
+  width: 56px;
+  height: 56px;
   border-radius: 4px;
-  background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
+  background: #f1f5f9;
   border: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
@@ -1090,25 +1060,13 @@ watch(calendarVisible, (val) => {
     }
   }
 
-  .stats-grid {
-    gap: 4px;
-    padding: 6px;
+  .stats-row {
+    padding: 8px 10px;
   }
 
-  .stat-item {
-    min-width: 70px;
-    padding: 6px 4px;
-    min-height: 50px;
-
-    .stat-text {
-      .stat-value {
-        font-size: 20px;
-      }
-
-      .stat-label {
-        font-size: 11px;
-      }
-    }
+  .stat-pill .pill-num {
+    font-size: 16px;
+    &.amber { font-size: 12px; }
   }
 }
 </style>

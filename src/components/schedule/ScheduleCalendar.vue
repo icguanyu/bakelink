@@ -1,4 +1,8 @@
 <script setup>
+import dayjs from "dayjs";
+
+const today = dayjs().format("YYYY-MM-DD");
+
 const props = defineProps({
   scheduleList: {
     type: Array,
@@ -15,67 +19,52 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["select"]);
-
-const selectDate = (date) => {
-  emit("select", date);
-};
+const selectDate = (date) => emit("select", date);
 </script>
 
 <template>
-  <div class="schedule-right-body">
-    <div class="schedule-week-header">
-      <div class="week-day">日</div>
-      <div class="week-day">一</div>
-      <div class="week-day">二</div>
-      <div class="week-day">三</div>
-      <div class="week-day">四</div>
-      <div class="week-day">五</div>
-      <div class="week-day">六</div>
+  <div class="schedule-calendar">
+    <div class="week-header">
+      <span
+        v-for="d in ['日', '一', '二', '三', '四', '五', '六']"
+        :key="d"
+        class="week-label"
+        >{{ d }}</span
+      >
     </div>
-    <div class="schedule-list">
+    <div class="calendar-grid">
       <div
         v-for="schedule in scheduleList"
         :key="schedule.date"
-        class="schedule-item"
+        class="cal-cell"
         :class="{
-          'item-selected': selectedDate === schedule.date,
-          'not-current-month': !schedule.isCurrentMonth,
+          'is-selected': selectedDate === schedule.date,
+          'is-today': schedule.date === today,
+          'is-other-month': !schedule.isCurrentMonth,
+          'has-schedule': schedule.hasSchedule,
         }"
         @click="selectDate(schedule.date)"
       >
         <div
-          class="schedule-header-row"
-          :class="{ 'no-orders': !schedule.hasSchedule }"
+          class="cell-date"
+          :class="{
+            saturday: schedule.dateObj.day() === 6,
+            sunday: schedule.dateObj.day() === 0,
+          }"
         >
-          <div class="date-section">
-            <div
-              class="date-box"
-              :class="{
-                saturday: schedule.dateObj.day() === 6,
-                sunday: schedule.dateObj.day() === 0,
-              }"
-            >
-              <div class="date-value">
-                {{ schedule.dateObj.format("DD") }}
-              </div>
-            </div>
-          </div>
+          {{ schedule.dateObj.format("D") }}
+        </div>
 
-          <div v-if="isLoading && !schedule.hasSchedule" class="mini-stats">
-            <span class="stat-badge muted">載入中</span>
-          </div>
-          <div v-else-if="schedule.hasSchedule" class="mini-stats">
-            <span v-if="schedule.orderCount > 0" class="stat-badge ordered">
-              訂 {{ schedule.orderCount }}
-            </span>
-            <span v-if="schedule.itemCount > 0" class="stat-badge completed">
-              品 {{ schedule.itemCount }}
-            </span>
-            <span class="stat-badge highlight">
-              {{ schedule.statusLabel }}
-            </span>
-          </div>
-          <div v-else class="no-orders-tag">未開單</div>
+        <div class="cell-body">
+          <template v-if="isLoading && !schedule.hasSchedule">
+            <span class="cell-dot"></span>
+          </template>
+          <template v-else-if="schedule.hasSchedule">
+            <span v-if="schedule.orderCount > 0" class="cell-badge orders"
+              >{{ schedule.orderCount }}筆</span
+            >
+            <span class="cell-badge status">{{ schedule.statusLabel }}</span>
+          </template>
         </div>
       </div>
     </div>
@@ -83,285 +72,195 @@ const selectDate = (date) => {
 </template>
 
 <style scoped lang="scss">
-.schedule-right-body {
-  flex: 0 0 auto;
-  width: 100%;
-  max-width: 600px;
-  overflow-y: auto;
+.schedule-calendar {
   background: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   padding: 12px;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
-
-    &:hover {
-      background: #94a3b8;
-    }
-  }
+  width: 100%;
+  max-width: 600px;
 }
 
-.schedule-list {
+.week-header {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-bottom: 12px;
-}
-
-.schedule-week-header {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-bottom: 8px;
-  padding: 0 0 8px 0;
+  gap: 3px;
+  margin-bottom: 6px;
+  padding-bottom: 8px;
   border-bottom: 1px solid #e2e8f0;
 
-  .week-day {
+  .week-label {
     text-align: center;
-    font-weight: 700;
-    color: #1c2345;
-    font-size: 13px;
-    padding: 6px 0;
-    letter-spacing: 0.5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    padding: 3px 0;
   }
 }
 
-.schedule-item {
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.cal-cell {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 5px;
   background: white;
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-  transition: all 0.2s ease;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  border: 2px solid transparent;
-  min-height: 110px;
-  position: relative;
+  min-height: 65px;
+  min-width: 50px;
+  padding: 2px 4px 5px;
+  gap: 3px;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 
-  &:hover {
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
-    border-color: #cbd5e1;
+  &:hover:not(.is-other-month) {
+    border-color: #94a3b8;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   }
 
-  &.item-selected {
-    border-color: #1c2345;
-    box-shadow: 0 3px 12px rgba(28, 35, 69, 0.15);
-    background: linear-gradient(
-      135deg,
-      rgba(28, 35, 69, 0.02) 0%,
-      rgba(46, 61, 95, 0.04) 100%
-    );
-  }
-}
-
-.schedule-header-row {
-  display: flex;
-  flex-direction: column;
-  padding: 2px;
-  gap: 4px;
-  flex: 1;
-  background: white;
-  transition: all 0.2s ease;
-  border-bottom: none;
-
-  &.no-orders {
+  &.is-selected {
+    border-color: #1e293b;
+    border-width: 1px;
     background: #f8fafc;
-    opacity: 0.6;
+  }
 
-    .date-box {
-      background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
-    }
+  &.is-today .cell-date {
+    background: #1e293b;
+    color: white;
+    border-radius: 4px;
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+    justify-content: center;
+  }
 
-    .mini-stats {
-      opacity: 0.4;
-    }
+  &.is-other-month {
+    opacity: 0.25;
+    pointer-events: none;
+    background: #f8fafc;
   }
 }
 
-.date-section {
-  flex-shrink: 0;
-}
-
-.date-box {
-  background: linear-gradient(135deg, #555c7e 20%, #2e3d5f 100%);
-  border-radius: 4px;
-  padding: 4px 5px;
-  color: white;
+.cell-date {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 12px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  text-align: center;
-  min-width: auto;
-  box-shadow: 0 1px 3px rgba(28, 35, 69, 0.1);
+  width: 22px;
+  height: 22px;
 
-  .date-value {
-    font-size: 22px;
-    display: block;
+  &.saturday {
+    color: #2563eb;
   }
-
-  .weekday {
-    opacity: 0.8;
+  &.sunday {
+    color: #dc2626;
   }
 }
 
-.stats-section {
-  display: none;
-}
-
-.mini-stats {
-  display: flex;
-  gap: 3px;
-  flex-wrap: wrap;
-  justify-content: center;
-  min-height: 16px;
-
-  .stat-badge {
-    padding: 1px 4px;
-    background: #f0f9ff;
-    border-radius: 3px;
-    font-weight: 700;
-    color: #1e293b;
-    line-height: 1.2;
-    font-size: 12px;
-    &.ordered {
-      background: #dbeafe;
-      color: #1e40af;
-    }
-
-    &.completed {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    &.cancelled {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    &.highlight {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    &.muted {
-      background: #f1f5f9;
-      color: #94a3b8;
-    }
-  }
-}
-
-.no-orders-tag {
-  color: #94a3b8;
-  padding: 2px 3px;
-  background: #f1f5f9;
-  border-radius: 3px;
-  text-align: center;
+.cell-body {
   flex: 1;
-  min-height: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
 }
 
+.cell-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  line-height: 1.4;
+
+  &.orders {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  &.status {
+    background: #fef3c7;
+    color: #92400e;
+  }
+}
+
+.cell-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  margin: 3px 0 0 2px;
+}
+
+// ── 響應式 ──────────────────────────────────
 @media (max-width: 1024px) {
-  .schedule-right-body {
-    width: 100%;
+  .schedule-calendar {
     max-width: 100%;
-    min-width: 0;
   }
 
-  .schedule-list {
-    gap: 4px;
+  .cal-cell {
+    min-height: 58px;
+    padding: 4px 3px;
   }
 
-  .schedule-item {
-    min-height: 80px;
-  }
-
-  .date-box {
-    .date-value {
-      font-size: 20px;
-    }
-  }
-
-  .mini-stats {
-    font-size: 11px;
-    display: flex;
-
-    .stat-badge {
-      padding: 2px 5px;
-      font-size: 11px;
-    }
-  }
-
-  .schedule-header-row {
-    padding: 5px;
+  .cell-date {
+    font-size: 13px;
   }
 }
 
 @media (max-width: 768px) {
-  .schedule-right-body {
-    width: 100%;
-    max-width: 100%;
+  .schedule-calendar {
     padding: 8px;
   }
 
-  .schedule-list {
-    grid-template-columns: repeat(7, 1fr);
+  .calendar-grid {
     gap: 2px;
   }
 
-  .schedule-item {
-    min-height: 50px;
+  .cal-cell {
+    min-height: 42px;
+    padding: 3px 3px;
   }
 
-  .item-selected {
-    border-width: 2px;
+  .cell-date {
+    font-size: 12px;
+    width: 18px;
+    height: 18px;
   }
 
-  .date-section {
-    width: 100%;
-    height: 100%;
+  .cal-cell.is-today .cell-date {
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
   }
 
-  .date-box {
-    width: 100%;
-    height: 100%;
-
-    .date-value {
-      font-size: 16px;
-    }
-  }
-
-  .mini-stats {
-    display: none;
-    font-size: 9px;
-    gap: 1px;
-
-    .stat-badge {
-      padding: 1px 3px;
-      font-size: 9px;
-    }
-  }
-
-  .no-orders-tag {
+  .cell-body {
     display: none;
   }
 
-  .schedule-header-row {
-    flex-direction: column;
-    align-items: center;
-    padding: 2px;
-    gap: 0;
+  // 有排程時在手機上顯示一個小藍點
+  .cal-cell.has-schedule .cell-body {
+    display: flex;
+    &::before {
+      content: "";
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #3b82f6;
+      display: block;
+    }
+  }
+
+  .cell-badge {
+    display: none;
   }
 }
 </style>

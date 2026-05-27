@@ -61,6 +61,11 @@ const orderNParts = computed(() => {
   return { prefix, lastThree };
 });
 
+const formatPickupTime = (datetime) => {
+  if (!datetime) return "-";
+  return dayjs(datetime).format("M/D HH:mm");
+};
+
 const updateStatus = (status) => {
   emit("status-change", props.order, status);
 };
@@ -72,163 +77,128 @@ const handleDeleteOrder = () => {
 </script>
 
 <template>
-  <div class="order-card" :class="{ 'simple-mode': viewMode === 'simple' }">
-    <!-- 订单顶部装饰 -->
-    <div class="order-ticket-top"></div>
+  <div
+    class="order-card"
+    :class="[
+      `status-${order.status.toLowerCase()}`,
+      { 'simple-mode': viewMode === 'simple' },
+    ]"
+  >
+    <!-- 狀態色條 -->
+    <div class="card-top-bar"></div>
 
-    <!-- 訂單頭部 -->
-    <div class="order-header">
-      <div class="order-id-section">
-        <div class="order-label">編號</div>
-        <div class="order-id">
-          <span class="id-prefix">{{ orderNParts.prefix }}</span>
-          <span class="id-highlight">{{ orderNParts.lastThree }}</span>
-        </div>
+    <!-- 頭部：編號 + 狀態 -->
+    <div class="card-header">
+      <div class="order-num">
+        <span class="num-prefix">{{ orderNParts.prefix }}</span
+        ><span class="num-main">{{ orderNParts.lastThree }}</span>
       </div>
-      <div
-        class="order-status-stamp"
-        :style="{
-          borderColor: getStatusColor(order.status),
-          color: getStatusColor(order.status),
-        }"
+      <span
+        class="status-chip"
+        :style="{ background: getStatusColor(order.status) }"
+        >{{ getStatusLabel(order.status) }}</span
       >
-        <span>{{ getStatusLabel(order.status) }}</span>
-      </div>
     </div>
 
     <!-- 客戶資訊 -->
-    <div class="order-customer">
-      <div class="customer-left">
-        <div class="user-info">
-          <el-icon><User /></el-icon>
-          <div class="customer-name">{{ order.customer_name }}</div>
-        </div>
-        <div v-if="viewMode === 'detailed'" class="payment-method">
-          <el-icon><CreditCard /></el-icon>
-          <el-tag size="small" type="info">{{
-            getPaymentLabel(order.payment_method)
-          }}</el-tag>
-
-          <el-tag
-            size="small"
-            type="success"
-            v-if="order.pickup_method === 'pickup'"
-          >
-            自取
-          </el-tag>
-          <el-tag
-            size="small"
-            type="warning"
-            v-if="order.pickup_method === 'delivery'"
-          >
-            宅配
-          </el-tag>
-        </div>
+    <div class="card-customer">
+      <div class="customer-name">{{ order.customer_name }}</div>
+      <div v-if="viewMode === 'detailed'" class="customer-meta">
+        <span class="meta-item">
+          <el-icon><Phone /></el-icon>{{ order.customer_phone }}
+        </span>
+        <span class="meta-item">
+          <el-icon><AlarmClock /></el-icon>{{ order.pickup_time }}
+        </span>
       </div>
-      <div v-if="viewMode === 'detailed'" class="customer-right">
-        <div class="info-row">
-          <div class="info-label">
-            <el-icon><Phone /></el-icon>
-            <span></span>
-          </div>
-          <span class="info-value">{{ order.customer_phone }}</span>
-        </div>
-        <div class="info-row">
-          <div class="info-label">
-            <el-icon><AlarmClock /></el-icon>
-            <span></span>
-          </div>
-          <el-tag size="small">
-            {{ order.pickup_time }}
-          </el-tag>
-        </div>
+      <div v-if="viewMode === 'detailed'" class="customer-tags">
+        <el-tag size="small" type="info">{{
+          getPaymentLabel(order.payment_method)
+        }}</el-tag>
+        <el-tag
+          size="small"
+          type="success"
+          v-if="order.pickup_method === 'pickup'"
+          >自取</el-tag
+        >
+        <el-tag
+          size="small"
+          type="warning"
+          v-if="order.pickup_method === 'delivery'"
+          >宅配</el-tag
+        >
       </div>
     </div>
 
-    <!-- 分隔線 -->
-    <div class="order-divider"></div>
-
-    <!-- 訂購項目 -->
-    <div v-if="viewMode === 'detailed'" class="order-items">
-      <div class="items-header">
+    <!-- 訂購明細 -->
+    <div v-if="viewMode === 'detailed'" class="card-items">
+      <div class="items-label">
         <span>訂購明細</span>
         <el-button
           type="primary"
+          icon="edit"
+          link
           size="small"
           @click="orderDetail.visible = true"
-          >詳細</el-button
         >
+          查看詳情
+        </el-button>
       </div>
       <div class="items-list">
-        <div v-for="(item, idx) in order.items" :key="idx" class="order-item">
+        <div v-for="(item, idx) in order.items" :key="idx" class="item-row">
           <span class="item-name">
             {{ item.product_name }}
             <el-tag v-if="item.is_sliced" size="small">切</el-tag>
           </span>
-          <span class="item-quantity">× {{ item.quantity }}</span>
+          <span class="item-qty">× {{ item.quantity }}</span>
           <span class="item-price">{{ $formatPrice(item.line_total) }}</span>
         </div>
       </div>
     </div>
 
     <!-- 備註 -->
-    <div v-if="viewMode === 'detailed' && order.note" class="order-note">
-      <div class="note-label">
-        <el-icon><Document /></el-icon>
-        <span>備註</span>
-      </div>
-      <div class="note-content">{{ order.note }}</div>
+    <div v-if="viewMode === 'detailed' && order.note" class="card-note">
+      <el-icon><Document /></el-icon>
+      <span>{{ order.note }}</span>
     </div>
 
-    <!-- 分隔線 -->
-    <!-- <div class="order-divider dashed"></div> -->
-
-    <!-- 訂單底部 -->
-    <div class="order-footer">
-      <div class="bring-bag" v-if="order.bring_own_bag">
-        <el-icon class="bag-icon"><ShoppingBag /></el-icon>
-
-        <el-tag size="small">自備</el-tag>
-      </div>
+    <!-- 底部：總金額 -->
+    <div class="card-footer">
+      <span v-if="order.bring_own_bag" class="bring-bag-tag">
+        <el-icon><ShoppingBag /></el-icon>自備袋
+      </span>
       <div class="order-total">
-        <span class="total-label">總計</span>
+        <span class="total-label">合計</span>
         <span class="total-amount">{{ $formatPrice(order.total_amount) }}</span>
       </div>
     </div>
 
-    <!-- 快速操作 -->
-    <div class="order-actions" @click.stop>
-      <el-button
-        v-if="order.status === 'PLACED'"
-        type="danger"
-        plain
-        size="small"
-        @click="updateStatus('CANCELLED')"
-      >
-        取消
-      </el-button>
-      <el-button
-        v-if="order.status === 'PLACED'"
-        class="complete"
-        type="success"
-        size="small"
-        @click="updateStatus('COMPLETED')"
-      >
-        完成
-      </el-button>
+    <!-- 操作按鈕 -->
+    <div class="card-actions" @click.stop>
+      <template v-if="order.status === 'PLACED'">
+        <el-button
+          size="small"
+          plain
+          class="btn-cancel"
+          @click="updateStatus('CANCELLED')"
+          >取消</el-button
+        >
+        <el-button
+          type="success"
+          class="btn-complete"
+          @click="updateStatus('COMPLETED')"
+          >✓ 完成取貨</el-button
+        >
+      </template>
       <el-button
         v-if="order.status === 'COMPLETED' || order.status === 'CANCELLED'"
-        type="primary"
         plain
         size="small"
+        style="flex: 1"
         @click="updateStatus('PLACED')"
+        >復原為已下單</el-button
       >
-        復原為已下單
-      </el-button>
     </div>
-
-    <!-- 订单底部装饰 -->
-    <div class="order-ticket-bottom"></div>
   </div>
 
   <!-- 訂購明細模態框 -->
@@ -242,396 +212,290 @@ const handleDeleteOrder = () => {
 </template>
 
 <style scoped lang="scss">
+$text-primary: #1e293b;
+$text-secondary: #64748b;
+$text-muted: #94a3b8;
+$border: #e2e8f0;
+$bg-subtle: #fafbfc;
+
 .order-card {
   position: relative;
   background: white;
-  border-radius: 0;
-  padding: 0;
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.08),
-    0 1px 2px rgba(0, 0, 0, 0.04);
-  transition: all 0.3s ease;
-  border: 1px solid #e2e8f0;
+  border: 1px solid $border;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  //cursor: pointer;
-  min-height: 480px;
+  min-height: 380px;
   height: 100%;
+  box-shadow: 0 1px 3px rgba(28, 25, 23, 0.07);
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
 
   &.simple-mode {
     min-height: initial;
   }
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow:
-      0 8px 20px rgba(0, 0, 0, 0.12),
-      0 2px 4px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 14px rgba(28, 25, 23, 0.11);
+    transform: translateY(-2px);
   }
 
-  // 票据顶部锯齿装饰
-  .order-ticket-top {
-    height: 8px;
-    background:
-      linear-gradient(-45deg, white 6px, transparent 0),
-      linear-gradient(45deg, white 6px, transparent 0);
-    background-repeat: repeat-x;
-    background-size: 12px 12px;
-    background-position: 0 0;
-    background-color: #b0d4f8;
+  // ── 狀態色條 ─────────────────────────────
+  .card-top-bar {
+    height: 3px;
+    flex-shrink: 0;
   }
 
-  // 票据底部锯齿装饰
-  .order-ticket-bottom {
-    height: 8px;
-    background:
-      linear-gradient(135deg, white 6px, transparent 0),
-      linear-gradient(-135deg, white 6px, transparent 0);
-    background-repeat: repeat-x;
-    background-size: 12px 12px;
-    background-position: 0 100%;
-    background-color: #f1f5f9;
+  &.status-placed .card-top-bar {
+    background: #2563eb;
+  }
+  &.status-completed .card-top-bar {
+    background: #16a34a;
+  }
+  &.status-cancelled .card-top-bar {
+    background: #d1d5db;
   }
 
-  .order-header {
+  // ── 頭部：編號 + 狀態 ────────────────────
+  .card-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    padding: 10px 20px 0px;
-    background: linear-gradient(to bottom, #fafbfc 0%, white 100%);
+    align-items: center;
+    padding: 10px 14px 6px;
 
-    .order-id-section {
-      display: flex;
-      flex-direction: column;
+    .order-num {
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+      color: $text-muted;
+      letter-spacing: 0.3px;
 
-      .order-label {
-        font-size: 9px;
-        color: #94a3b8;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-weight: 600;
-      }
-
-      .order-id {
-        font-size: 14px;
-        font-family: monospace;
-        display: flex;
-        gap: 2px;
-        align-items: center;
-        .id-prefix {
-          color: #64748b;
-          font-weight: 500;
-        }
-        .id-highlight {
-          color: #1e40af;
-          font-weight: 700;
-          font-size: 16px;
-        }
+      .num-main {
+        color: $text-primary;
+        font-weight: 700;
+        font-size: 13px;
       }
     }
 
-    .order-status-stamp {
-      position: relative;
-      white-space: nowrap;
-      padding: 6px 8px;
-      border: 2.5px solid;
-      border-radius: 4px;
-      font-weight: 700;
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      transform: rotate(-2deg);
-      background: white;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    .status-chip {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+      letter-spacing: 0.3px;
     }
   }
 
-  .order-customer {
-    padding: 10px 20px;
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
+  // ── 客戶資訊 ─────────────────────────────
+  .card-customer {
+    padding: 2px 14px 10px;
+    border-bottom: 1px solid $border;
 
-    .customer-left {
+    .customer-name {
+      line-height: 18px;
+      font-size: 18px;
+      font-weight: 700;
+      color: $text-primary;
+      margin-bottom: 7px;
+    }
+
+    .customer-meta {
       display: flex;
-      align-items: flex-start;
-      gap: 6px;
-      flex: 1;
-      flex-direction: column;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 5px;
 
-      .user-info {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .el-icon {
-        font-size: 16px;
-        color: #94a3b8;
-        flex-shrink: 0;
-      }
-
-      .customer-name {
-        color: #1e293b;
-        font-weight: 700;
-      }
-
-      .payment-method {
-        display: flex;
+      .meta-item {
+        display: inline-flex;
         align-items: center;
         gap: 4px;
+        font-size: 13px;
+        color: $text-secondary;
 
         .el-icon {
-          font-size: 16px;
-          color: #94a3b8;
-          flex-shrink: 0;
+          font-size: 13px;
+          color: $text-muted;
         }
       }
     }
 
-    .customer-right {
+    .customer-tags {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex: 1;
-      align-items: flex-end;
-    }
-
-    .info-row {
-      display: flex;
-      gap: 4px;
-      align-items: center;
-      font-size: 14px;
-      width: 100%;
-    }
-
-    .info-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      color: #64748b;
-      font-weight: 500;
-      white-space: nowrap;
-      .el-icon {
-        font-size: 14px;
-        color: #94a3b8;
-      }
-    }
-
-    .info-value {
-      color: #1e293b;
-      font-weight: 600;
-      text-align: right;
-      justify-self: end;
-
-      &.pickup-time {
-        font-family: "Courier New", monospace;
-        font-size: 15px;
-
-        .pickup-date {
-          color: #64748b;
-          margin-right: 4px;
-        }
-      }
+      gap: 5px;
+      flex-wrap: wrap;
     }
   }
 
-  .order-divider {
-    height: 1px;
-    background: #e2e8f0;
-    margin: 0 20px;
-
-    &.dashed {
-      height: 0;
-      border-top: 2px dashed #cbd5e1;
-      margin: 8px 20px;
-    }
-  }
-
-  .order-items {
-    padding: 12px 20px;
-    background: #fafbfc;
+  // ── 訂購明細 ─────────────────────────────
+  .card-items {
+    padding: 10px 14px;
+    background: $bg-subtle;
     flex: 1;
     display: flex;
     flex-direction: column;
 
-    .items-header {
-      font-size: 12px;
-      color: #64748b;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-      flex-shrink: 0;
+    .items-label {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-size: 11px;
+      color: $text-muted;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 7px;
     }
 
     .items-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      max-height: 160px;
+      gap: 4px;
+      max-height: 150px;
       overflow-y: auto;
-      padding-right: 4px;
-      flex-shrink: 0;
-      pre {
-        font-size: 12px;
-      }
-      &::-webkit-scrollbar {
-        width: 4px;
-      }
 
+      &::-webkit-scrollbar {
+        width: 3px;
+      }
       &::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
+        background: $border;
         border-radius: 2px;
       }
 
-      .order-item {
+      .item-row {
         display: grid;
         grid-template-columns: 1fr auto auto;
-        gap: 12px;
+        gap: 8px;
         align-items: center;
-        font-size: 14px;
+        font-size: 13px;
         padding: 6px 10px;
         background: white;
         border-radius: 4px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid $border;
 
         .item-name {
-          color: #334155;
+          color: $text-primary;
           font-weight: 500;
           display: inline-flex;
           align-items: center;
-          gap: 6px;
+          gap: 4px;
         }
 
-        .item-quantity {
-          color: #64748b;
-          font-weight: 600;
-          min-width: 40px;
+        .item-qty {
+          color: $text-muted;
+          font-size: 12px;
           text-align: center;
+          min-width: 32px;
         }
 
         .item-price {
-          color: #1e293b;
-          font-weight: 700;
-          font-family: "Courier New", monospace;
-          min-width: 60px;
+          color: $text-primary;
+          font-weight: 600;
+          // font-family: "Courier New", monospace;
           text-align: right;
+          min-width: 56px;
         }
       }
     }
   }
 
-  .order-note {
-    padding: 10px;
-    background: #fffbeb;
-    border-left: 3px solid #fbbf24;
-    margin: 0 20px;
-    border-radius: 0 4px 4px 0;
-
+  // ── 備註 ─────────────────────────────────
+  .card-note {
     display: flex;
-    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 8px 12px;
+    background: #fffbeb;
+    border-left: 3px solid #d97706;
+    margin: 0 14px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 13px;
+    color: #78350f;
+    line-height: 1.4;
 
-    .note-label {
-      display: flex;
-      font-size: 12px;
-      align-items: center;
-      gap: 4px;
-      color: #92400e;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .note-content {
-      font-size: 13px;
-      color: #78350f;
-      line-height: 1.5;
+    .el-icon {
+      color: #d97706;
+      flex-shrink: 0;
+      margin-top: 1px;
     }
   }
 
-  .order-footer {
+  // ── 底部：合計 ───────────────────────────
+  .card-footer {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-    background: linear-gradient(to bottom, white 0%, #fafbfc 100%);
+    justify-content: space-between;
+    padding: 8px 14px;
+    border-top: 1px solid $border;
+    background: white;
+
+    .bring-bag-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: $text-secondary;
+      .el-icon {
+        font-size: 14px;
+      }
+    }
 
     .order-total {
-      margin-left: auto;
       display: flex;
-      align-items: center;
-      gap: 2px;
+      align-items: baseline;
+      justify-content: space-between;
+      width: 100%;
+      gap: 5px;
 
       .total-label {
         font-size: 11px;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        color: $text-muted;
         font-weight: 600;
+        text-transform: uppercase;
       }
 
       .total-amount {
-        font-size: 24px;
+        font-size: 20px;
         font-weight: 700;
-        color: #1e293b;
-        font-family: "Courier New", monospace;
+        color: $text-primary;
         line-height: 1;
       }
     }
-    .bring-bag {
-      display: flex;
-      flex-wrap: nowrap;
-      align-items: center;
-      gap: 2px;
-
-      justify-content: flex-end;
-    }
   }
 
-  .order-actions {
+  // ── 操作按鈕 ─────────────────────────────
+  .card-actions {
     display: flex;
+    align-items: center;
     gap: 8px;
-    padding: 12px 20px 16px;
-    background: #fafbfc;
-    border-top: 1px solid #e2e8f0;
+    padding: 10px 14px;
+    background: $bg-subtle;
 
     .el-button {
-      flex: 1;
-      font-size: 14px;
-      padding: 6px 12px !important;
-      height: 32px;
+      margin: 0;
     }
 
-    .complete {
+    .btn-cancel {
+      flex: 1;
+      font-size: 13px;
+    }
+
+    .btn-complete {
       flex: 2;
+      font-size: 14px;
+      font-weight: 600;
+      height: 36px;
     }
   }
 }
+
 @media (max-width: 768px) {
-  .orders-grid {
-    display: block;
-    border: 1px solid #000;
-  }
   .order-card {
-    min-height: 0px;
-    height: initial;
-    .order-items {
+    min-height: 0;
+    height: auto;
+
+    .card-items {
       flex: 0;
-    }
-    .order-customer {
-      .customer-right {
-        flex-direction: row;
-        justify-content: flex-end;
-      }
-      .info-row {
-        width: initial;
-        gap: 2px;
-      }
     }
   }
 }
