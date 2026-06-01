@@ -10,6 +10,21 @@ const router = createRouter({
       component: () => import("../views/home.vue"),
     },
     {
+      path: "/s/:slug",
+      name: "store",
+      component: () => import("../views/store/index.vue"),
+    },
+    {
+      path: "/s/:slug/schedules",
+      name: "store-schedules",
+      component: () => import("../views/store/schedules.vue"),
+    },
+    {
+      path: "/s/:slug/schedules/:date",
+      name: "store-order",
+      component: () => import("../views/store/order.vue"),
+    },
+    {
       path: "/shop",
       name: "shop",
       meta: { requireAuth: true },

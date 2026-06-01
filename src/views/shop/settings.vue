@@ -36,6 +36,7 @@ const defaultBusinessHours = [
 const form = reactive({
   avatar: "",
   shopName: "山丘烘焙坊",
+  shopSlug: "",
   owner: "王麵麥",
   phone: "02-1234-5678",
   email: "hello@bakery.test",
@@ -59,6 +60,30 @@ const form = reactive({
 });
 
 const segment = ref("basic");
+
+const slugError = computed(() => {
+  const s = form.shopSlug;
+  if (!s) return "前台入口網址為必填";
+  if (s.length < 2) return "至少需要 2 個字元";
+  if (!/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(s))
+    return "只允許小寫英文、數字，可用連字號(-)，但不能開頭或結尾";
+  return "";
+});
+
+const slugUrl = computed(() =>
+  form.shopSlug ? `${window.location.origin}/s/${form.shopSlug}` : ""
+);
+
+const onSlugInput = (val) => {
+  form.shopSlug = val.toLowerCase().replace(/[^a-z0-9-]/g, "");
+};
+
+const copySlugUrl = () => {
+  if (!slugUrl.value) return;
+  navigator.clipboard.writeText(slugUrl.value).then(() => {
+    ElMessage.success("已複製入口網址");
+  });
+};
 
 const dayLabelMap = {
   0: "日",
@@ -126,6 +151,11 @@ const toggleAllWeekday = (enabled) => {
 };
 
 const handleSave = async () => {
+  if (slugError.value) {
+    segment.value = "basic";
+    ElMessage.error(slugError.value);
+    return;
+  }
   isLoading.value = true;
   try {
     const payload = {
@@ -133,7 +163,6 @@ const handleSave = async () => {
       businessHours: normalizeBusinessHours(form.businessHours),
     };
     await Users.Put(payload);
-    // 儲存成功後，更新 authStore 中的使用者資訊
     await authStore.fetchUser();
     ElMessage.success("設定已儲存");
   } catch (error) {
@@ -269,6 +298,34 @@ onMounted(() => {
               maxlength="200"
               show-word-limit
             />
+          </el-form-item>
+
+          <el-divider />
+          <div class="card__subtitle">前台入口</div>
+          <el-form-item label="專屬網址" required>
+            <div class="slug-wrap">
+              <div class="slug-input-row">
+                <span class="slug-prefix">/s/</span>
+                <el-input
+                  v-model="form.shopSlug"
+                  placeholder="your-bakery"
+                  maxlength="50"
+                  :class="{ 'is-error': slugError }"
+                  @input="onSlugInput"
+                />
+              </div>
+              <div v-if="slugError" class="slug-msg error">
+                <el-icon><Warning /></el-icon>{{ slugError }}
+              </div>
+              <div v-else-if="form.shopSlug" class="slug-msg preview">
+                <el-icon><Link /></el-icon>
+                <span class="slug-url">{{ slugUrl }}</span>
+                <el-button type="primary" link size="small" @click="copySlugUrl">複製</el-button>
+              </div>
+              <div v-else class="slug-msg hint">
+                設定後消費者可透過固定網址進入您的訂購頁面
+              </div>
+            </div>
           </el-form-item>
 
           <el-divider />
@@ -623,6 +680,69 @@ h2 {
 .day {
   color: var(--el-text-color-primary);
   font-weight: 600;
+}
+
+.slug-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.slug-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--el-border-color);
+  border-radius: var(--el-border-radius-base);
+  overflow: hidden;
+  transition: border-color 0.2s;
+
+  &:focus-within {
+    border-color: var(--el-color-primary);
+  }
+
+  .slug-prefix {
+    padding: 0 10px;
+    background: var(--el-fill-color-light);
+    color: var(--el-text-color-secondary);
+    font-size: 13px;
+    white-space: nowrap;
+    border-right: 1px solid var(--el-border-color);
+    line-height: 30px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+  }
+
+  .el-input {
+    flex: 1;
+    :deep(.el-input__wrapper) {
+      border: none;
+      box-shadow: none !important;
+      border-radius: 0;
+    }
+  }
+}
+
+.slug-msg {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+
+  .el-icon { font-size: 13px; flex-shrink: 0; }
+
+  &.error   { color: var(--el-color-danger); }
+  &.preview { color: var(--el-text-color-secondary); }
+  &.hint    { color: var(--el-text-color-placeholder); }
+
+  .slug-url {
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--el-color-primary);
+    word-break: break-all;
+  }
 }
 
 .actions {
