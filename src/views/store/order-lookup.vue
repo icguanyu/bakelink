@@ -54,11 +54,12 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
   <div class="lookup-page">
 
     <!-- 頂部導覽 -->
-    <div class="lookup-nav">
-      <button class="nav-back" @click="router.back()">
-        <i class="bx bx-arrow-back"></i>
+    <div class="topbar">
+      <button class="topbar__back" @click="router.back()">
+        <i class="bx bx-chevron-left"></i>
       </button>
-      <div class="nav-title">查詢訂單</div>
+      <span class="topbar__title">查詢訂單</span>
+      <span class="topbar__spacer"></span>
     </div>
 
     <div class="lookup-body">
@@ -190,39 +191,44 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
   flex-direction: column;
 }
 
-/* Nav */
-.lookup-nav {
+/* Topbar */
+.topbar {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: #fff;
-  border-bottom: 1px solid #ede8e2;
   display: flex;
   align-items: center;
-  gap: 12px;
   padding: 12px 16px;
-}
+  background: #f7f3ee;
 
-.nav-back {
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1.5px solid #e8ddd5;
-  background: #fdf8f2;
-  color: #5c4b3e;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  &:active { background: #f0e8de; }
-}
+  &__back {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: #fff;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    font-size: 20px;
+    color: #2f2a25;
+    flex-shrink: 0;
+  }
 
-.nav-title {
-  font-size: 17px;
-  font-weight: 800;
-  color: #1a120b;
+  &__title {
+    flex: 1;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a120b;
+  }
+
+  &__spacer {
+    width: 36px;
+    flex-shrink: 0;
+  }
 }
 
 /* Body */

@@ -71,6 +71,16 @@ const statusConfig = {
   ANNOUNCED: { label: "即將開放", class: "badge--announced" },
 };
 
+const isPastSchedule = (s) =>
+  s.status === "CLOSED" || dayjs(s.schedule_date).isBefore(today, "day");
+
+const expandedIds = ref(new Set());
+const toggleExpand = (id) => {
+  const s = new Set(expandedIds.value);
+  s.has(id) ? s.delete(id) : s.add(id);
+  expandedIds.value = s;
+};
+
 const goOrder = (schedule) => {
   router.push({
     name: "store-order",
@@ -173,9 +183,32 @@ const formatDeadline = (iso) =>
         v-for="s in monthSchedules"
         :key="s.id"
         class="schedule-card"
-        :class="{ 'schedule-card--announced': s.status === 'ANNOUNCED' }"
+        :class="{
+          'schedule-card--announced': s.status === 'ANNOUNCED',
+          'schedule-card--past': isPastSchedule(s),
+        }"
       >
-        <div class="schedule-card__head">
+        <!-- 已過去：可收合的標題列 -->
+        <div
+          v-if="isPastSchedule(s)"
+          class="schedule-card__collapsed"
+          @click="toggleExpand(s.id)"
+        >
+          <div class="schedule-card__collapsed-left">
+            <span class="schedule-card__collapsed-date">
+              {{ dayjs(s.schedule_date).format("M/D") }}
+              （週{{ ["日","一","二","三","四","五","六"][dayjs(s.schedule_date).day()] }}）
+            </span>
+            <span class="badge badge--closed">已結單</span>
+          </div>
+          <i
+            class="bx schedule-card__collapsed-chevron"
+            :class="expandedIds.has(s.id) ? 'bx-chevron-up' : 'bx-chevron-down'"
+          ></i>
+        </div>
+
+        <!-- 未過去：完整標題 -->
+        <div v-else class="schedule-card__head">
           <div class="schedule-card__date">
             <span class="schedule-card__day">{{ dayjs(s.schedule_date).date() }}</span>
             <span class="schedule-card__month">{{ dayjs(s.schedule_date).format("M 月") }}</span>
@@ -198,39 +231,39 @@ const formatDeadline = (iso) =>
           </div>
         </div>
 
-        <!-- 品項列表 -->
-        <div v-if="s.items?.length" class="schedule-card__items">
-          <div
-            v-for="item in s.items"
-            :key="item.id"
-            class="item-chip"
-          >
-            <div class="item-chip__main">
-              <span class="item-chip__name">{{ item.product_name }}</span>
-              <span class="item-chip__price">${{ item.unit_price }}</span>
-            </div>
-            <span
-              v-if="item.sales_limit > 0"
-              class="item-chip__stock"
-              :class="{ 'item-chip__stock--low': item.remaining <= 5 }"
+        <!-- 展開內容（已過去時需手動展開；未過去時永遠顯示） -->
+        <template v-if="!isPastSchedule(s) || expandedIds.has(s.id)">
+          <!-- 品項列表 -->
+          <div v-if="s.items?.length" class="schedule-card__items">
+            <div
+              v-for="item in s.items"
+              :key="item.id"
+              class="item-chip"
             >
-              剩 {{ item.remaining }}
-            </span>
+              <div class="item-chip__main">
+                <span class="item-chip__name">{{ item.product_name }}</span>
+                <span class="item-chip__price">${{ item.unit_price }}</span>
+              </div>
+              <span
+                v-if="item.sales_limit > 0 && !isPastSchedule(s)"
+                class="item-chip__stock"
+                :class="{ 'item-chip__stock--low': item.remaining <= 5 }"
+              >
+                限量 {{ item.remaining }}
+              </span>
+            </div>
           </div>
-        </div>
-        <div v-else class="schedule-card__items-empty">品項即將公告</div>
+          <div v-else class="schedule-card__items-empty">品項即將公告</div>
 
-        <el-button
-          v-if="s.status === 'OPEN'"
-          type="primary"
-          class="schedule-card__btn"
-          @click="goOrder(s)"
-        >
-          立即訂購
-        </el-button>
-        <el-button v-else disabled class="schedule-card__btn">
-          {{ s.status === 'CLOSED' ? '已結單' : '尚未開放' }}
-        </el-button>
+          <el-button
+            v-if="s.status === 'OPEN'"
+            type="primary"
+            class="schedule-card__btn"
+            @click="goOrder(s)"
+          >
+            我要訂購
+          </el-button>
+        </template>
       </div>
     </div>
   </div>
@@ -350,7 +383,7 @@ const formatDeadline = (iso) =>
     span {
       font-size: 11px;
       font-weight: 700;
-      color: #b8a898;
+      color: #6b5040;
       letter-spacing: 0.03em;
 
       &:first-child { color: #e07060; }  /* 日 */
@@ -393,9 +426,9 @@ const formatDeadline = (iso) =>
 
   /* 有行程但不是今天 */
   &--open {
-    background: #fff7e6;
-    .cal-cell__day { color: #8a5a10; }
-    .cal-cell__dot { background: #e09020; }
+    background: #edfaf3;
+    .cal-cell__day { color: #1e7a48; }
+    .cal-cell__dot { background: #2eaa62; }
   }
 
   &--announced {
@@ -423,8 +456,8 @@ const formatDeadline = (iso) =>
 
   /* 今天同時有行程：保留底色 + 黃圈 */
   &--today.cal-cell--open {
-    background: #fff7e6;
-    .cal-cell__dot { background: #e09020; }
+    background: #edfaf3;
+    .cal-cell__dot { background: #2eaa62; }
   }
 
   &--today.cal-cell--announced {
@@ -444,7 +477,7 @@ const formatDeadline = (iso) =>
     align-items: center;
     gap: 6px;
     font-size: 12px;
-    color: #8a7060;
+    color: #523828;
   }
 
   &__dot {
@@ -452,7 +485,7 @@ const formatDeadline = (iso) =>
     height: 8px;
     border-radius: 50%;
 
-    &--open { background: #e8a020; }
+    &--open { background: #2eaa62; }
     &--announced { background: #6080d0; }
   }
 }
@@ -461,7 +494,7 @@ const formatDeadline = (iso) =>
 .section-title {
   font-size: 13px;
   font-weight: 700;
-  color: #8a7060;
+  color: #523828;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-top: 4px;
@@ -471,7 +504,7 @@ const formatDeadline = (iso) =>
 .empty {
   text-align: center;
   padding: 40px 0;
-  color: #c0b0a0;
+  color: #7a5040;
 
   i { font-size: 40px; display: block; margin-bottom: 8px; }
   p { font-size: 14px; margin: 0; }
@@ -489,6 +522,40 @@ const formatDeadline = (iso) =>
 
   &--announced {
     opacity: 0.85;
+  }
+
+  &--past {
+    padding: 10px 16px;
+    background: #f5f2ef;
+    box-shadow: none;
+    border: 1px solid #e8e0d8;
+  }
+
+  &__collapsed {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    padding: 2px 0;
+    &:active { opacity: 0.6; }
+  }
+
+  &__collapsed-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__collapsed-date {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b4838;
+  }
+
+  &__collapsed-chevron {
+    font-size: 18px;
+    color: #7a5040;
   }
 
   &__head {
@@ -519,7 +586,7 @@ const formatDeadline = (iso) =>
 
   &__month {
     font-size: 11px;
-    color: #8a7060;
+    color: #523828;
     font-weight: 600;
   }
 
@@ -544,12 +611,12 @@ const formatDeadline = (iso) =>
 
   &__deadline {
     font-size: 12px;
-    color: #a89080;
+    color: #6b4838;
   }
 
   &__note {
     font-size: 12px;
-    color: #8a7060;
+    color: #523828;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -565,12 +632,11 @@ const formatDeadline = (iso) =>
 
   &__items-empty {
     font-size: 12px;
-    color: #c0b0a0;
+    color: #7a5040;
   }
 
   &__btn {
     width: 100%;
-    border-radius: 12px;
     height: 44px;
     font-size: 15px;
     font-weight: 700;
@@ -585,13 +651,18 @@ const formatDeadline = (iso) =>
   border-radius: 6px;
 
   &--open {
-    background: #fff0cc;
-    color: #9a6010;
+    background: #e0f7ec;
+    color: #1a7a45;
   }
 
   &--announced {
     background: #e8eeff;
     color: #3050a0;
+  }
+
+  &--closed {
+    background: #ede8e2;
+    color: #6b4838;
   }
 }
 
@@ -603,7 +674,7 @@ const formatDeadline = (iso) =>
   gap: 8px;
   background: #fdf8f2;
   border: 1px solid #ede0d0;
-  border-radius: 10px;
+  border-radius: 6px;
   padding: 8px 12px;
   width: 100%;
 
@@ -625,7 +696,7 @@ const formatDeadline = (iso) =>
 
   &__price {
     font-size: 14px;
-    color: #a89080;
+    color: #6b4838;
     white-space: nowrap;
     flex-shrink: 0;
   }
@@ -633,7 +704,7 @@ const formatDeadline = (iso) =>
   &__stock {
     font-size: 11px;
     font-weight: 700;
-    color: #a89080;
+    color: #6b4838;
     white-space: nowrap;
     flex-shrink: 0;
 

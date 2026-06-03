@@ -127,6 +127,12 @@ const handleDeleteOrder = () => {
           v-if="order.pickup_method === 'delivery'"
           >宅配</el-tag
         >
+        <el-tag
+          size="small"
+          type="primary"
+          v-if="order.bring_own_bag"
+          >自備袋</el-tag
+        >
       </div>
     </div>
 
@@ -164,9 +170,6 @@ const handleDeleteOrder = () => {
 
     <!-- 底部：總金額 -->
     <div class="card-footer">
-      <span v-if="order.bring_own_bag" class="bring-bag-tag">
-        <el-icon><ShoppingBag /></el-icon>自備袋
-      </span>
       <div class="order-total">
         <span class="total-label">合計</span>
         <span class="total-amount">{{ $formatPrice(order.total_amount) }}</span>
@@ -428,17 +431,6 @@ $bg-subtle: #fafbfc;
     padding: 8px 14px;
     border-top: 1px solid $border;
     background: white;
-
-    .bring-bag-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 12px;
-      color: $text-secondary;
-      .el-icon {
-        font-size: 14px;
-      }
-    }
 
     .order-total {
       display: flex;

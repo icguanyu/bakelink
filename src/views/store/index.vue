@@ -324,7 +324,7 @@ const hasDelivery = computed(
             "
           >
             <i class="bx bx-calendar-check"></i>
-            查看接單行程
+            查看近期菜單
           </button>
           <button
             class="cta-btn cta-btn--ghost"
