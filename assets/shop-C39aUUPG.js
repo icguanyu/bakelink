@@ -1,1 +1,0 @@
-import{D as t}from"./index-CwEIzLzH.js";const h={GetInfo:e=>t.get(`/shop/${e}`),GetSchedules:(e,r)=>t.get(`/shop/${e}/schedules`,{params:r}),GetScheduleByDate:(e,r)=>t.get(`/shop/${e}/schedules/${r}`),CreateOrder:(e,r)=>t.post(`/shop/${e}/orders`,r),GetOrder:(e,r,s)=>t.get(`/shop/${e}/orders/${r}`,{params:{phone:s}})};export{h as S};

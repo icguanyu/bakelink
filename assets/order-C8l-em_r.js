@@ -1,1 +1,0 @@
-import{_ as e,c as t,o as c}from"./index-CwEIzLzH.js";const o={},r={style:{padding:"32px","text-align":"center",color:"#888"}};function n(s,_){return c(),t("div",r," 下單頁面（待建） ")}const d=e(o,[["render",n]]);export{d as default};
