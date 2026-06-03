@@ -11,7 +11,12 @@ const route = useRoute();
 const slug = route.params.slug;
 const date = route.params.date;
 
-const paymentLabel = { cash: "現金", linepay: "Line Pay", bank: "銀行轉帳", card: "信用卡" };
+const paymentLabel = {
+  cash: "現金",
+  linepay: "Line Pay",
+  bank: "銀行轉帳",
+  card: "信用卡",
+};
 const pickupMethodLabel = { PICKUP: "門市自取", DELIVERY: "宅配" };
 
 const isLoading = ref(true);
@@ -43,7 +48,7 @@ const fetchData = async () => {
     ]);
     shop.value = shopRes.data;
     schedule.value = scheduleRes.data;
-
+    console.log("schedule:", schedule.value);
     if (shop.value?.paymentMethods?.length) {
       form.payment_method = shop.value.paymentMethods[0];
     }
@@ -72,17 +77,17 @@ const cartItems = computed(() =>
       is_sliced: cart[item.id].is_sliced,
       unit_price: item.unit_price,
       name: item.product_name,
-    }))
+    })),
 );
 
 const totalAmount = computed(() =>
-  cartItems.value.reduce((sum, i) => sum + i.unit_price * i.quantity, 0)
+  cartItems.value.reduce((sum, i) => sum + i.unit_price * i.quantity, 0),
 );
 
 const isDelivery = computed(() => form.pickup_method === "DELIVERY");
 
-const hasMultiPickup = computed(() =>
-  (shop.value?.pickupMethods?.length ?? 0) > 1
+const hasMultiPickup = computed(
+  () => (shop.value?.pickupMethods?.length ?? 0) > 1,
 );
 
 const increment = (itemId, remaining) => {
@@ -98,7 +103,9 @@ const decrement = (itemId) => {
 
 const pickupTimeOptions = computed(() => {
   const dow = dayjs(date).day(); // 0=日 ~ 6=六
-  const hours = shop.value?.businessHours?.find((h) => h.day === dow && h.enabled);
+  const hours = shop.value?.businessHours?.find(
+    (h) => h.day === dow && h.enabled,
+  );
   if (!hours) return [];
 
   const [startStr, endStr] = hours.time; // ["09:00", "17:00"]
@@ -117,12 +124,30 @@ const pickupTimeOptions = computed(() => {
 });
 
 const submitOrder = async () => {
-  if (cartItems.value.length === 0) { ElMessage.warning("請至少選擇一項商品"); return; }
-  if (!form.customer_name.trim()) { ElMessage.warning("請填寫姓名"); return; }
-  if (!form.customer_phone.trim()) { ElMessage.warning("請填寫電話"); return; }
-  if (!form.pickup_time) { ElMessage.warning("請選擇取貨時間"); return; }
-  if (!form.payment_method) { ElMessage.warning("請選擇付款方式"); return; }
-  if (isDelivery.value && !form.customer_address.trim()) { ElMessage.warning("宅配需填寫地址"); return; }
+  if (cartItems.value.length === 0) {
+    ElMessage.warning("請至少選擇一項商品");
+    return;
+  }
+  if (!form.customer_name.trim()) {
+    ElMessage.warning("請填寫姓名");
+    return;
+  }
+  if (!form.customer_phone.trim()) {
+    ElMessage.warning("請填寫電話");
+    return;
+  }
+  if (!form.pickup_time) {
+    ElMessage.warning("請選擇取貨時間");
+    return;
+  }
+  if (!form.payment_method) {
+    ElMessage.warning("請選擇付款方式");
+    return;
+  }
+  if (isDelivery.value && !form.customer_address.trim()) {
+    ElMessage.warning("宅配需填寫地址");
+    return;
+  }
 
   isSubmitting.value = true;
   try {
@@ -136,7 +161,11 @@ const submitOrder = async () => {
       bring_own_bag: form.bring_own_bag,
       note: form.note.trim() || null,
       customer_address: isDelivery.value ? form.customer_address.trim() : null,
-      items: cartItems.value.map((i) => ({ schedule_item_id: i.schedule_item_id, quantity: i.quantity, is_sliced: i.is_sliced })),
+      items: cartItems.value.map((i) => ({
+        schedule_item_id: i.schedule_item_id,
+        quantity: i.quantity,
+        is_sliced: i.is_sliced,
+      })),
     });
     successOrder.value = res.data;
   } catch (err) {
@@ -154,7 +183,9 @@ const submitOrder = async () => {
 const dateLabel = computed(() => {
   if (!date) return "";
   const d = dayjs(date);
-  return d.format(`M月D日（週${ ["日","一","二","三","四","五","六"][d.day()] }）`);
+  return d.format(
+    `M月D日（週${["日", "一", "二", "三", "四", "五", "六"][d.day()]}）`,
+  );
 });
 
 const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
@@ -162,7 +193,6 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
 
 <template>
   <div class="order-page">
-
     <!-- 頂部導覽 -->
     <div class="order-nav">
       <button class="nav-back" @click="router.back()">
@@ -170,7 +200,7 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
       </button>
       <div class="nav-title">
         <div class="nav-date">{{ dateLabel }}</div>
-        <div class="nav-shop">{{ shop?.shopName ?? '' }}</div>
+        <div class="nav-shop">{{ shop?.shopName ?? "" }}</div>
       </div>
     </div>
 
@@ -179,9 +209,18 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
       <el-skeleton animated>
         <template #template>
           <div class="skeleton-wrap">
-            <el-skeleton-item variant="rect" style="width:100%;height:120px;border-radius:16px" />
-            <el-skeleton-item variant="rect" style="width:100%;height:200px;border-radius:16px" />
-            <el-skeleton-item variant="rect" style="width:100%;height:160px;border-radius:16px" />
+            <el-skeleton-item
+              variant="rect"
+              style="width: 100%; height: 120px; border-radius: 16px"
+            />
+            <el-skeleton-item
+              variant="rect"
+              style="width: 100%; height: 200px; border-radius: 16px"
+            />
+            <el-skeleton-item
+              variant="rect"
+              style="width: 100%; height: 160px; border-radius: 16px"
+            />
           </div>
         </template>
       </el-skeleton>
@@ -201,7 +240,12 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
       <div class="success-card">
         <div class="success-row">
           <span class="success-label">訂單編號</span>
-          <span class="success-val">{{ successOrder.order_no?.slice(0, -3) }}<span class="order-no-suffix">{{ successOrder.order_no?.slice(-3) }}</span></span>
+          <span class="success-val"
+            >{{ successOrder.order_no?.slice(0, -3)
+            }}<span class="order-no-suffix">{{
+              successOrder.order_no?.slice(-3)
+            }}</span></span
+          >
         </div>
         <div class="success-row">
           <span class="success-label">取貨日期</span>
@@ -209,11 +253,15 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
         </div>
         <div class="success-row">
           <span class="success-label">取貨時間</span>
-          <span class="success-val">{{ successOrder.pickup_time ?? form.pickup_time }}</span>
+          <span class="success-val">{{
+            successOrder.pickup_time ?? form.pickup_time
+          }}</span>
         </div>
         <div class="success-row">
           <span class="success-label">訂單金額</span>
-          <span class="success-val success-val--price">{{ fmt(successOrder.total_amount ?? totalAmount) }}</span>
+          <span class="success-val success-val--price">{{
+            fmt(successOrder.total_amount ?? totalAmount)
+          }}</span>
         </div>
       </div>
 
@@ -231,13 +279,18 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
           </div>
           <div class="success-item-right">
             <span class="success-item-qty">x{{ item.quantity }}</span>
-            <span class="success-item-price">{{ fmt(item.line_total ?? item.unit_price * item.quantity) }}</span>
+            <span class="success-item-price">{{
+              fmt(item.line_total ?? item.unit_price * item.quantity)
+            }}</span>
           </div>
         </div>
       </div>
 
       <p class="success-hint">請憑訂單編號到店取貨，或來電確認</p>
-      <button class="cta-btn" @click="router.push({ name: 'store-schedules', params: { slug } })">
+      <button
+        class="cta-btn"
+        @click="router.push({ name: 'store-schedules', params: { slug } })"
+      >
         回到行程頁
       </button>
     </div>
@@ -245,15 +298,20 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
     <!-- 正常下單畫面 -->
     <template v-else-if="schedule">
       <div class="order-body">
-
         <!-- 商品選擇 -->
         <section class="card">
           <div class="card__title"><i class="bx bx-basket"></i> 選擇商品</div>
-          <div v-if="!schedule.items?.length" class="empty-hint">此行程尚無品項</div>
+          <div v-if="!schedule.items?.length" class="empty-hint">
+            此行程尚無品項
+          </div>
           <div v-else class="item-list">
             <div v-for="item in schedule.items" :key="item.id" class="item-row">
               <div class="item-img">
-                <img v-if="item.image_url" :src="item.image_url" :alt="item.product_name" />
+                <img
+                  v-if="item.image_url"
+                  :src="item.image_url"
+                  :alt="item.product_name"
+                />
                 <i v-else class="bx bx-baguette"></i>
               </div>
               <div class="item-info">
@@ -263,7 +321,10 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
                   剩餘 {{ item.remaining }} 份
                 </div>
                 <!-- 切片選項，只在已選數量 > 0 時顯示 -->
-                <label v-if="(cart[item.id]?.quantity ?? 0) > 0" class="slice-toggle">
+                <label
+                  v-if="(cart[item.id]?.quantity ?? 0) > 0"
+                  class="slice-toggle"
+                >
                   <input type="checkbox" v-model="cart[item.id].is_sliced" />
                   <span class="slice-check"></span>
                   <span class="slice-label">需要切片</span>
@@ -280,7 +341,10 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
                 <span class="qty-num">{{ cart[item.id]?.quantity ?? 0 }}</span>
                 <button
                   class="qty-btn qty-btn--add"
-                  :disabled="item.remaining > 0 && (cart[item.id]?.quantity ?? 0) >= item.remaining"
+                  :disabled="
+                    item.remaining > 0 &&
+                    (cart[item.id]?.quantity ?? 0) >= item.remaining
+                  "
                   @click="increment(item.id, item.remaining)"
                 >
                   <i class="bx bx-plus"></i>
@@ -302,7 +366,9 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
                 v-for="m in shop.pickupMethods"
                 :key="m"
                 class="toggle-btn"
-                :class="{ 'toggle-btn--active': form.pickup_method === m.toUpperCase() }"
+                :class="{
+                  'toggle-btn--active': form.pickup_method === m.toUpperCase(),
+                }"
                 @click="form.pickup_method = m.toUpperCase()"
               >
                 {{ pickupMethodLabel[m.toUpperCase()] ?? m }}
@@ -313,9 +379,17 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
           <!-- 取貨時間 -->
           <div class="form-row">
             <label class="form-label">取貨時間</label>
-            <select v-model="form.pickup_time" class="form-select" :disabled="pickupTimeOptions.length === 0">
-              <option value="" disabled>{{ pickupTimeOptions.length ? '請選擇時間' : '當日無營業時間' }}</option>
-              <option v-for="t in pickupTimeOptions" :key="t" :value="t">{{ t }}</option>
+            <select
+              v-model="form.pickup_time"
+              class="form-select"
+              :disabled="pickupTimeOptions.length === 0"
+            >
+              <option value="" disabled>
+                {{ pickupTimeOptions.length ? "請選擇時間" : "當日無營業時間" }}
+              </option>
+              <option v-for="t in pickupTimeOptions" :key="t" :value="t">
+                {{ t }}
+              </option>
             </select>
           </div>
 
@@ -350,20 +424,44 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
           <div class="card__title"><i class="bx bx-user"></i> 聯絡資訊</div>
 
           <div class="form-row">
-            <label class="form-label">姓名 <span class="required">*</span></label>
-            <input v-model="form.customer_name" class="form-input" placeholder="請輸入姓名" />
+            <label class="form-label"
+              >姓名 <span class="required">*</span></label
+            >
+            <input
+              v-model="form.customer_name"
+              class="form-input"
+              placeholder="請輸入姓名"
+            />
           </div>
           <div class="form-row">
-            <label class="form-label">電話 <span class="required">*</span></label>
-            <input v-model="form.customer_phone" class="form-input" type="tel" placeholder="請輸入手機號碼" />
+            <label class="form-label"
+              >電話 <span class="required">*</span></label
+            >
+            <input
+              v-model="form.customer_phone"
+              class="form-input"
+              type="tel"
+              placeholder="請輸入手機號碼"
+            />
           </div>
           <div v-if="isDelivery" class="form-row">
-            <label class="form-label">地址 <span class="required">*</span></label>
-            <input v-model="form.customer_address" class="form-input" placeholder="請輸入收貨地址" />
+            <label class="form-label"
+              >地址 <span class="required">*</span></label
+            >
+            <input
+              v-model="form.customer_address"
+              class="form-input"
+              placeholder="請輸入收貨地址"
+            />
           </div>
           <div class="form-row">
             <label class="form-label">備註</label>
-            <textarea v-model="form.note" class="form-textarea" placeholder="特殊需求或備註（選填）" rows="2" />
+            <textarea
+              v-model="form.note"
+              class="form-textarea"
+              placeholder="特殊需求或備註（選填）"
+              rows="2"
+            />
           </div>
         </section>
 
@@ -388,7 +486,6 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
         </button>
       </div>
     </template>
-
   </div>
 </template>
 
@@ -428,7 +525,9 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   justify-content: center;
   cursor: pointer;
 
-  &:active { background: #f0e8de; }
+  &:active {
+    background: #f0e8de;
+  }
 }
 
 .nav-title {
@@ -474,8 +573,17 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   padding: 48px 20px;
   text-align: center;
 
-  i { font-size: 52px; margin-bottom: 12px; display: block; }
-  p { font-size: 16px; font-weight: 700; color: #8a7060; margin: 0; }
+  i {
+    font-size: 52px;
+    margin-bottom: 12px;
+    display: block;
+  }
+  p {
+    font-size: 16px;
+    font-weight: 700;
+    color: #8a7060;
+    margin: 0;
+  }
 }
 
 /* Success */
@@ -516,7 +624,7 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   background: #fff;
   border-radius: 16px;
   padding: 18px 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
   margin-bottom: 16px;
 }
 
@@ -527,7 +635,9 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   padding: 10px 0;
   border-bottom: 1px solid #f3ede8;
 
-  &:last-child { border-bottom: none; }
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
 .success-label {
@@ -540,7 +650,10 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   font-weight: 700;
   color: #1a120b;
 
-  &--price { color: #c08a50; font-size: 16px; }
+  &--price {
+    color: #c08a50;
+    font-size: 16px;
+  }
 }
 
 .order-no-suffix {
@@ -574,7 +687,9 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   padding: 6px 0;
   border-bottom: 1px solid #f0e8e0;
 
-  &:last-child { border-bottom: none; }
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
 .success-item-name {
@@ -637,7 +752,7 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   background: #fff;
   border-radius: 16px;
   padding: 18px 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 
   &__title {
     font-size: 13px;
@@ -650,7 +765,9 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
     align-items: center;
     gap: 6px;
 
-    i { font-size: 15px; }
+    i {
+      font-size: 15px;
+    }
   }
 }
 
@@ -673,7 +790,9 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   padding: 10px 0;
   border-bottom: 1px solid #f3ede8;
 
-  &:last-child { border-bottom: none; }
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
 .item-img {
@@ -689,7 +808,11 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   color: #d4b896;
   font-size: 24px;
 
-  img { width: 100%; height: 100%; object-fit: cover; }
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .item-info {
@@ -726,9 +849,13 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   margin-top: 6px;
   cursor: pointer;
 
-  input { display: none; }
+  input {
+    display: none;
+  }
 
-  &:active { opacity: 0.7; }
+  &:active {
+    opacity: 0.7;
+  }
 }
 
 .slice-check {
@@ -786,15 +913,22 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   cursor: pointer;
   transition: all 0.12s;
 
-  &:disabled { opacity: 0.35; cursor: default; }
-  &:not(:disabled):active { background: #f0e8de; }
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  &:not(:disabled):active {
+    background: #f0e8de;
+  }
 
   &--add {
     background: #c08a50;
     border-color: #c08a50;
     color: #fff;
 
-    &:not(:disabled):active { background: #a87440; }
+    &:not(:disabled):active {
+      background: #a87440;
+    }
   }
 }
 
@@ -810,7 +944,9 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
 .form-row {
   margin-bottom: 14px;
 
-  &:last-child { margin-bottom: 0; }
+  &:last-child {
+    margin-bottom: 0;
+  }
 
   &--inline {
     display: flex;
@@ -826,7 +962,9 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   color: #8a7060;
   margin-bottom: 7px;
 
-  .required { color: #c06050; }
+  .required {
+    color: #c06050;
+  }
 }
 
 .form-row--inline .form-label {
@@ -848,8 +986,12 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   box-sizing: border-box;
   font-family: inherit;
 
-  &::placeholder { color: #c0b0a0; }
-  &:focus { border-color: #c08a50; }
+  &::placeholder {
+    color: #c0b0a0;
+  }
+  &:focus {
+    border-color: #c08a50;
+  }
 }
 
 .form-textarea {
@@ -884,7 +1026,9 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   cursor: pointer;
   transition: all 0.15s;
 
-  &:active { opacity: 0.7; }
+  &:active {
+    opacity: 0.7;
+  }
 
   &--active {
     background: #c08a50;
@@ -898,7 +1042,9 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   position: relative;
   display: inline-block;
 
-  input { display: none; }
+  input {
+    display: none;
+  }
 
   &-track {
     display: block;
@@ -919,7 +1065,7 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
       height: 20px;
       border-radius: 50%;
       background: #fff;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
       transition: transform 0.2s;
     }
   }
@@ -927,7 +1073,9 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   input:checked + .switch-track {
     background: #c08a50;
 
-    &::after { transform: translateX(18px); }
+    &::after {
+      transform: translateX(18px);
+    }
   }
 }
 
@@ -981,13 +1129,22 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   font-weight: 700;
   letter-spacing: 0.03em;
   cursor: pointer;
-  transition: background 0.15s, box-shadow 0.15s;
+  transition:
+    background 0.15s,
+    box-shadow 0.15s;
   box-shadow: 0 4px 14px rgba(192, 138, 80, 0.35);
 
-  i { font-size: 20px; }
+  i {
+    font-size: 20px;
+  }
 
-  &:hover { background: #a87440; }
-  &:active { background: #8a5e30; box-shadow: none; }
+  &:hover {
+    background: #a87440;
+  }
+  &:active {
+    background: #8a5e30;
+    box-shadow: none;
+  }
 
   &:disabled {
     background: #d4c5b0;
