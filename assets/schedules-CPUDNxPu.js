@@ -1,1 +1,0 @@
-import{M as t}from"./index-CaM3ErPw.js";const u={Create:e=>t.post("/schedules",e),GetByDate:e=>t.get(`/schedules/${e}`),GetByMonth:e=>t.get(`/schedules/month/${e}`),Update:(e,s)=>t.put(`/schedules/${e}`,s),Delete:e=>t.delete(`/schedules/${e}`)};export{u as S};
