@@ -196,12 +196,13 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
     <!-- 頂部導覽 -->
     <div class="order-nav">
       <button class="nav-back" @click="router.back()">
-        <i class="bx bx-arrow-back"></i>
+        <i class="bx bx-chevron-left"></i>
       </button>
       <div class="nav-title">
         <div class="nav-date">{{ dateLabel }}</div>
         <div class="nav-shop">{{ shop?.shopName ?? "" }}</div>
       </div>
+      <span class="nav-spacer"></span>
     </div>
 
     <!-- 載入中 -->
@@ -503,11 +504,9 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   position: sticky;
   top: 0;
   z-index: 10;
-  background: #fff;
-  border-bottom: 1px solid #ede8e2;
+  background: #f7f3ee;
   display: flex;
   align-items: center;
-  gap: 12px;
   padding: 12px 16px;
 }
 
@@ -515,30 +514,31 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   flex-shrink: 0;
   width: 36px;
   height: 36px;
-  border-radius: 50%;
-  border: 1.5px solid #e8ddd5;
-  background: #fdf8f2;
-  color: #5c4b3e;
-  font-size: 18px;
+  border: none;
+  background: #fff;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  font-size: 20px;
+  color: #2f2a25;
 
-  &:active {
-    background: #f0e8de;
-  }
+  &:active { opacity: 0.7; }
 }
 
 .nav-title {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 2px;
 }
 
 .nav-date {
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 700;
   color: #1a120b;
   line-height: 1.2;
 }
@@ -546,6 +546,11 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
 .nav-shop {
   font-size: 12px;
   color: #8a7060;
+}
+
+.nav-spacer {
+  width: 36px;
+  flex-shrink: 0;
 }
 
 /* States */

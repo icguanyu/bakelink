@@ -3,7 +3,30 @@
     "allow": [
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\user\\\\Desktop\\\\bakelink\" -Force)",
       "Bash(Select-Object Name, FullName)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(wmux browser *)",
+      "Bash(curl -s \"https://bakelink-backend-239173126142.asia-east1.run.app/docs/json\")",
+      "Bash(curl -s \"https://bakelink-backend-239173126142.asia-east1.run.app/openapi.json\")",
+      "Bash(curl -s \"https://bakelink-backend-239173126142.asia-east1.run.app/docs/swagger.json\")",
+      "Bash(curl -s \"https://bakelink-backend-239173126142.asia-east1.run.app/api-json\")",
+      "Bash(curl -s \"https://bakelink-backend-239173126142.asia-east1.run.app/swagger.json\")",
+      "Bash(curl -s \"https://bakelink-backend-239173126142.asia-east1.run.app/docs/swagger-ui-init.js\")",
+      "Bash(npx vite *)",
+      "Bash(curl -s \"https://bakelink-backend-239173126142.asia-east1.run.app/shop/umai/schedules?month=2026-06\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s \"https://bakelink-backend-239173126142.asia-east1.run.app/api-docs\")",
+      "Bash(python3 -c ' *)",
+      "Bash(grep -E \"main\\\\.\\(js|ts\\)$\")",
+      "Bash(grep -E \"\\\\.\\(css|scss\\)$\")",
+      "Bash(grep \"\\\\.vue$\")",
+      "Bash(npx vue-tsc *)",
+      "Bash(git restore *)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\user\\.claude\\projects\\c--Users-user-Desktop-bakelink\\memory"
     ]
   }
 }
