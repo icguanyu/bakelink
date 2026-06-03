@@ -151,7 +151,16 @@ const hasDelivery = computed(
           <div class="card__title"><i class="bx bx-map-pin"></i> 店家資訊</div>
           <div v-if="shop.address" class="info-row">
             <span class="info-row__label">地址</span>
-            <span>{{ shop.address }}</span>
+            <span class="info-row__address">
+              {{ shop.address }}
+              <a
+                :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(shop.address)}`"
+                target="_blank"
+                rel="noopener"
+                class="map-link"
+                title="在 Google Maps 開啟"
+              ><i class="bx bx-map"></i></a>
+            </span>
           </div>
           <div v-if="shop.phone" class="info-row">
             <span class="info-row__label">電話</span>
@@ -506,6 +515,31 @@ const hasDelivery = computed(
       color: #c08a50;
     }
   }
+
+  &__address {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+}
+
+.map-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: #edfaf3;
+  color: #1e7a48;
+  font-size: 14px;
+  flex-shrink: 0;
+  text-decoration: none;
+  transition: background 0.15s;
+
+  &:hover { background: #d0f0e0; }
+  &:active { background: #b0e8cc; }
 }
 
 /* Business hours */

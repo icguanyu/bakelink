@@ -105,7 +105,7 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
           >
             <div class="order-header-left">
               <div class="order-no">{{ order.order_no }}</div>
-              <div class="order-date-chip">{{ fmtDate(order.schedule_date) }}</div>
+              <div v-if="!isPast(order)" class="order-date-chip">{{ fmtDate(order.schedule_date) }}</div>
             </div>
             <div class="order-header-right">
               <span
@@ -114,7 +114,7 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
               >
                 {{ statusLabel[order.status] ?? order.status }}
               </span>
-              <span class="order-total-mini">{{ fmt(order.total_amount) }}</span>
+              <span v-if="!isPast(order)" class="order-total-mini">{{ fmt(order.total_amount) }}</span>
               <i
                 v-if="isPast(order)"
                 class="bx order-chevron"
