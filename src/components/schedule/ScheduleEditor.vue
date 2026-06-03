@@ -3,7 +3,7 @@ import { ref, reactive, watch, computed } from "vue";
 import dayjs from "dayjs";
 import { Schedules } from "@/api/schedules";
 import { scheduleStatusOptions } from "@/utils/constants";
-import { ElNotification, ElMessage } from "element-plus";
+import { ElNotification, ElMessage, ElMessageBox } from "element-plus";
 
 const formRef = ref(null);
 const statusOptions = scheduleStatusOptions;
@@ -59,10 +59,13 @@ const initializeDateTimeFields = () => {
     const startDateTime = dayjs(form.order_start_at);
     orderStartDate.value = startDateTime.format("YYYY-MM-DD");
     orderStartTime.value = startDateTime.format("HH:mm");
-  } else {
-    // 預設為今日 09:00
+  } else if (form.status === "OPEN") {
+    // OPEN 才預設時間，ANNOUNCED 留空讓使用者自行填寫
     orderStartDate.value = dayjs().format("YYYY-MM-DD");
     orderStartTime.value = "09:00";
+  } else {
+    orderStartDate.value = "";
+    orderStartTime.value = "";
   }
   if (form.order_end_at) {
     const endDateTime = dayjs(form.order_end_at);
@@ -112,7 +115,9 @@ watch(orderEndDate, (newDate) => {
   }
 });
 
-const needsOrderTime = computed(() => form.status === "OPEN");
+const needsStartTime = computed(() => form.status === "OPEN" || form.status === "ANNOUNCED");
+const needsEndTime   = computed(() => form.status === "OPEN");
+const needsOrderTime = needsEndTime; // 向後相容（saveEditor / beforeSave 用）
 
 const excludeProductIds = computed(() => {
   return form.items.map((item) => item.product_id);
@@ -163,11 +168,13 @@ const closeEditor = () => {
 };
 
 const beforeSave = (formRef) => {
-  if (needsOrderTime.value) {
+  if (needsEndTime.value) {
     if (!orderStartDate.value || !orderStartTime.value) {
-      ElMessage.error("收單中狀態需填寫開單開始時間");
+      ElMessage.error("請填寫開單開始時間");
       return;
     }
+  }
+  if (needsEndTime.value) {
     if (!orderEndDate.value || !orderEndTime.value) {
       ElMessage.error("收單中狀態需填寫開單截止時間");
       return;
@@ -184,15 +191,12 @@ const beforeSave = (formRef) => {
 };
 
 const saveEditor = async () => {
-  // 只有 OPEN 狀態才組合時間（其他狀態保留原有值）
-  if (needsOrderTime.value) {
-    if (orderStartDate.value && orderStartTime.value) {
-      form.order_start_at = `${orderStartDate.value} ${orderStartTime.value}`;
-    }
-    if (orderEndDate.value) {
-      const endTime = orderEndTime.value || "00:00";
-      form.order_end_at = `${orderEndDate.value} ${endTime}`;
-    }
+  if (needsStartTime.value && orderStartDate.value && orderStartTime.value) {
+    form.order_start_at = `${orderStartDate.value} ${orderStartTime.value}:00`;
+  }
+  if (needsEndTime.value && orderEndDate.value) {
+    const endTime = orderEndTime.value || "00:00";
+    form.order_end_at = `${orderEndDate.value} ${endTime}:00`;
   }
 
   loading.value = true;
@@ -318,42 +322,54 @@ const deleteSchedule = async () => {
             </el-form-item>
           </div>
 
-          <template v-if="needsOrderTime">
-            <el-form-item label="開單開始時間" class="field">
-              <div class="datetime-inputs">
-                <el-date-picker
-                  v-model="orderStartDate"
-                  type="date"
-                  placeholder="選擇日期"
-                  value-format="YYYY-MM-DD"
-                />
-                <el-time-select
-                  v-model="orderStartTime"
-                  placeholder="選擇時間"
-                  start="00:00"
-                  step="00:30"
-                  end="23:30"
-                />
-              </div>
-            </el-form-item>
-            <el-form-item label="開單截止時間" class="field">
-              <div class="datetime-inputs">
-                <el-date-picker
-                  v-model="orderEndDate"
-                  type="date"
-                  placeholder="選擇日期"
-                  value-format="YYYY-MM-DD"
-                />
-                <el-time-select
-                  v-model="orderEndTime"
-                  placeholder="選擇時間"
-                  start="00:00"
-                  step="00:30"
-                  end="23:30"
-                />
-              </div>
-            </el-form-item>
-          </template>
+          <!-- 狀態說明 -->
+          <div v-if="form.status" class="status-hint" :class="`status-hint--${form.status.toLowerCase()}`">
+            <template v-if="form.status === 'ANNOUNCED'">
+              <i class="el-icon-info"></i>
+              <span><b>預告模式</b>：行程對客人可見，但尚未開放下單。填寫「開單開始時間」後，客人可將提醒加入行事曆，到時間自動通知。</span>
+            </template>
+            <template v-else-if="form.status === 'OPEN'">
+              <span><b>接單中</b>：客人可立即下單。需設定開單區間（開始 → 截止），超過截止時間後請手動切換為「已結單」。</span>
+            </template>
+            <template v-else-if="form.status === 'CLOSED'">
+              <span><b>已結單</b>：停止接受新訂單，行程仍對客人可見但按鈕會顯示「已結單」。</span>
+            </template>
+          </div>
+
+          <el-form-item v-if="needsStartTime" label="開單開始時間" class="field">
+            <div class="datetime-inputs">
+              <el-date-picker
+                v-model="orderStartDate"
+                type="date"
+                placeholder="選擇日期"
+                value-format="YYYY-MM-DD"
+              />
+              <el-time-select
+                v-model="orderStartTime"
+                placeholder="選擇時間"
+                start="00:00"
+                step="00:30"
+                end="23:30"
+              />
+            </div>
+          </el-form-item>
+          <el-form-item v-if="needsEndTime" label="開單截止時間" class="field">
+            <div class="datetime-inputs">
+              <el-date-picker
+                v-model="orderEndDate"
+                type="date"
+                placeholder="選擇日期"
+                value-format="YYYY-MM-DD"
+              />
+              <el-time-select
+                v-model="orderEndTime"
+                placeholder="選擇時間"
+                start="00:00"
+                step="00:30"
+                end="23:30"
+              />
+            </div>
+          </el-form-item>
         </el-form>
       </div>
 
@@ -487,6 +503,37 @@ const deleteSchedule = async () => {
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 6px;
+}
+
+.status-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 4px;
+
+  b { font-weight: 700; }
+
+  &--announced {
+    background: #eef2ff;
+    color: #3050a0;
+    border-left: 3px solid #6080d0;
+  }
+
+  &--open {
+    background: #e8f9ef;
+    color: #1a6b40;
+    border-left: 3px solid #2eaa62;
+  }
+
+  &--closed {
+    background: #f1f5f9;
+    color: #475569;
+    border-left: 3px solid #94a3b8;
+  }
 }
 
 .section-note {

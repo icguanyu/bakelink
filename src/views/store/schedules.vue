@@ -67,8 +67,17 @@ const monthSchedules = computed(() =>
 );
 
 const statusConfig = {
-  OPEN:      { label: "接單中", class: "badge--open" },
-  ANNOUNCED: { label: "即將開放", class: "badge--announced" },
+  OPEN: { label: "接單中", class: "badge--open" },
+};
+
+const getBadge = (s) => {
+  if (s.status === "OPEN") return { label: "接單中", class: "badge--open" };
+  if (s.status === "ANNOUNCED") {
+    const dt = s.order_start_at ? dayjs(s.order_start_at) : null;
+    const label = dt ? `${dt.format("MM/DD HH:mm")} 開放預訂` : "即將開放";
+    return { label, class: "badge--announced" };
+  }
+  return { label: s.status, class: "" };
 };
 
 const isPastSchedule = (s) =>
@@ -90,6 +99,49 @@ const goOrder = (schedule) => {
 
 const formatDeadline = (iso) =>
   dayjs(iso).format("M/D HH:mm");
+
+const addToCalendar = (s) => {
+  const shopName = route.params.slug;
+  const summary = `開放預訂通知`;
+  const description = `${shopName} 的接單行程即將開放，記得來下單！`;
+
+  let dtStart, dtEnd;
+  if (s.order_start_at) {
+    const dt = dayjs(s.order_start_at);
+    dtStart = `DTSTART:${dt.format("YYYYMMDDTHHmmss")}`;
+    dtEnd   = `DTEND:${dt.add(30, "minute").format("YYYYMMDDTHHmmss")}`;
+  } else {
+    const dateStr = dayjs(s.schedule_date).format("YYYYMMDD");
+    dtStart = `DTSTART;VALUE=DATE:${dateStr}`;
+    dtEnd   = `DTEND;VALUE=DATE:${dateStr}`;
+  }
+
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//BakeLink//BakeLink//EN",
+    "BEGIN:VEVENT",
+    dtStart,
+    dtEnd,
+    `SUMMARY:${summary}`,
+    `DESCRIPTION:${description}`,
+    "BEGIN:VALARM",
+    "TRIGGER:-PT0M",
+    "ACTION:DISPLAY",
+    `DESCRIPTION:${shopName} 現在開放預訂囉！`,
+    "END:VALARM",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+
+  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `bakelink-${s.schedule_date}.ics`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
 </script>
 
 <template>
@@ -179,6 +231,7 @@ const formatDeadline = (iso) =>
       </div>
 
       <!-- 行程卡片 -->
+      <template v-else>
       <div
         v-for="s in monthSchedules"
         :key="s.id"
@@ -218,13 +271,16 @@ const formatDeadline = (iso) =>
               <span class="schedule-card__weekday">
                 週{{ ["日","一","二","三","四","五","六"][dayjs(s.schedule_date).day()] }}
               </span>
-              <span class="badge" :class="statusConfig[s.status]?.class">
-                {{ statusConfig[s.status]?.label }}
+              <span class="badge" :class="getBadge(s).class">
+                {{ getBadge(s).label }}
               </span>
             </div>
-            <div class="schedule-card__deadline">
+            <div v-if="s.status !== 'ANNOUNCED'" class="schedule-card__deadline">
               截單：{{ formatDeadline(s.order_end_at) }}
             </div>
+            <button v-if="s.status === 'ANNOUNCED' && s.order_start_at" class="cal-btn" @click.stop="addToCalendar(s)">
+              <i class="bx bx-calendar-plus"></i> 加入行事曆提醒
+            </button>
             <div v-if="s.note" class="schedule-card__note">
               <i class="bx bx-info-circle"></i> {{ s.note }}
             </div>
@@ -265,6 +321,7 @@ const formatDeadline = (iso) =>
           </el-button>
         </template>
       </div>
+      </template>
     </div>
   </div>
 </template>
@@ -641,6 +698,27 @@ const formatDeadline = (iso) =>
     font-size: 15px;
     font-weight: 700;
   }
+}
+
+.cal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1.5px solid #c8d8e8;
+  background: #f0f6fb;
+  color: #4a7fa5;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+
+  i { font-size: 14px; }
+  &:hover { background: #ddeef8; }
+  &:active { background: #cce4f4; }
 }
 
 /* Badge */
