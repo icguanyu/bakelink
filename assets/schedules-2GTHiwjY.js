@@ -1,0 +1,1 @@
+import{N as t}from"./index-zgoYxAWe.js";const u={Create:e=>t.post("/schedules",e),GetByDate:e=>t.get(`/schedules/${e}`),GetByMonth:e=>t.get(`/schedules/month/${e}`),Update:(e,s)=>t.put(`/schedules/${e}`,s),Delete:e=>t.delete(`/schedules/${e}`)};export{u as S};
