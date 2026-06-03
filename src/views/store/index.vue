@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { Loading } from "@element-plus/icons-vue";
 import { Shop } from "@/api/shop";
 
 const router = useRouter();
@@ -24,10 +25,15 @@ const shop = ref(null);
 const isLoading = ref(true);
 const notFound = ref(false);
 
+// 商品相關
+const categories = ref([]);
+const products = ref([]);
+const activeCategoryId = ref(null);
+const productsLoading = ref(false);
+
 const fetchShop = async () => {
   try {
     const res = await Shop.GetInfo(route.params.slug);
-    console.log("店家資料", res.data);
     shop.value = res.data;
   } catch (err) {
     if (err?.response?.status === 404) {
@@ -38,7 +44,38 @@ const fetchShop = async () => {
   }
 };
 
-onMounted(fetchShop);
+const fetchCategories = async () => {
+  try {
+    const res = await Shop.GetCategories(route.params.slug);
+    categories.value = res.data?.data ?? [];
+    console.log("categories", categories.value);
+  } catch {}
+};
+
+const fetchProducts = async () => {
+  productsLoading.value = true;
+  try {
+    const params = activeCategoryId.value
+      ? { category_id: activeCategoryId.value }
+      : {};
+    const res = await Shop.GetProducts(route.params.slug, params);
+    products.value = res.data?.data ?? [];
+  } catch {
+    products.value = [];
+  } finally {
+    productsLoading.value = false;
+  }
+};
+
+onMounted(async () => {
+  await fetchShop();
+  if (!notFound.value) {
+    fetchCategories();
+    fetchProducts();
+  }
+});
+
+watch(activeCategoryId, fetchProducts);
 
 const activeHours = computed(
   () => shop.value?.businessHours?.filter((h) => h.enabled) ?? [],
@@ -102,7 +139,7 @@ const hasDelivery = computed(
             </span>
           </div>
           <h1 class="hero__name">{{ shop.shopName }}</h1>
-          <p class="hero__owner">by {{ shop.ownerName }}</p>
+          <!-- <p class="hero__owner">by {{ shop.ownerName }}</p> -->
           <p v-if="shop.intro" class="hero__intro">{{ shop.intro }}</p>
         </div>
       </div>
@@ -113,11 +150,11 @@ const hasDelivery = computed(
         <div class="card">
           <div class="card__title"><i class="bx bx-map-pin"></i> 店家資訊</div>
           <div v-if="shop.address" class="info-row">
-            <span class="info-row__icon"><i class="bx bx-map"></i></span>
+            <span class="info-row__label">地址</span>
             <span>{{ shop.address }}</span>
           </div>
           <div v-if="shop.phone" class="info-row">
-            <span class="info-row__icon"><i class="bx bx-phone"></i></span>
+            <span class="info-row__label">電話</span>
             <a :href="`tel:${shop.phone}`" class="info-row__link">{{
               shop.phone
             }}</a>
@@ -142,33 +179,39 @@ const hasDelivery = computed(
           </div>
         </div>
 
-        <!-- 付款方式 -->
-        <div v-if="shop.paymentMethods?.length" class="card">
+        <!-- 付款 & 取貨方式 -->
+        <div
+          v-if="shop.paymentMethods?.length || shop.pickupMethods?.length"
+          class="card"
+        >
           <div class="card__title">
-            <i class="bx bx-credit-card"></i> 付款方式
+            <i class="bx bx-credit-card"></i> 付款 & 取貨
           </div>
-          <div class="tags">
-            <span
-              v-for="m in shop.paymentMethods"
-              :key="m"
-              class="tag tag--payment"
-            >
-              {{ paymentLabel[m] ?? m }}
-            </span>
-          </div>
-        </div>
-
-        <!-- 取貨方式 -->
-        <div v-if="shop.pickupMethods?.length" class="card">
-          <div class="card__title"><i class="bx bx-package"></i> 取貨方式</div>
-          <div class="tags">
-            <span
-              v-for="m in shop.pickupMethods"
-              :key="m"
-              class="tag tag--pickup"
-            >
-              {{ pickupLabel[m] ?? m }}
-            </span>
+          <div class="method-group">
+            <div v-if="shop.paymentMethods?.length" class="method-row">
+              <span class="method-row__label">付款</span>
+              <div class="tags">
+                <span
+                  v-for="m in shop.paymentMethods"
+                  :key="m"
+                  class="tag tag--payment"
+                >
+                  {{ paymentLabel[m] ?? m }}
+                </span>
+              </div>
+            </div>
+            <div v-if="shop.pickupMethods?.length" class="method-row">
+              <span class="method-row__label">取貨</span>
+              <div class="tags">
+                <span
+                  v-for="m in shop.pickupMethods"
+                  :key="m"
+                  class="tag tag--pickup"
+                >
+                  {{ pickupLabel[m] ?? m }}
+                </span>
+              </div>
+            </div>
           </div>
           <div v-if="hasDelivery && shop.shipping?.note" class="shipping-note">
             <i class="bx bx-info-circle"></i>
@@ -176,12 +219,103 @@ const hasDelivery = computed(
           </div>
         </div>
 
+        <!-- 本店商品 -->
+        <div class="card card--products">
+          <div class="card__title"><i class="bx bx-store"></i> 本店商品</div>
+
+          <!-- 種類 tabs -->
+          <div v-if="categories.length > 0" class="cat-tabs">
+            <button
+              v-for="cat in categories"
+              :key="cat.id"
+              class="cat-tab"
+              :class="{ 'cat-tab--active': activeCategoryId === cat.id }"
+              @click="activeCategoryId = cat.id"
+            >
+              {{ cat.name }}
+            </button>
+            <button
+              class="cat-tab cat-tab--all"
+              :class="{ 'cat-tab--all-active': activeCategoryId === null }"
+              @click="activeCategoryId = null"
+            >
+              全部
+            </button>
+          </div>
+
+          <!-- 商品清單 -->
+          <!-- 初次載入 skeleton -->
+          <div
+            v-if="productsLoading && products.length === 0"
+            class="product-skeleton"
+          >
+            <div v-for="n in 4" :key="n" class="product-skeleton__item">
+              <el-skeleton-item
+                variant="image"
+                style="width: 100%; aspect-ratio: 1; border-radius: 12px"
+              />
+              <el-skeleton-item
+                variant="text"
+                style="width: 70%; margin-top: 8px"
+              />
+              <el-skeleton-item variant="text" style="width: 40%" />
+            </div>
+          </div>
+
+          <div
+            v-else-if="!productsLoading && products.length === 0"
+            class="empty-hint"
+            style="margin-top: 4px"
+          >
+            尚無上架商品
+          </div>
+
+          <!-- 切換種類時 grid 保留，疊加 loading overlay -->
+          <div
+            v-else
+            class="product-grid-wrap"
+            :class="{ 'product-grid-wrap--loading': productsLoading }"
+          >
+            <div class="product-grid-overlay" v-if="productsLoading">
+              <el-icon class="is-loading" size="28" color="#c08a50"
+                ><Loading
+              /></el-icon>
+            </div>
+            <div class="product-grid">
+              <div
+                v-for="product in products"
+                :key="product.id"
+                class="product-card"
+              >
+                <!-- 圖片 -->
+                <div class="product-card__img-wrap">
+                  <img
+                    v-if="product.image_urls?.[0]"
+                    :src="product.image_urls[0]"
+                    :alt="product.name"
+                    class="product-card__img"
+                  />
+                  <div v-else class="product-card__img-fallback">
+                    <i class="bx bx-baguette"></i>
+                  </div>
+                </div>
+                <!-- 資訊 -->
+                <div class="product-card__info">
+                  <div class="product-card__name">{{ product.name }}</div>
+                  <div v-if="product.description" class="product-card__desc">
+                    {{ product.description }}
+                  </div>
+                  <div class="product-card__price">NT$ {{ product.price }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- CTA -->
         <div class="cta-block">
-          <el-button
-            type="primary"
-            rounded
-            icon="calendar"
+          <button
+            class="cta-btn"
             @click="
               router.push({
                 name: 'store-schedules',
@@ -189,8 +323,21 @@ const hasDelivery = computed(
               })
             "
           >
+            <i class="bx bx-calendar-check"></i>
             查看接單行程
-          </el-button>
+          </button>
+          <button
+            class="cta-btn cta-btn--ghost"
+            @click="
+              router.push({
+                name: 'store-order-lookup',
+                params: { slug: route.params.slug },
+              })
+            "
+          >
+            <i class="bx bx-receipt"></i>
+            查詢我的訂單
+          </button>
         </div>
       </div>
     </template>
@@ -343,12 +490,12 @@ const hasDelivery = computed(
     margin-top: 10px;
   }
 
-  &__icon {
+  &__label {
     flex-shrink: 0;
-    width: 20px;
-    color: #c08a50;
-    font-size: 16px;
-    margin-top: 1px;
+    width: 32px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #8a7060;
   }
 
   &__link {
@@ -426,6 +573,32 @@ const hasDelivery = computed(
   }
 }
 
+/* Method group */
+.method-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.method-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  &__label {
+    flex-shrink: 0;
+    width: 32px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #8a7060;
+    padding-top: 5px;
+  }
+
+  .tags {
+    flex: 1;
+  }
+}
+
 /* Shipping note */
 .shipping-note {
   margin-top: 12px;
@@ -450,8 +623,225 @@ const hasDelivery = computed(
 /* CTA */
 .cta-block {
   padding: 8px 0 4px;
-  .el-button {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cta-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border-radius: 999px;
+  border: none;
+  background: #c08a50;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    box-shadow 0.15s;
+  box-shadow: 0 4px 14px rgba(192, 138, 80, 0.35);
+
+  i {
+    font-size: 18px;
+  }
+
+  &:hover {
+    background: #a87440;
+    box-shadow: 0 6px 18px rgba(192, 138, 80, 0.45);
+  }
+
+  &:active {
+    background: #8a5e30;
+    box-shadow: none;
+  }
+
+  &--ghost {
+    background: #fff;
+    color: #8a7060;
+    border: 1.5px solid #e8ddd5;
+    box-shadow: none;
+
+    &:hover {
+      background: #fff;
+     
+      color: #c08a50;
+      box-shadow: none;
+    }
+
+    &:active {
+      background: #f0e8de;
+      box-shadow: none;
+    }
+  }
+}
+
+/* Products card */
+.card--products {
+  padding-bottom: 20px;
+}
+
+/* Category tabs */
+.cat-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.cat-tab {
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1.5px solid #e8ddd5;
+  background: #fdf8f2;
+  color: #8a7060;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:active {
+    opacity: 0.7;
+  }
+
+  &--active {
+    background: #c08a50;
+    border-color: #c08a50;
+    color: #fff;
+  }
+
+  &--all {
+    border-color: #c8d8e8;
+    background: #f0f6fb;
+    color: #5a7a96;
+  }
+
+  &--all-active {
+    background: #4a7fa5;
+    border-color: #4a7fa5;
+    color: #fff;
+  }
+}
+
+/* Product grid */
+.product-grid-wrap {
+  position: relative;
+
+  &--loading .product-grid {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+}
+
+.product-grid-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+
+  .el-icon {
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.product-skeleton {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+:deep(.el-skeleton) {
+  --el-skeleton-color: #e8ddd5;
+  --el-skeleton-to-color: #f0e8e0;
+}
+
+.product-card {
+  background: #fdf8f2;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #f0e8de;
+
+  &__img-wrap {
     width: 100%;
+    aspect-ratio: 1.4;
+    overflow: hidden;
+    background: #f5ede3;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &__img-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #d4b896;
+    font-size: 36px;
+  }
+
+  &__info {
+    padding: 10px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  &__name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a120b;
+    line-height: 1.35;
+  }
+
+  &__desc {
+    font-size: 12px;
+    color: #9a8070;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__price {
+    font-size: 14px;
+    font-weight: 800;
+    color: #c08a50;
+    margin-top: 4px;
   }
 }
 </style>

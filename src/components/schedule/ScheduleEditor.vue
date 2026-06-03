@@ -112,6 +112,8 @@ watch(orderEndDate, (newDate) => {
   }
 });
 
+const needsOrderTime = computed(() => form.status === "OPEN");
+
 const excludeProductIds = computed(() => {
   return form.items.map((item) => item.product_id);
 });
@@ -134,7 +136,7 @@ const addProduct = () => {
   form.items.push({
     product_id: product.id,
     product_name: product.name,
-    sales_limit: 0,
+    sales_limit: null,
   });
   selectedProductId.value = "";
 };
@@ -144,17 +146,13 @@ const removeProduct = (id) => {
 };
 
 const incrementLimit = (item) => {
+  if (item.sales_limit === null) return;
   item.sales_limit++;
 };
 
 const decrementLimit = (item) => {
-  if (item.sales_limit > 0) {
-    item.sales_limit--;
-  }
-  // 當數量降至 0 時自動刪除
-  if (item.sales_limit === 0) {
-    removeProduct(item.product_id);
-  }
+  if (item.sales_limit === null || item.sales_limit <= 0) return;
+  item.sales_limit--;
 };
 
 const closeEditor = () => {
@@ -165,6 +163,16 @@ const closeEditor = () => {
 };
 
 const beforeSave = (formRef) => {
+  if (needsOrderTime.value) {
+    if (!orderStartDate.value || !orderStartTime.value) {
+      ElMessage.error("收單中狀態需填寫開單開始時間");
+      return;
+    }
+    if (!orderEndDate.value || !orderEndTime.value) {
+      ElMessage.error("收單中狀態需填寫開單截止時間");
+      return;
+    }
+  }
   const isEmptyProducts = form.items.length === 0;
   formRef.validate((valid) => {
     if (valid && !isEmptyProducts) {
@@ -176,14 +184,15 @@ const beforeSave = (formRef) => {
 };
 
 const saveEditor = async () => {
-  // 組合日期和時間
-  if (orderStartDate.value && orderStartTime.value) {
-    form.order_start_at = `${orderStartDate.value} ${orderStartTime.value}`;
-  }
-  if (orderEndDate.value) {
-    // 若未填時間，預設為當天 00:00
-    const endTime = orderEndTime.value || "00:00";
-    form.order_end_at = `${orderEndDate.value} ${endTime}`;
+  // 只有 OPEN 狀態才組合時間（其他狀態保留原有值）
+  if (needsOrderTime.value) {
+    if (orderStartDate.value && orderStartTime.value) {
+      form.order_start_at = `${orderStartDate.value} ${orderStartTime.value}`;
+    }
+    if (orderEndDate.value) {
+      const endTime = orderEndTime.value || "00:00";
+      form.order_end_at = `${orderEndDate.value} ${endTime}`;
+    }
   }
 
   loading.value = true;
@@ -309,46 +318,48 @@ const deleteSchedule = async () => {
             </el-form-item>
           </div>
 
-          <el-form-item label="開單開始時間" class="field" required>
-            <div class="datetime-inputs">
-              <el-date-picker
-                v-model="orderStartDate"
-                type="date"
-                placeholder="選擇日期"
-                value-format="YYYY-MM-DD"
-              />
-              <el-time-select
-                v-model="orderStartTime"
-                placeholder="選擇時間"
-                start="00:00"
-                step="00:30"
-                end="23:30"
-              />
-            </div>
-          </el-form-item>
-          <el-form-item label="開單截止時間" class="field" required>
-            <div class="datetime-inputs">
-              <el-date-picker
-                v-model="orderEndDate"
-                type="date"
-                placeholder="選擇日期"
-                value-format="YYYY-MM-DD"
-              />
-              <el-time-select
-                v-model="orderEndTime"
-                placeholder="選擇時間"
-                start="00:00"
-                step="00:30"
-                end="23:30"
-              />
-            </div>
-          </el-form-item>
+          <template v-if="needsOrderTime">
+            <el-form-item label="開單開始時間" class="field">
+              <div class="datetime-inputs">
+                <el-date-picker
+                  v-model="orderStartDate"
+                  type="date"
+                  placeholder="選擇日期"
+                  value-format="YYYY-MM-DD"
+                />
+                <el-time-select
+                  v-model="orderStartTime"
+                  placeholder="選擇時間"
+                  start="00:00"
+                  step="00:30"
+                  end="23:30"
+                />
+              </div>
+            </el-form-item>
+            <el-form-item label="開單截止時間" class="field">
+              <div class="datetime-inputs">
+                <el-date-picker
+                  v-model="orderEndDate"
+                  type="date"
+                  placeholder="選擇日期"
+                  value-format="YYYY-MM-DD"
+                />
+                <el-time-select
+                  v-model="orderEndTime"
+                  placeholder="選擇時間"
+                  start="00:00"
+                  step="00:30"
+                  end="23:30"
+                />
+              </div>
+            </el-form-item>
+          </template>
         </el-form>
       </div>
 
       <div class="editor-section">
         <div class="section-title">今日出爐產品</div>
-        <div class="section-note">可售為 0 表示不設定上限</div>
+        <div class="section-note">不設上限則任意數量皆可下單</div>
         <div class="section-content">
           <div class="field-row add-row">
             <SelectProduct
@@ -373,28 +384,45 @@ const deleteSchedule = async () => {
                   <div class="product-name">{{ item.product_name }}</div>
                 </div>
                 <div class="product-limit">
-                  <div class="field-label">可售</div>
-                  <div class="quantity-control">
+                  <!-- 不限量 -->
+                  <template v-if="item.sales_limit === null">
+                    <span class="limit-badge">不限量</span>
                     <el-button
-                      :icon="'Minus'"
-                      circle
                       size="small"
-                      @click="decrementLimit(item)"
-                    />
-                    <el-input
-                      v-model.number="item.sales_limit"
-                      class="quantity-input"
-                      inputmode="numeric"
-                    />
-                    <el-button
-                      :icon="'Plus'"
-                      circle
-                      type="primary"
                       plain
+                      @click="item.sales_limit = 10"
+                    >設上限</el-button>
+                  </template>
+                  <!-- 限量 -->
+                  <template v-else>
+                    <div class="quantity-control">
+                      <el-button
+                        icon="Minus"
+                        circle
+                        size="small"
+                        :disabled="item.sales_limit <= 0"
+                        @click="decrementLimit(item)"
+                      />
+                      <el-input
+                        v-model.number="item.sales_limit"
+                        class="quantity-input"
+                        inputmode="numeric"
+                      />
+                      <el-button
+                        icon="Plus"
+                        circle
+                        type="primary"
+                        plain
+                        size="small"
+                        @click="incrementLimit(item)"
+                      />
+                    </div>
+                    <el-button
                       size="small"
-                      @click="incrementLimit(item)"
-                    />
-                  </div>
+                      plain
+                      @click="item.sales_limit = null"
+                    >不限量</el-button>
+                  </template>
                 </div>
               </div>
             </div>
@@ -552,7 +580,18 @@ const deleteSchedule = async () => {
 .product-limit {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+}
+
+.limit-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 3px 10px;
+  white-space: nowrap;
 }
 
 .quantity-control {

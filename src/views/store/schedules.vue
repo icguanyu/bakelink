@@ -229,7 +229,7 @@ const formatDeadline = (iso) =>
           立即訂購
         </el-button>
         <el-button v-else disabled class="schedule-card__btn">
-          尚未開放
+          {{ s.status === 'CLOSED' ? '已結單' : '尚未開放' }}
         </el-button>
       </div>
     </div>
@@ -615,7 +615,7 @@ const formatDeadline = (iso) =>
   }
 
   &__name {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: #3a2e28;
     white-space: nowrap;
@@ -624,7 +624,7 @@ const formatDeadline = (iso) =>
   }
 
   &__price {
-    font-size: 12px;
+    font-size: 14px;
     color: #a89080;
     white-space: nowrap;
     flex-shrink: 0;

@@ -6,7 +6,6 @@ export const scheduleStatusOptions = [
   { label: "預告", value: "ANNOUNCED" },
   { label: "收單中", value: "OPEN" },
   { label: "已結單", value: "CLOSED" },
-  { label: "出貨結束", value: "FULFILLED" },
 ];
 
 /**

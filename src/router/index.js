@@ -25,6 +25,11 @@ const router = createRouter({
       component: () => import("../views/store/order.vue"),
     },
     {
+      path: "/s/:slug/orders",
+      name: "store-order-lookup",
+      component: () => import("../views/store/order-lookup.vue"),
+    },
+    {
       path: "/shop",
       name: "shop",
       meta: { requireAuth: true },

@@ -22,8 +22,24 @@ export const Shop = {
     return request.post(`/shop/${slug}/orders`, data);
   },
 
-  // 消費者查詢訂單（以電話驗證身份）
+  // 消費者查詢單筆訂單（以電話驗證身份）
   GetOrder: (slug, orderNo, phone) => {
     return request.get(`/shop/${slug}/orders/${orderNo}`, { params: { phone } });
+  },
+
+  // 消費者查詢該電話的所有訂單（不限狀態，找不到回 { data: [] }）
+  GetOrdersByPhone: (slug, phone) => {
+    return request.get(`/shop/${slug}/orders`, { params: { phone } });
+  },
+
+  // 取得店家有上架商品的種類清單（只回傳至少有一個 is_active 商品的種類）
+  GetCategories: (slug) => {
+    return request.get(`/shop/${slug}/categories`);
+  },
+
+  // 取得店家上架商品清單（is_active = true）
+  // params: { category_id: uuid }（選填）
+  GetProducts: (slug, params) => {
+    return request.get(`/shop/${slug}/products`, { params });
   },
 };

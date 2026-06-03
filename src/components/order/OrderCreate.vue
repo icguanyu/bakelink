@@ -1,5 +1,6 @@
 <script setup>
 import { ref, reactive, computed, nextTick, watch } from "vue";
+import dayjs from "dayjs";
 import { Orders } from "@/api/orders";
 import { ElMessage, ElNotification } from "element-plus";
 import SelectPaymentMethod from "@/components/select/SelectPaymentMethod.vue";
@@ -8,6 +9,7 @@ const visible = ref(false);
 const loading = ref(false);
 const formRef = ref(null);
 const currentSchedule = ref(null);
+const shopInfo = ref(null);
 
 const emit = defineEmits(["created"]);
 
@@ -103,12 +105,24 @@ const resetForm = () => {
   });
 };
 
-const open = (schedule) => {
+// 取貨時間 start = orderPickupTime，end = 當日營業結束時間
+const pickupTimeStart = computed(() => shopInfo.value?.orderPickupTime || "09:00");
+
+const pickupTimeEnd = computed(() => {
+  const date = currentSchedule.value?.schedule_date;
+  if (!date || !shopInfo.value?.businessHours) return "20:00";
+  const dow = dayjs(date).day();
+  const hours = shopInfo.value.businessHours.find((h) => h.day === dow && h.enabled);
+  return hours?.time?.[1] || "20:00";
+});
+
+const open = (schedule, shop = null) => {
   if (!schedule || !schedule.items || schedule.items.length === 0) {
     ElMessage.warning("此排程尚無可訂購的產品");
     return;
   }
   currentSchedule.value = schedule;
+  shopInfo.value = shop;
   resetForm();
   visible.value = true;
 };
@@ -264,9 +278,9 @@ defineExpose({ open, close });
           <el-time-select
             v-model="form.pickup_time"
             placeholder="選擇時間"
-            start="09:00"
+            :start="pickupTimeStart"
             step="00:30"
-            end="22:00"
+            :end="pickupTimeEnd"
           />
         </el-form-item>
 

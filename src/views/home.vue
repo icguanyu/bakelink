@@ -92,21 +92,14 @@ const handleLogin = async () => {
 
 <style lang="scss" scoped>
 .login {
-  min-height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
   display: grid;
   place-items: center;
   padding: 32px 16px;
   background:
-    radial-gradient(
-      circle at 20% 20%,
-      rgba(255, 217, 179, 0.45),
-      transparent 55%
-    ),
-    radial-gradient(
-      circle at 80% 0%,
-      rgba(196, 231, 255, 0.5),
-      transparent 45%
-    ),
+    radial-gradient(circle at 15% 20%, rgba(255, 210, 150, 0.4), transparent 50%),
+    radial-gradient(circle at 85% 80%, rgba(200, 150, 90, 0.2), transparent 50%),
     #f7f3ee;
 }
 
@@ -150,6 +143,15 @@ const handleLogin = async () => {
   }
   :deep(.el-input__wrapper) {
     border-radius: 12px;
+    background: #fdf8f2;
+    box-shadow: 0 0 0 1px #e8ddd5;
+
+    &:hover { box-shadow: 0 0 0 1px #c8a880; }
+    &.is-focus { box-shadow: 0 0 0 2px #c08a50 !important; }
+  }
+  :deep(.el-input__inner) {
+    color: #1a120b;
+    &::placeholder { color: #c0b0a0; }
   }
 }
 
@@ -157,6 +159,19 @@ const handleLogin = async () => {
   width: 100%;
   margin-top: 8px;
   border-radius: 12px;
+  background: #c08a50 !important;
+  border-color: #c08a50 !important;
+  box-shadow: 0 4px 14px rgba(192, 138, 80, 0.35);
+
+  &:hover {
+    background: #a87440 !important;
+    border-color: #a87440 !important;
+  }
+
+  &:active {
+    background: #8a5e30 !important;
+    border-color: #8a5e30 !important;
+  }
 }
 
 .login__ghost {

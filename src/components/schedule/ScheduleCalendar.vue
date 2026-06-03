@@ -63,7 +63,7 @@ const selectDate = (date) => emit("select", date);
             <span v-if="schedule.orderCount > 0" class="cell-badge orders"
               >{{ schedule.orderCount }}筆</span
             >
-            <span class="cell-badge status">{{ schedule.statusLabel }}</span>
+            <span class="cell-badge status" :class="`status--${schedule.status}`">{{ schedule.statusLabel }}</span>
           </template>
         </div>
       </div>
@@ -189,6 +189,11 @@ const selectDate = (date) => emit("select", date);
   &.status {
     background: #fef3c7;
     color: #92400e;
+
+    &.status--CLOSED {
+      background: #e5e7eb;
+      color: #6b7280;
+    }
   }
 }
 

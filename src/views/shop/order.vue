@@ -4,11 +4,13 @@ import dayjs from "dayjs";
 import { orderStatusOptions } from "@/utils/constants";
 import { Schedules } from "@/api/schedules";
 import { Orders } from "@/api/orders";
+import { Users } from "@/api/auth";
 import { ElNotification } from "element-plus";
 
 const router = useRouter();
 const scrollContainerRef = ref(null);
 const orderCreate = ref(null);
+const shopData = ref(null);
 // 訂單狀態
 const activeTab = ref("all");
 const searchQuery = ref("");
@@ -243,7 +245,7 @@ const handleOrderDeleted = () => {
   console.log("test");
 };
 
-onMounted(() => {
+onMounted(async () => {
   scrollContainerRef.value = document.querySelector(".container");
   if (scrollContainerRef.value) {
     scrollContainerRef.value.addEventListener("scroll", handleScroll, {
@@ -252,6 +254,10 @@ onMounted(() => {
   }
   window.addEventListener("resize", handleScroll, { passive: true });
   initScheduleDataByDate(selectedDate.value);
+  try {
+    const res = await Users.Me();
+    shopData.value = res.data;
+  } catch {}
 });
 
 onBeforeUnmount(() => {
@@ -312,7 +318,7 @@ watch(selectedDate, (val) => {
             type="primary"
             icon="Plus"
             :disabled="!schedule.id"
-            @click="orderCreate.open(schedule)"
+            @click="orderCreate.open(schedule, shopData)"
             >{{ schedule.id ? "新增訂單" : "請先開單" }}</el-button
           >
         </div>

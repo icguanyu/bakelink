@@ -32,15 +32,16 @@ const availableProducts = computed(() => {
 const groupedProducts = computed(() => {
   const excludeSet = new Set(props.excludeIds);
   const filteredProducts = products.value.filter(
-    (product) => !excludeSet.has(product.id)
+    (product) => !excludeSet.has(product.id),
   );
 
   // 按種類分組
   const groups = {};
   filteredProducts.forEach((product) => {
     const categoryId = product.category_id;
-    const categoryName = product.category?.name || product.category_name || "未分類";
-    
+    const categoryName =
+      product.category?.name || product.category_name || "未分類";
+
     if (!groups[categoryId]) {
       groups[categoryId] = {
         label: categoryName,
@@ -62,7 +63,7 @@ const initData = async () => {
   try {
     const productsRes = await Products.List({});
     console.log("products", productsRes);
-    products.value = productsRes.data.data || [];
+    products.value = productsRes.data.data.filter((p) => p.is_active) || [];
   } catch (err) {
     console.error("fetch data error", err);
   } finally {

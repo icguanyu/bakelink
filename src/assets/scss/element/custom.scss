@@ -1,42 +1,38 @@
-// ElMessage 自訂樣式 - 更鮮明的顏色
+// ElMessage 自訂樣式 — 配合暖棕色主題
 .el-message {
-  --el-message-padding: 15px 20px;
-  --el-message-close-size: 18px;
-  
+  --el-message-padding: 13px 18px;
+  --el-message-close-size: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(60, 30, 10, 0.10);
+  font-size: 14px;
+  font-weight: 500;
+
   &.el-message--success {
-    --el-message-bg-color: #f0f9ff;
-    --el-message-border-color: #22c55e;
-    --el-message-text-color: #15803d;
-    .el-message__icon {
-      color: #22c55e;
-    }
+    --el-message-bg-color: #f2faf4;
+    --el-message-border-color: #7ab88a;
+    --el-message-text-color: #2d6b42;
+    .el-message__icon { color: #5a9672; }
   }
-  
+
   &.el-message--warning {
-    --el-message-bg-color: #fffbeb;
-    --el-message-border-color: #f59e0b;
-    --el-message-text-color: #b45309;
-    .el-message__icon {
-      color: #f59e0b;
-    }
+    --el-message-bg-color: #fdf6ec;
+    --el-message-border-color: #c08a50;
+    --el-message-text-color: #7a5020;
+    .el-message__icon { color: #c08a50; }
   }
-  
+
   &.el-message--error {
-    --el-message-bg-color: #fef2f2;
-    --el-message-border-color: #ef4444;
-    --el-message-text-color: #b91c1c;
-    .el-message__icon {
-      color: #ef4444;
-    }
+    --el-message-bg-color: #fdf2f0;
+    --el-message-border-color: #c06050;
+    --el-message-text-color: #7a2a20;
+    .el-message__icon { color: #c06050; }
   }
-  
+
   &.el-message--info {
-    --el-message-bg-color: #f8fafc;
-    --el-message-border-color: #3b82f6;
-    --el-message-text-color: #1e40af;
-    .el-message__icon {
-      color: #3b82f6;
-    }
+    --el-message-bg-color: #f5f1ed;
+    --el-message-border-color: #a08878;
+    --el-message-text-color: #5c4b3e;
+    .el-message__icon { color: #8a7060; }
   }
 }
 
