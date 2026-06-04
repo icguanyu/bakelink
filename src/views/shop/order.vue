@@ -712,6 +712,7 @@ $bg-card:       #ffffff;
 .toolbar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 12px;
   gap: 12px;
   flex-wrap: wrap;
@@ -770,22 +771,13 @@ $bg-card:       #ffffff;
   display: flex;
   gap: 6px;
   margin-bottom: 12px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: $border;
-    border-radius: 2px;
-  }
+  width: 100%;
 }
 
 .status-tab {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 7px 14px;
   background: $bg-card;
@@ -794,7 +786,7 @@ $bg-card:       #ffffff;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
-  flex-shrink: 0;
+  flex: 1;
 
   &:hover {
     background: #fafaf9;

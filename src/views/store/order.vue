@@ -323,7 +323,7 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
                 </div>
                 <!-- 切片選項，只在已選數量 > 0 時顯示 -->
                 <label
-                  v-if="(cart[item.id]?.quantity ?? 0) > 0"
+                  v-if="(cart[item.id]?.quantity ?? 0) > 0 && item.is_sliceable"
                   class="slice-toggle"
                 >
                   <input type="checkbox" v-model="cart[item.id].is_sliced" />

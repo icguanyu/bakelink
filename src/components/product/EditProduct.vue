@@ -19,6 +19,7 @@ const form = reactive({
   ingredient_details: [],
   image_urls: [],
   is_active: true,
+  is_sliceable: false,
 });
 
 const resetForm = () => {
@@ -181,6 +182,10 @@ defineExpose({ open, close });
             :rows="3"
             placeholder="例如：高筋麵粉、牛奶、酵母、鹽、糖"
           />
+        </el-form-item>
+
+        <el-form-item label="可切片" prop="is_sliceable">
+          <el-switch v-model="form.is_sliceable" />
         </el-form-item>
 
         <el-form-item label="狀態" required prop="is_active">

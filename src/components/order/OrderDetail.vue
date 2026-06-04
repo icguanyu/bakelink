@@ -347,7 +347,7 @@ defineExpose({ visible });
             </div>
 
             <template v-if="getItemQuantity(product.product_id) > 0">
-              <div class="slice-control">
+              <div v-if="product.is_sliceable" class="slice-control">
                 <span>切</span>
                 <el-switch
                   v-model="getItemByProductId(product.product_id).is_sliced"

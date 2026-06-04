@@ -57,6 +57,9 @@ const form = reactive({
     note: "歡迎自備容器，享環保折扣。",
   },
   businessHours: [...defaultBusinessHours],
+  lineUrl: "",
+  facebookUrl: "",
+  instagramUrl: "",
 });
 
 const segment = ref("basic");
@@ -84,6 +87,12 @@ const copySlugUrl = () => {
     ElMessage.success("已複製入口網址");
   });
 };
+
+const openSlugUrl = () => {
+  if (!slugUrl.value) return;
+  window.open(slugUrl.value, "_blank");
+};
+
 
 const dayLabelMap = {
   0: "日",
@@ -301,6 +310,30 @@ onMounted(() => {
           </el-form-item>
 
           <el-divider />
+          <div class="card__subtitle">社群連結</div>
+          <el-form-item label="LINE">
+            <el-input
+              v-model="form.lineUrl"
+              placeholder="https://line.me/..."
+              maxlength="200"
+            />
+          </el-form-item>
+          <el-form-item label="Facebook">
+            <el-input
+              v-model="form.facebookUrl"
+              placeholder="https://facebook.com/..."
+              maxlength="200"
+            />
+          </el-form-item>
+          <el-form-item label="Instagram">
+            <el-input
+              v-model="form.instagramUrl"
+              placeholder="https://instagram.com/..."
+              maxlength="200"
+            />
+          </el-form-item>
+
+          <el-divider />
           <div class="card__subtitle">前台入口</div>
           <el-form-item label="專屬網址" required>
             <div class="slug-wrap">
@@ -321,6 +354,7 @@ onMounted(() => {
                 <el-icon><Link /></el-icon>
                 <span class="slug-url">{{ slugUrl }}</span>
                 <el-button type="primary" link size="small" @click="copySlugUrl">複製</el-button>
+                <el-button type="primary" link size="small" @click="openSlugUrl">開啟</el-button>
               </div>
               <div v-else class="slug-msg hint">
                 設定後消費者可透過固定網址進入您的訂購頁面
@@ -730,7 +764,9 @@ h2 {
   align-items: center;
   gap: 5px;
   font-size: 12px;
-
+  .el-button{
+    margin-left: 0px;
+  }
   .el-icon { font-size: 13px; flex-shrink: 0; }
 
   &.error   { color: var(--el-color-danger); }

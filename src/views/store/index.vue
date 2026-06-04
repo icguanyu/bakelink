@@ -168,6 +168,35 @@ const hasDelivery = computed(
               shop.phone
             }}</a>
           </div>
+          <div v-if="shop.lineUrl || shop.facebookUrl || shop.instagramUrl" class="info-row">
+            <span class="info-row__label">社群</span>
+            <div class="social-links">
+              <a
+                v-if="shop.lineUrl"
+                :href="shop.lineUrl"
+                target="_blank"
+                rel="noopener"
+                class="social-link social-link--line"
+                title="LINE"
+              ><i class="bx bxl-line"></i></a>
+              <a
+                v-if="shop.facebookUrl"
+                :href="shop.facebookUrl"
+                target="_blank"
+                rel="noopener"
+                class="social-link social-link--facebook"
+                title="Facebook"
+              ><i class="bx bxl-facebook"></i></a>
+              <a
+                v-if="shop.instagramUrl"
+                :href="shop.instagramUrl"
+                target="_blank"
+                rel="noopener"
+                class="social-link social-link--instagram"
+                title="Instagram"
+              ><i class="bx bxl-instagram"></i></a>
+            </div>
+          </div>
         </div>
 
         <!-- 營業時間 -->
@@ -521,6 +550,40 @@ const hasDelivery = computed(
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
+  }
+}
+
+.social-links {
+  display: flex;
+  gap: 8px;
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 18px;
+  text-decoration: none;
+  transition: opacity 0.15s;
+
+  &:active { opacity: 0.7; }
+
+  &--line {
+    background: #06c755;
+    color: #fff;
+  }
+
+  &--facebook {
+    background: #1877f2;
+    color: #fff;
+  }
+
+  &--instagram {
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%);
+    color: #fff;
   }
 }
 

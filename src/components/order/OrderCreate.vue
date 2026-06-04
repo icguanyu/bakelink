@@ -23,6 +23,7 @@ const availableProducts = computed(() => {
     unit_price: item.unit_price,
     sales_limit: item.sales_limit,
     image_url: item.image_url,
+    is_sliceable: item.is_sliceable ?? false,
   }));
 });
 
@@ -356,7 +357,7 @@ defineExpose({ open, close });
               {{ $formatPrice(product.unit_price) }}
             </div>
           </div>
-          <div v-if="getQuantity(product.product_id) > 0" class="slice-control">
+          <div v-if="getQuantity(product.product_id) > 0 && product.is_sliceable" class="slice-control">
             <span>切</span>
             <el-switch
               v-model="productIsSliced[product.product_id]"
