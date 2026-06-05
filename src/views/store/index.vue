@@ -365,7 +365,7 @@ const hasDelivery = computed(
         "
       >
         <i class="bx bx-calendar-check"></i>
-        近期菜單
+        我要訂購
       </button>
       <button
         class="cta-btn cta-btn--ghost"

@@ -23,7 +23,8 @@
       "Bash(grep -E \"\\\\.\\(css|scss\\)$\")",
       "Bash(grep \"\\\\.vue$\")",
       "Bash(npx vue-tsc *)",
-      "Bash(git restore *)"
+      "Bash(git restore *)",
+      "Bash(git config *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\user\\.claude\\projects\\c--Users-user-Desktop-bakelink\\memory"
