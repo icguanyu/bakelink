@@ -66,8 +66,10 @@ const dateStats = computed(() => {
 });
 
 // 日期星期顯示
-const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
-const dayName = computed(() => `週${dayNames[dayjs(selectedDate.value).day()]}`);
+const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
+const dayName = computed(
+  () => `週${dayNames[dayjs(selectedDate.value).day()]}`,
+);
 
 // 日期顯示標籤
 const dateLabel = computed(() => {
@@ -306,7 +308,9 @@ watch(selectedDate, (val) => {
             <button
               class="toggle-btn"
               :class="{ active: viewMode === 'detailed' }"
-              @click="viewMode = viewMode === 'detailed' ? 'simple' : 'detailed'"
+              @click="
+                viewMode = viewMode === 'detailed' ? 'simple' : 'detailed'
+              "
               :title="viewMode === 'detailed' ? '切換簡易' : '切換詳細'"
             >
               <el-icon><Document /></el-icon>
@@ -328,10 +332,7 @@ watch(selectedDate, (val) => {
     <!-- 頂部統計卡片 -->
     <div v-show="showStats" class="stats-cards">
       <div class="stat-card">
-        <div
-          class="stat-icon"
-          style="background: #764ba2"
-        >
+        <div class="stat-icon" style="background: #764ba2">
           <el-icon><Calendar /></el-icon>
         </div>
         <div class="stat-content">
@@ -340,10 +341,7 @@ watch(selectedDate, (val) => {
         </div>
       </div>
       <div class="stat-card">
-        <div
-          class="stat-icon"
-          style="background: #4f82f1"
-        >
+        <div class="stat-icon" style="background: #4f82f1">
           <el-icon><Clock /></el-icon>
         </div>
         <div class="stat-content">
@@ -352,10 +350,7 @@ watch(selectedDate, (val) => {
         </div>
       </div>
       <div class="stat-card">
-        <div
-          class="stat-icon"
-          style="background: #22a94a"
-        >
+        <div class="stat-icon" style="background: #22a94a">
           <el-icon><CircleCheck /></el-icon>
         </div>
         <div class="stat-content">
@@ -364,10 +359,7 @@ watch(selectedDate, (val) => {
         </div>
       </div>
       <div class="stat-card">
-        <div
-          class="stat-icon"
-          style="background: #f43f5e"
-        >
+        <div class="stat-icon" style="background: #f43f5e">
           <el-icon><Warning /></el-icon>
         </div>
         <div class="stat-content">
@@ -376,10 +368,7 @@ watch(selectedDate, (val) => {
         </div>
       </div>
       <div class="stat-card highlight">
-        <div
-          class="stat-icon"
-          style="background: #fa709a"
-        >
+        <div class="stat-icon" style="background: #fa709a">
           <el-icon><Money /></el-icon>
         </div>
         <div class="stat-content">
@@ -558,13 +547,13 @@ watch(selectedDate, (val) => {
 @use "@/assets/scss/scrollbar.scss" as *;
 
 // ── 色彩變數 ──────────────────────────────────────────────
-$accent:        #3b82f6;
-$accent-light:  #eff6ff;
-$text-primary:  #1e293b;
-$text-secondary:#64748b;
-$border:        #e2e8f0;
-$bg-page:       #f8fafc;
-$bg-card:       #ffffff;
+$accent: #3b82f6;
+$accent-light: #eff6ff;
+$text-primary: #1e293b;
+$text-secondary: #64748b;
+$border: #e2e8f0;
+$bg-page: #f8fafc;
+$bg-card: #ffffff;
 
 .order-manager {
   padding: 16px;
@@ -778,11 +767,11 @@ $bg-card:       #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 7px 14px;
+  gap: 5px;
+  padding: 7px 10px;
   background: $bg-card;
   border: 1px solid $border;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;

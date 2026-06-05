@@ -29,8 +29,8 @@ const successOrder = ref(null); // 下單成功後存訂單資訊
 const cart = reactive({}); // schedule_item_id → { quantity, is_sliced }
 
 const form = reactive({
-  customer_name: "Nick",
-  customer_phone: "0933895891",
+  customer_name: "",
+  customer_phone: "",
   customer_address: "",
   pickup_time: "",
   payment_method: "",
