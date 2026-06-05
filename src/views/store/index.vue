@@ -350,35 +350,36 @@ const hasDelivery = computed(
           </div>
         </div>
 
-        <!-- CTA -->
-        <div class="cta-block">
-          <button
-            class="cta-btn"
-            @click="
-              router.push({
-                name: 'store-schedules',
-                params: { slug: route.params.slug },
-              })
-            "
-          >
-            <i class="bx bx-calendar-check"></i>
-            查看近期菜單
-          </button>
-          <button
-            class="cta-btn cta-btn--ghost"
-            @click="
-              router.push({
-                name: 'store-order-lookup',
-                params: { slug: route.params.slug },
-              })
-            "
-          >
-            <i class="bx bx-receipt"></i>
-            查詢我的訂單
-          </button>
-        </div>
       </div>
     </template>
+
+    <!-- 固定底部 CTA -->
+    <div v-if="shop && !isLoading" class="bottom-bar">
+      <button
+        class="cta-btn"
+        @click="
+          router.push({
+            name: 'store-schedules',
+            params: { slug: route.params.slug },
+          })
+        "
+      >
+        <i class="bx bx-calendar-check"></i>
+        近期菜單
+      </button>
+      <button
+        class="cta-btn cta-btn--ghost"
+        @click="
+          router.push({
+            name: 'store-order-lookup',
+            params: { slug: route.params.slug },
+          })
+        "
+      >
+        <i class="bx bx-receipt"></i>
+        我的訂單
+      </button>
+    </div>
   </div>
 </template>
 
@@ -387,7 +388,7 @@ const hasDelivery = computed(
   height: 100dvh;
   overflow-y: auto;
   background: #f7f3ee;
-  padding-bottom: 40px;
+  padding-bottom: 100px;
 }
 
 .state-center {
@@ -717,12 +718,25 @@ const hasDelivery = computed(
   }
 }
 
-/* CTA */
-.cta-block {
-  padding: 8px 0 4px;
+/* Fixed bottom bar */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
   display: flex;
-  flex-direction: column;
   gap: 10px;
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  background: rgba(247, 243, 238, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(232, 221, 213, 0.6);
+
+  .cta-btn {
+    flex: 1;
+  }
 }
 
 .cta-btn {
