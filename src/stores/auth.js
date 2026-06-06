@@ -3,8 +3,8 @@ import { defineStore } from "pinia";
 import axios from "axios";
 import { Auth, Users } from "@/api/auth";
 
-const TOKEN_KEY = "bakelink-token";
-const USER_KEY = "bakelink-user";
+const TOKEN_KEY = "prelo-token";
+const USER_KEY = "prelo-user";
 
 export const useAuthStore = defineStore("auth", () => {
   const token = ref(localStorage.getItem(TOKEN_KEY) || "");

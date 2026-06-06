@@ -42,10 +42,34 @@ const handleLogin = async () => {
 <template>
   <div class="login-page">
     <div class="login">
-      <div class="login__card">
-        <div class="login__brand"></div>
-        <div class="login__title">登入</div>
-        <div class="login__subtitle">請使用你的帳號與密碼</div>
+      <!-- Left brand panel -->
+      <div class="login__panel">
+        <!-- 幾何裝飾層 -->
+        <div class="geo geo--ring-xl" />
+        <div class="geo geo--ring-md" />
+        <div class="geo geo--diamond" />
+        <div class="geo geo--diamond-sm" />
+        <div class="geo geo--hline geo--hline-1" />
+        <div class="geo geo--hline geo--hline-2" />
+
+        <div class="login__panel-inner">
+          <div class="login__logo"></div>
+          <p class="login__brand-chinese">鋪樂</p>
+          <p class="login__brand-tagline">烘焙商城管理平台</p>
+          <ul class="login__features">
+            <li>管理訂單與出貨狀態</li>
+            <li>商品上架與庫存追蹤</li>
+            <li>客戶資料一目了然</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Right form panel -->
+      <div class="login__form-panel">
+        <div class="login__mobile-logo"></div>
+        <h2 class="login__title">歡迎回來</h2>
+        <p class="login__subtitle">請輸入您的帳號與密碼</p>
+
         <el-form
           ref="formRef"
           class="login__form"
@@ -54,20 +78,24 @@ const handleLogin = async () => {
           :rules="rules"
           @keyup.enter="handleLogin"
         >
-          <el-form-item label="帳號" prop="email">
+          <el-form-item prop="email">
+            <template #label><span class="form-label">帳號</span></template>
             <el-input
               v-model="form.email"
-              placeholder="輸入帳號"
+              placeholder="輸入電子郵件"
               autocomplete="username"
+              size="large"
             />
           </el-form-item>
-          <el-form-item label="密碼" prop="password">
+          <el-form-item prop="password">
+            <template #label><span class="form-label">密碼</span></template>
             <el-input
               v-model="form.password"
               placeholder="輸入密碼"
               type="password"
               autocomplete="current-password"
               show-password
+              size="large"
             />
           </el-form-item>
           <el-button
@@ -78,7 +106,7 @@ const handleLogin = async () => {
             :disabled="loading"
             @click="handleLogin"
           >
-            登入
+            {{ loading ? "登入中..." : "登入" }}
           </el-button>
         </el-form>
       </div>
@@ -88,6 +116,12 @@ const handleLogin = async () => {
 </template>
 
 <style lang="scss" scoped>
+$panel-bg: #1c1108;
+$input-bg: #f7f2ec;
+$border: #ddd4c8;
+$text-primary: #1a120b;
+$text-muted: #7a6a5c;
+
 .login-page {
   height: 100dvh;
   overflow-y: auto;
@@ -97,115 +131,324 @@ const handleLogin = async () => {
 
 .login {
   flex: 1;
-  display: grid;
-  place-items: center;
-  padding: 32px 16px;
-  background:
-    radial-gradient(
-      circle at 15% 20%,
-      rgba(255, 210, 150, 0.4),
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 85% 80%,
-      rgba(200, 150, 90, 0.2),
-      transparent 50%
-    ),
-    #f7f3ee;
-}
-
-.login__card {
-  width: min(420px, 100%);
-  background: #fff;
-  border-radius: 20px;
-  padding: 28px 28px 32px;
-  box-shadow: 0 18px 45px rgba(40, 27, 18, 0.12);
-}
-
-.login__brand {
   display: flex;
+  min-height: 0;
+}
+
+// ─── Left brand panel ─────────────────────────────────────────────────────────
+.login__panel {
+  flex: 0 0 50%;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(var(--color-primary-rgb), 0.25) 0%, transparent 55%),
+    radial-gradient(circle at 80% 80%, rgba(255, 180, 80, 0.1) 0%, transparent 45%),
+    $panel-bg;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  margin: 0 auto;
+
+  @media (max-width: 800px) {
+    display: none;
+  }
+}
+
+.login__panel-inner {
+  padding: 48px 56px;
+  max-width: 360px;
+}
+
+.login__logo {
+  width: 160px;
+  height: 44px;
+  margin-bottom: 24px;
   background-image: url("@/assets/images/logo.png");
-  background-size: 140%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: left center;
+  filter: brightness(0) invert(1);
+}
+
+.login__brand-name {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+
+.login__brand-chinese {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 200, 140, 0.55);
+  letter-spacing: 0.2em;
+  margin: -16px 0 20px;
+}
+
+.login__brand-tagline {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-primary);
+  letter-spacing: 0.1em;
+  margin: 0 0 36px;
+}
+
+.login__features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  li {
+    font-size: 14px;
+    color: rgba(#f0e8de, 0.6);
+    padding-left: 16px;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      opacity: 0.7;
+    }
+  }
+}
+
+// ─── Right form panel ─────────────────────────────────────────────────────────
+.login__form-panel {
+  flex: 0 0 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+  background:
+    repeating-linear-gradient(
+      -55deg,
+      transparent,
+      transparent 28px,
+      rgba(180, 140, 100, 0.09) 28px,
+      rgba(180, 140, 100, 0.09) 29px
+    ),
+    #ffffff;
+
+  @media (max-width: 800px) {
+    flex: 1;
+    padding: 40px 24px;
+  }
+}
+
+.login__mobile-logo {
+  display: none;
+  width: 130px;
+  height: 36px;
+  margin-bottom: 20px;
+  background-image: url("@/assets/images/logo.png");
+  background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  width: 80px;
-  height: 80px;
+
+  @media (max-width: 800px) {
+    display: block;
+  }
 }
 
 .login__title {
   font-size: 22px;
   font-weight: 700;
-  color: #2f2a25;
+  color: $text-primary;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
   text-align: center;
+  width: min(380px, 100%);
 }
 
 .login__subtitle {
+  font-size: 14px;
+  color: $text-muted;
+  margin: 0 0 28px;
   text-align: center;
-  color: #7b6b5f;
-  margin: 6px 0 20px;
+  width: min(380px, 100%);
 }
 
+// ─── Form ─────────────────────────────────────────────────────────────────────
 .login__form {
-  :deep(.el-form-item__label) {
-    color: #5c4b3e;
+  width: min(380px, 100%);
+
+  .form-label {
+    font-size: 13px;
     font-weight: 600;
+    color: #3e3028;
   }
+
+  :deep(.el-form-item) {
+    margin-bottom: 18px;
+  }
+
+  :deep(.el-form-item__label) {
+    padding-bottom: 6px;
+    line-height: 1;
+  }
+
   :deep(.el-input__wrapper) {
-    border-radius: 12px;
-    background: #fdf8f2;
-    box-shadow: 0 0 0 1px #e8ddd5;
+    border-radius: 8px;
+    background: $input-bg;
+    box-shadow: 0 0 0 1px $border;
+    transition: box-shadow 0.18s ease, background 0.18s ease;
+    padding: 0 12px;
 
     &:hover {
-      box-shadow: 0 0 0 1px #c8a880;
+      box-shadow: 0 0 0 1px #c0b0a0;
     }
+
     &.is-focus {
-      box-shadow: 0 0 0 2px #c08a50 !important;
+      box-shadow: 0 0 0 2px var(--color-primary) !important;
+      background: #fff;
     }
   }
+
   :deep(.el-input__inner) {
-    color: #1a120b;
+    height: 42px;
+    font-size: 14px;
+    color: $text-primary;
+
     &::placeholder {
-      color: #c0b0a0;
+      color: #b8a898;
     }
   }
 }
 
+// ─── Geometric layer ──────────────────────────────────────────────────────────
+.geo {
+  position: absolute;
+  pointer-events: none;
+}
+
+.geo--ring-xl {
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  top: -130px;
+  right: -130px;
+  border: 1.5px solid transparent;
+  border-top-color: rgba(var(--color-primary-rgb), 0.5);
+  border-right-color: rgba(var(--color-primary-rgb), 0.25);
+  animation: geo-spin 55s linear infinite;
+  will-change: transform;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 38px;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    border-bottom-color: rgba(var(--color-primary-rgb), 0.2);
+    border-left-color: rgba(var(--color-primary-rgb), 0.12);
+  }
+}
+
+.geo--ring-md {
+  width: 240px;
+  height: 240px;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+  border-radius: 50%;
+  bottom: -70px;
+  left: -70px;
+  animation: geo-float 10s ease-in-out infinite, geo-breathe 6s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.geo--diamond {
+  width: 72px;
+  height: 72px;
+  border: 1.5px solid rgba(var(--color-primary-rgb), 0.45);
+  top: 40%;
+  right: 56px;
+  animation: geo-float-diamond 9s ease-in-out infinite;
+  will-change: transform;
+}
+
+.geo--diamond-sm {
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid rgba(var(--color-primary-rgb), 0.4);
+  top: 22%;
+  left: 28px;
+  animation: geo-float-diamond 13s ease-in-out infinite reverse;
+  will-change: transform;
+}
+
+.geo--hline {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--color-primary-rgb), 0.5), transparent);
+
+  &-1 {
+    width: 180px;
+    bottom: 26%;
+    right: 0;
+    animation: geo-breathe 5s ease-in-out infinite;
+  }
+
+  &-2 {
+    width: 90px;
+    top: 32%;
+    left: 0;
+    animation: geo-breathe 5s ease-in-out 2.5s infinite;
+  }
+}
+
+@keyframes geo-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes geo-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-20px); }
+}
+
+@keyframes geo-float-diamond {
+  0%, 100% { transform: rotate(45deg) translateY(0); }
+  50%       { transform: rotate(45deg) translateY(-12px); }
+}
+
+@keyframes geo-breathe {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1; }
+}
+
+// ─── Submit button ────────────────────────────────────────────────────────────
 .login__submit {
   width: 100%;
-  margin-top: 8px;
-  border-radius: 12px;
-  background: #c08a50 !important;
-  border-color: #c08a50 !important;
-  box-shadow: 0 4px 14px rgba(192, 138, 80, 0.35);
+  margin-top: 6px;
+  height: 44px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  transition: background 0.18s, opacity 0.18s;
 
-  &:hover {
-    background: #a87440 !important;
-    border-color: #a87440 !important;
+  &:hover:not(:disabled) {
+    background: var(--color-primary-hover) !important;
+    border-color: var(--color-primary-hover) !important;
   }
 
-  &:active {
-    background: #8a5e30 !important;
-    border-color: #8a5e30 !important;
-  }
-}
-
-.login__ghost {
-  width: 100%;
-  margin-top: 10px;
-  margin-left: 0;
-  border-radius: 12px;
-}
-
-@media (max-width: 480px) {
-  .login__card {
-    padding: 24px 20px 28px;
+  &:active:not(:disabled) {
+    background: var(--color-primary-dark) !important;
+    border-color: var(--color-primary-dark) !important;
   }
 
-  .login__brand img {
-    width: 110px;
-    height: 110px;
+  &:disabled {
+    opacity: 0.6;
   }
 }
 </style>

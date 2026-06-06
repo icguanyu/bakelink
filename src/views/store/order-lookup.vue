@@ -16,7 +16,7 @@ const expandedIds = ref(new Set()); // 過去訂單手動展開的 id 集合
 const form = reactive({ phone: "" });
 
 const statusLabel = { PLACED: "已下單", COMPLETED: "已完成", CANCELLED: "已取消" };
-const statusColor = { PLACED: "#c08a50", COMPLETED: "#5a9672", CANCELLED: "#c06050" };
+const statusColor = { PLACED: "var(--color-secondary)", COMPLETED: "#5a9672", CANCELLED: "#c06050" };
 const paymentLabel = { cash: "現金", linepay: "Line Pay", bank: "銀行轉帳", card: "信用卡" };
 const pickupLabel = { pickup: "門市自取", delivery: "宅配" };
 
@@ -298,7 +298,7 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
   font-family: inherit;
 
   &::placeholder { color: #c0b0a0; }
-  &:focus { border-color: #c08a50; }
+  &:focus { border-color: var(--color-secondary); }
 }
 
 .query-btn {
@@ -306,7 +306,7 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
   padding: 13px;
   border-radius: 999px;
   border: none;
-  background: #c08a50;
+  background: var(--color-secondary);
   color: #fff;
   font-size: 15px;
   font-weight: 700;
@@ -319,7 +319,7 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
   margin-top: 4px;
 
   i { font-size: 17px; }
-  &:hover { background: #a87440; }
+  &:hover { background: var(--color-secondary-hover); }
   &:active { background: #8a5e30; }
   &:disabled { background: #d4c5b0; cursor: default; }
 }
@@ -469,7 +469,7 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
 .slice-tag {
   font-size: 11px;
   background: #fdf3e3;
-  color: #c08a50;
+  color: var(--color-secondary);
   border: 1px solid #f0d8b0;
   border-radius: 4px;
   padding: 1px 6px;
@@ -510,6 +510,6 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
 .total-amount {
   font-size: 20px;
   font-weight: 800;
-  color: #c08a50;
+  color: var(--color-secondary);
 }
 </style>

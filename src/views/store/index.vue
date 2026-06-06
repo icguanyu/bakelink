@@ -4,7 +4,6 @@ import { useRouter, useRoute } from "vue-router";
 import { Loading } from "@element-plus/icons-vue";
 import { Shop } from "@/api/shop";
 
-
 const router = useRouter();
 const route = useRoute();
 
@@ -37,7 +36,9 @@ const fetchShop = async () => {
     const res = await Shop.GetInfo(route.params.slug);
     console.log("shop info", res.data);
     shop.value = res.data;
-    document.title = res.data.shopName ? `${res.data.shopName} | BakeLink` : "BakeLink";
+    document.title = res.data.shopName
+      ? `${res.data.shopName} | Prelo`
+      : "Prelo";
   } catch (err) {
     if (err?.response?.status === 404) {
       notFound.value = true;
@@ -96,11 +97,27 @@ const hasDelivery = computed(
       <el-skeleton animated>
         <template #template>
           <div class="hero">
-            <div class="hero__cover" style="background: linear-gradient(160deg, #e0e0e0 0%, #c8c8c8 55%, #b0b0b0 100%)"></div>
+            <el-skeleton-item
+              style="
+                width: 100%;
+                height: 180px;
+                display: block;
+                border-radius: 0;
+              "
+            />
             <div class="hero__identity">
-              <el-skeleton-item variant="circle" style="width: 80px; height: 80px" />
-              <el-skeleton-item variant="h1" style="width: 160px; margin-top: 12px" />
-              <el-skeleton-item variant="text" style="width: 260px; margin-top: 6px" />
+              <el-skeleton-item
+                variant="circle"
+                style="width: 120px; height: 120px"
+              />
+              <el-skeleton-item
+                variant="h1"
+                style="width: 160px; margin-top: 12px"
+              />
+              <el-skeleton-item
+                variant="text"
+                style="width: 260px; margin-top: 6px"
+              />
             </div>
           </div>
           <div class="body">
@@ -129,7 +146,12 @@ const hasDelivery = computed(
       <!-- Hero -->
       <div class="hero">
         <div class="hero__cover">
-          <img v-if="shop.cover" :src="shop.cover" :alt="shop.shopName" class="hero__cover-img" />
+          <img
+            v-if="shop.cover"
+            :src="shop.cover"
+            :alt="shop.shopName"
+            class="hero__cover-img"
+          />
         </div>
         <div class="hero__identity">
           <div class="hero__avatar">
@@ -158,7 +180,8 @@ const hasDelivery = computed(
                 rel="noopener"
                 class="map-link"
                 title="在 Google Maps 開啟"
-              ><i class="bx bx-map"></i></a>
+                ><i class="bx bx-map"></i
+              ></a>
             </span>
           </div>
           <div v-if="shop.phone" class="info-row">
@@ -167,7 +190,10 @@ const hasDelivery = computed(
               shop.phone
             }}</a>
           </div>
-          <div v-if="shop.lineUrl || shop.facebookUrl || shop.instagramUrl" class="info-row">
+          <div
+            v-if="shop.lineUrl || shop.facebookUrl || shop.instagramUrl"
+            class="info-row"
+          >
             <span class="info-row__label">社群</span>
             <div class="social-links">
               <a
@@ -177,7 +203,8 @@ const hasDelivery = computed(
                 rel="noopener"
                 class="social-link social-link--line"
                 title="LINE"
-              ><i class="bx bxl-line"></i></a>
+                ><i class="bx bxl-line"></i
+              ></a>
               <a
                 v-if="shop.facebookUrl"
                 :href="shop.facebookUrl"
@@ -185,7 +212,8 @@ const hasDelivery = computed(
                 rel="noopener"
                 class="social-link social-link--facebook"
                 title="Facebook"
-              ><i class="bx bxl-facebook"></i></a>
+                ><i class="bx bxl-facebook"></i
+              ></a>
               <a
                 v-if="shop.instagramUrl"
                 :href="shop.instagramUrl"
@@ -193,7 +221,8 @@ const hasDelivery = computed(
                 rel="noopener"
                 class="social-link social-link--instagram"
                 title="Instagram"
-              ><i class="bx bxl-instagram"></i></a>
+                ><i class="bx bxl-instagram"></i
+              ></a>
             </div>
           </div>
         </div>
@@ -314,7 +343,10 @@ const hasDelivery = computed(
             :class="{ 'product-grid-wrap--loading': productsLoading }"
           >
             <div class="product-grid-overlay" v-if="productsLoading">
-              <el-icon class="is-loading" size="28" color="#c08a50"
+              <el-icon
+                class="is-loading"
+                size="28"
+                :style="{ color: 'var(--color-secondary)' }"
                 ><Loading
               /></el-icon>
             </div>
@@ -348,7 +380,6 @@ const hasDelivery = computed(
             </div>
           </div>
         </div>
-
       </div>
     </template>
 
@@ -381,7 +412,7 @@ const hasDelivery = computed(
         </button>
       </div>
       <div class="bottom-bar__powered">
-        由 <a href="/" target="_blank" rel="noopener">BakeLink</a> 提供服務
+        由 <a href="/" target="_blank" rel="noopener">Prelo</a> 提供服務
       </div>
     </div>
   </div>
@@ -447,12 +478,12 @@ const hasDelivery = computed(
     gap: 6px;
     padding: 0 20px 28px;
     text-align: center;
-    margin-top: -40px;
+    margin-top: -60px;
   }
 
   &__avatar {
-    width: 80px;
-    height: 80px;
+    width: 120px;
+    height: 120px;
     border-radius: 999px;
     overflow: hidden;
     border: 4px solid #fff;
@@ -462,7 +493,7 @@ const hasDelivery = computed(
     justify-content: center;
     background: #ffd88a;
     position: relative;
-    z-index: 1;
+    z-index: 2001;
     margin-bottom: 6px;
 
     img {
@@ -525,7 +556,7 @@ const hasDelivery = computed(
 
     i {
       font-size: 17px;
-      color: #c08a50;
+      color: var(--color-secondary);
     }
   }
 }
@@ -556,7 +587,7 @@ const hasDelivery = computed(
     text-decoration: none;
 
     &:active {
-      color: #c08a50;
+      color: var(--color-secondary);
     }
   }
 
@@ -577,15 +608,19 @@ const hasDelivery = computed(
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
   font-size: 18px;
   text-decoration: none;
   transition: opacity 0.15s;
 
-  &:active { opacity: 0.7; }
-
+  &:active {
+    opacity: 0.7;
+  }
+  & .bx {
+    font-size: 22px;
+  }
   &--line {
     background: #06c755;
     color: #fff;
@@ -597,7 +632,14 @@ const hasDelivery = computed(
   }
 
   &--instagram {
-    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%);
+    background: radial-gradient(
+      circle at 30% 107%,
+      #fdf497 0%,
+      #fdf497 5%,
+      #fd5949 45%,
+      #d6249f 60%,
+      #285aeb 90%
+    );
     color: #fff;
   }
 }
@@ -616,8 +658,12 @@ const hasDelivery = computed(
   text-decoration: none;
   transition: background 0.15s;
 
-  &:hover { background: #d0f0e0; }
-  &:active { background: #b0e8cc; }
+  &:hover {
+    background: #d0f0e0;
+  }
+  &:active {
+    background: #b0e8cc;
+  }
 }
 
 /* Business hours */
@@ -728,7 +774,7 @@ const hasDelivery = computed(
     flex-shrink: 0;
     font-size: 14px;
     margin-top: 1px;
-    color: #c08a50;
+    color: var(--color-secondary);
   }
 }
 
@@ -785,7 +831,7 @@ const hasDelivery = computed(
   padding: 14px 20px;
   border-radius: 999px;
   border: none;
-  background: #c08a50;
+  background: var(--color-secondary);
   color: #fff;
   font-size: 15px;
   font-weight: 700;
@@ -794,15 +840,15 @@ const hasDelivery = computed(
   transition:
     background 0.15s,
     box-shadow 0.15s;
-  box-shadow: 0 4px 14px rgba(192, 138, 80, 0.35);
+  box-shadow: 0 4px 14px rgba(var(--color-secondary-rgb), 0.35);
 
   i {
     font-size: 18px;
   }
 
   &:hover {
-    background: #a87440;
-    box-shadow: 0 6px 18px rgba(192, 138, 80, 0.45);
+    background: var(--color-secondary-hover);
+    box-shadow: 0 6px 18px rgba(var(--color-secondary-rgb), 0.45);
   }
 
   &:active {
@@ -812,14 +858,13 @@ const hasDelivery = computed(
 
   &--ghost {
     background: #fff;
-    color: #8a7060;
+    color: var(--color-secondary);
     border: 1.5px solid #e8ddd5;
     box-shadow: none;
 
     &:hover {
       background: #fff;
-     
-      color: #c08a50;
+      color: var(--color-secondary);
       box-shadow: none;
     }
 
@@ -859,20 +904,19 @@ const hasDelivery = computed(
   }
 
   &--active {
-    background: #c08a50;
-    border-color: #c08a50;
+    background: var(--color-secondary);
+    border-color: var(--color-secondary);
     color: #fff;
   }
 
   &--all {
-    border-color: #c8d8e8;
-    background: #f0f6fb;
-    color: #5a7a96;
+    border-color: var(--color-secondary);
+    color: var(--color-secondary);
   }
 
   &--all-active {
-    background: #4a7fa5;
-    border-color: #4a7fa5;
+    background: var(--color-secondary);
+    border-color: var(--color-secondary);
     color: #fff;
   }
 }
@@ -937,7 +981,9 @@ const hasDelivery = computed(
   overflow: hidden;
   border: 1px solid #ede8e2;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-  transition: box-shadow 0.15s, transform 0.15s;
+  transition:
+    box-shadow 0.15s,
+    transform 0.15s;
 
   &:active {
     transform: scale(0.98);

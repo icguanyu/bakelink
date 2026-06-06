@@ -20,7 +20,7 @@ const handleImageUpload = async (event) => {
   if (!imageFile) return;
 
   const options = {
-    maxSizeMB: 0.5,
+    maxSizeMB: 0.2,
   };
   
   loading.value = true;

@@ -491,6 +491,10 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
 </template>
 
 <style lang="scss" scoped>
+// SVG data URI 無法使用 CSS var()，以 SCSS 變數替代（值需與 _variables.scss 同步）
+$_primary-hex: 'fe904d';
+$_secondary-hex: 'c8944a';
+
 .order-page {
   height: 100dvh;
   overflow-y: auto;
@@ -656,13 +660,13 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   color: #1a120b;
 
   &--price {
-    color: #c08a50;
+    color: var(--color-secondary);
     font-size: 16px;
   }
 }
 
 .order-no-suffix {
-  color: #c08a50;
+  color: var(--color-secondary);
   font-weight: 800;
 }
 
@@ -727,7 +731,7 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
 .slice-tag {
   font-size: 11px;
   background: #fdf3e3;
-  color: #c08a50;
+  color: var(--color-secondary);
   border: 1px solid #f0d8b0;
   border-radius: 4px;
   padding: 1px 6px;
@@ -837,7 +841,7 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
 .item-price {
   font-size: 13px;
   font-weight: 700;
-  color: #c08a50;
+  color: var(--color-secondary);
   margin-top: 2px;
 }
 
@@ -876,8 +880,8 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   transition: all 0.15s;
 
   .slice-toggle input:checked + & {
-    background: #c08a50;
-    border-color: #c08a50;
+    background: var(--color-secondary);
+    border-color: var(--color-secondary);
 
     &::after {
       content: "";
@@ -927,12 +931,12 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   }
 
   &--add {
-    background: #c08a50;
-    border-color: #c08a50;
+    background: var(--color-secondary);
+    border-color: var(--color-secondary);
     color: #fff;
 
     &:not(:disabled):active {
-      background: #a87440;
+      background: var(--color-secondary-hover);
     }
   }
 }
@@ -995,7 +999,7 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
     color: #c0b0a0;
   }
   &:focus {
-    border-color: #c08a50;
+    border-color: var(--color-secondary);
   }
 }
 
@@ -1006,7 +1010,7 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
 
 .form-select {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c08a50' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23#{$_secondary-hex}' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
   padding-right: 36px;
@@ -1036,8 +1040,8 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   }
 
   &--active {
-    background: #c08a50;
-    border-color: #c08a50;
+    background: var(--color-secondary);
+    border-color: var(--color-secondary);
     color: #fff;
   }
 }
@@ -1076,7 +1080,7 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   }
 
   input:checked + .switch-track {
-    background: #c08a50;
+    background: var(--color-secondary);
 
     &::after {
       transform: translateX(18px);
@@ -1128,7 +1132,7 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   padding: 14px 20px;
   border-radius: 999px;
   border: none;
-  background: #c08a50;
+  background: var(--color-secondary);
   color: #fff;
   font-size: 15px;
   font-weight: 700;
@@ -1137,14 +1141,14 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
   transition:
     background 0.15s,
     box-shadow 0.15s;
-  box-shadow: 0 4px 14px rgba(192, 138, 80, 0.35);
+  box-shadow: 0 4px 14px rgba(var(--color-secondary-rgb), 0.35);
 
   i {
     font-size: 20px;
   }
 
   &:hover {
-    background: #a87440;
+    background: var(--color-secondary-hover);
   }
   &:active {
     background: #8a5e30;

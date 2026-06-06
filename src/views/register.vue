@@ -87,9 +87,19 @@ const features = [
   <div class="page">
     <!-- 左側品牌欄 -->
     <aside class="brand">
+      <!-- 幾何裝飾層 -->
+      <div class="geo geo--ring-xl" />
+      <div class="geo geo--ring-md" />
+      <div class="geo geo--diamond" />
+      <div class="geo geo--diamond-sm" />
+      <div class="geo geo--hline geo--hline-1" />
+      <div class="geo geo--hline geo--hline-2" />
+      <div class="geo geo--dots" />
+      <div class="geo geo--block" />
+
       <div class="brand__inner">
         <div class="brand__logo" @click="router.push('/')" />
-        <div class="brand__name" @click="router.push('/')">BakeLink</div>
+        <div class="brand__chinese">鋪樂</div>
 
         <div class="brand__eyebrow">小店家最愛・預購訂單管理工具</div>
         <div class="brand__headline">
@@ -165,7 +175,7 @@ const features = [
           <el-form-item label="店名" prop="shopName">
             <el-input
               v-model="form.shopName"
-              placeholder="例：山丘烘焙坊"
+              placeholder="例：我家烘焙坊"
               size="large"
               autocomplete="organization"
             />
@@ -258,7 +268,7 @@ const features = [
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(circle at 20% 30%, rgba(192, 138, 80, 0.25) 0%, transparent 55%),
+      radial-gradient(circle at 20% 30%, rgba(var(--color-primary-rgb), 0.25) 0%, transparent 55%),
       radial-gradient(circle at 80% 80%, rgba(255, 180, 80, 0.1) 0%, transparent 45%);
     pointer-events: none;
   }
@@ -270,16 +280,24 @@ const features = [
   width: 100%;
 }
 
+.brand__chinese {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 200, 140, 0.55);
+  letter-spacing: 0.2em;
+  margin: -18px 0 28px;
+}
+
 .brand__logo {
   background-image: url("@/assets/images/logo.png");
-  background-size: 140%;
+  background-size: contain;
   background-repeat: no-repeat;
-  background-position: center;
-  width: 52px;
-  height: 52px;
-  margin-bottom: 6px;
+  background-position: left center;
+  width: 150px;
+  height: 42px;
+  margin-bottom: 28px;
   cursor: pointer;
-  opacity: 0.95;
+  filter: brightness(0) invert(1);
 }
 
 .brand__name {
@@ -334,8 +352,8 @@ const features = [
 .feature__icon {
   width: 40px;
   height: 40px;
-  background: rgba(192, 138, 80, 0.15);
-  border: 1px solid rgba(192, 138, 80, 0.25);
+  background: rgba(var(--color-primary-rgb), 0.15);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.25);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -368,7 +386,15 @@ const features = [
 
 /* ── 右側 ── */
 .form-col {
-  background: #faf7f3;
+  background:
+    repeating-linear-gradient(
+      -55deg,
+      transparent,
+      transparent 28px,
+      rgba(180, 140, 100, 0.09) 28px,
+      rgba(180, 140, 100, 0.09) 29px
+    ),
+    #faf7f3;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -403,7 +429,7 @@ const features = [
 
   .el-button {
     font-size: 14px;
-    color: #c08a50;
+    color: var(--color-primary);
     padding: 0 2px;
   }
 }
@@ -423,7 +449,7 @@ const features = [
     transition: box-shadow 0.15s;
 
     &:hover { box-shadow: 0 0 0 1px #c8a880; }
-    &.is-focus { box-shadow: 0 0 0 2px #c08a50 !important; }
+    &.is-focus { box-shadow: 0 0 0 2px var(--color-primary) !important; }
   }
 
   :deep(.el-input__inner) {
@@ -445,21 +471,21 @@ const features = [
   border-radius: 10px;
   font-size: 15px;
   font-weight: 600;
-  background: #c08a50 !important;
-  border-color: #c08a50 !important;
-  box-shadow: 0 4px 16px rgba(192, 138, 80, 0.3);
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 4px 16px rgba(var(--color-primary-rgb), 0.3);
   transition: all 0.15s;
 
   &:hover {
-    background: #a87440 !important;
-    border-color: #a87440 !important;
-    box-shadow: 0 6px 20px rgba(192, 138, 80, 0.4);
+    background: var(--color-primary-hover) !important;
+    border-color: var(--color-primary-hover) !important;
+    box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.4);
     transform: translateY(-1px);
   }
 
   &:active {
     transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(192, 138, 80, 0.3);
+    box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.3);
   }
 }
 
@@ -475,8 +501,115 @@ const features = [
     text-decoration: underline;
     text-underline-offset: 2px;
 
-    &:hover { color: #c08a50; }
+    &:hover { color: var(--color-primary); }
   }
+}
+
+/* ── Geometric layer ── */
+.geo {
+  position: absolute;
+  pointer-events: none;
+}
+
+// 大環：缺口弧線，旋轉時可見方向感
+.geo--ring-xl {
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  top: -130px;
+  right: -130px;
+  border: 1.5px solid transparent;
+  border-top-color: rgba(var(--color-primary-rgb), 0.5);
+  border-right-color: rgba(var(--color-primary-rgb), 0.25);
+  animation: geo-spin 30s linear infinite;
+  will-change: transform;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 38px;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    border-bottom-color: rgba(var(--color-primary-rgb), 0.2);
+    border-left-color: rgba(var(--color-primary-rgb), 0.12);
+  }
+}
+
+// 中環：浮動 + 呼吸
+.geo--ring-md {
+  width: 240px;
+  height: 240px;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+  border-radius: 50%;
+  bottom: -70px;
+  left: -70px;
+  animation: geo-float 10s ease-in-out infinite, geo-breathe 6s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+// 大菱形：浮動
+.geo--diamond {
+  width: 72px;
+  height: 72px;
+  border: 1.5px solid rgba(var(--color-primary-rgb), 0.45);
+  top: 40%;
+  right: 56px;
+  animation: geo-float-diamond 9s ease-in-out infinite;
+  will-change: transform;
+}
+
+// 小菱形：反向浮動
+.geo--diamond-sm {
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid rgba(var(--color-primary-rgb), 0.4);
+  top: 22%;
+  left: 28px;
+  animation: geo-float-diamond 13s ease-in-out infinite reverse;
+  will-change: transform;
+}
+
+// 水平線：脈動
+.geo--hline {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--color-primary-rgb), 0.5), transparent);
+
+  &-1 {
+    width: 180px;
+    bottom: 26%;
+    right: 0;
+    animation: geo-breathe 5s ease-in-out infinite;
+  }
+
+  &-2 {
+    width: 90px;
+    top: 32%;
+    left: 0;
+    animation: geo-breathe 5s ease-in-out 2.5s infinite;
+  }
+}
+
+.geo--dots,
+.geo--block { display: none; }
+
+@keyframes geo-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes geo-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-20px); }
+}
+
+@keyframes geo-float-diamond {
+  0%, 100% { transform: rotate(45deg) translateY(0); }
+  50%       { transform: rotate(45deg) translateY(-12px); }
+}
+
+@keyframes geo-breathe {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1; }
 }
 
 /* ── RWD ── */

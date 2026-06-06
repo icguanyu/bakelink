@@ -1,7 +1,9 @@
 <template>
   <footer class="footer">
-    <span class="footer__copy">© {{ year }} BakeLink</span>
+    <span class="footer__copy">© {{ year }} Prelo 鋪樂</span>
     <nav class="footer__links">
+      <RouterLink to="/">回到首頁</RouterLink>
+      <span class="footer__sep" />
       <a href="#">服務條款</a>
       <span class="footer__sep" />
       <a href="#">隱私權政策</a>
@@ -27,7 +29,7 @@ const year = new Date().getFullYear();
 
 .footer__copy {
   font-size: 12px;
-  color: #a89888;
+  color: var(--color-secondary) !important;
 }
 
 .footer__links {
@@ -37,12 +39,8 @@ const year = new Date().getFullYear();
 
   a {
     font-size: 12px;
-    color: #a89888;
+    color: var(--color-secondary) !important;
     text-decoration: none;
-
-    &:hover {
-      color: #c08a50;
-    }
   }
 }
 

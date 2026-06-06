@@ -1,5 +1,5 @@
 import axios from "axios";
-const token = localStorage.getItem("bakelink-token");
+const token = localStorage.getItem("prelo-token");
 
 let isShowAlert = false; // 避免顯示太多次 ElMessageBox
 

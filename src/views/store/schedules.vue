@@ -119,7 +119,7 @@ const addToCalendar = (s) => {
   const ics = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//BakeLink//BakeLink//EN",
+    "PRODID:-//Prelo//Prelo//EN",
     "BEGIN:VEVENT",
     dtStart,
     dtEnd,
@@ -138,7 +138,7 @@ const addToCalendar = (s) => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `bakelink-${s.schedule_date}.ics`;
+  a.download = `prelo-${s.schedule_date}.ics`;
   a.click();
   URL.revokeObjectURL(url);
 };
@@ -678,7 +678,7 @@ const addToCalendar = (s) => {
     align-items: center;
     gap: 4px;
 
-    i { font-size: 13px; color: #c08a50; }
+    i { font-size: 13px; color: var(--color-secondary); }
   }
 
   &__items {

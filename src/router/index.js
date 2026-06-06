@@ -84,7 +84,7 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem("bakelink-token");
+  const token = localStorage.getItem("prelo-token");
 
   if (to.matched.some((m) => m.meta.requireAuth)) {
     // requireAuth = true = 需驗證

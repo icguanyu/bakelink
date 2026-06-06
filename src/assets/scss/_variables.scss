@@ -1,0 +1,16 @@
+// ┌─────────────────────────────────────────────────────────┐
+// │  Prelo 品牌色變數                                        │
+// │  主色（後台）→ --color-primary                           │
+// │  次要色（前台）→ --color-secondary                        │
+// └─────────────────────────────────────────────────────────┘
+:root {
+  --color-primary:         #fe904d;
+  --color-primary-hover:   #e07838;
+  --color-primary-dark:    #c06228;
+  --color-primary-rgb:     254, 144, 77;
+
+  --color-secondary:       #c8944a;
+  --color-secondary-hover: #ad7d38;
+  --color-secondary-dark:  #8f6228;
+  --color-secondary-rgb:   200, 148, 74;
+}

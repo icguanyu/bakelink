@@ -26,7 +26,7 @@ export async function onRequest(context) {
     if (!res.ok) return context.next();
 
     const shop = await res.json();
-    const title = shop.shopName ?? "BakeLink";
+    const title = shop.shopName ?? "Prelo";
     const description = shop.intro ?? "麵包烘焙訂購平台";
     const image = shop.coverImage ?? shop.avatar ?? "";
 
@@ -40,7 +40,7 @@ export async function onRequest(context) {
   <meta charset="UTF-8" />
   <title>${escape(title)}</title>
   <meta name="description" content="${escape(description)}" />
-  <meta property="og:site_name" content="BakeLink" />
+  <meta property="og:site_name" content="Prelo" />
   <meta property="og:title" content="${escape(title)}" />
   <meta property="og:description" content="${escape(description)}" />
   <meta property="og:url" content="${escape(canonical)}" />
