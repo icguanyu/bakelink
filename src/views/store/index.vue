@@ -35,6 +35,7 @@ const productsLoading = ref(false);
 const fetchShop = async () => {
   try {
     const res = await Shop.GetInfo(route.params.slug);
+    console.log("shop info", res.data);
     shop.value = res.data;
     document.title = res.data.shopName ? `${res.data.shopName} | BakeLink` : "BakeLink";
   } catch (err) {
@@ -95,7 +96,7 @@ const hasDelivery = computed(
       <el-skeleton animated>
         <template #template>
           <div class="hero">
-            <div class="hero__cover" style="background: #e8ddd5"></div>
+            <div class="hero__cover" style="background: linear-gradient(160deg, #e0e0e0 0%, #c8c8c8 55%, #b0b0b0 100%)"></div>
             <div class="hero__identity">
               <el-skeleton-item variant="circle" style="width: 80px; height: 80px" />
               <el-skeleton-item variant="h1" style="width: 160px; margin-top: 12px" />
@@ -128,7 +129,7 @@ const hasDelivery = computed(
       <!-- Hero -->
       <div class="hero">
         <div class="hero__cover">
-          <img v-if="shop.coverImage" :src="shop.coverImage" :alt="shop.shopName" class="hero__cover-img" />
+          <img v-if="shop.cover" :src="shop.cover" :alt="shop.shopName" class="hero__cover-img" />
         </div>
         <div class="hero__identity">
           <div class="hero__avatar">
@@ -353,30 +354,35 @@ const hasDelivery = computed(
 
     <!-- 固定底部 CTA -->
     <div v-if="shop && !isLoading" class="bottom-bar">
-      <button
-        class="cta-btn"
-        @click="
-          router.push({
-            name: 'store-schedules',
-            params: { slug: route.params.slug },
-          })
-        "
-      >
-        <i class="bx bx-calendar-check"></i>
-        我要訂購
-      </button>
-      <button
-        class="cta-btn cta-btn--ghost"
-        @click="
-          router.push({
-            name: 'store-order-lookup',
-            params: { slug: route.params.slug },
-          })
-        "
-      >
-        <i class="bx bx-receipt"></i>
-        我的訂單
-      </button>
+      <div class="bottom-bar__btns">
+        <button
+          class="cta-btn"
+          @click="
+            router.push({
+              name: 'store-schedules',
+              params: { slug: route.params.slug },
+            })
+          "
+        >
+          <i class="bx bx-calendar-check"></i>
+          我要訂購
+        </button>
+        <button
+          class="cta-btn cta-btn--ghost"
+          @click="
+            router.push({
+              name: 'store-order-lookup',
+              params: { slug: route.params.slug },
+            })
+          "
+        >
+          <i class="bx bx-receipt"></i>
+          我的訂單
+        </button>
+      </div>
+      <div class="bottom-bar__powered">
+        由 <a href="/" target="_blank" rel="noopener">BakeLink</a> 提供服務
+      </div>
     </div>
   </div>
 </template>
@@ -386,7 +392,7 @@ const hasDelivery = computed(
   height: 100dvh;
   overflow-y: auto;
   background: #f7f3ee;
-  padding-bottom: 100px;
+  padding-bottom: 120px;
 }
 
 .state-center {
@@ -422,7 +428,7 @@ const hasDelivery = computed(
 .hero {
   &__cover {
     height: 180px;
-    background: linear-gradient(160deg, #c9945c 0%, #8a4e22 55%, #3e1e08 100%);
+    background: linear-gradient(160deg, #e0e0e0 0%, #c8c8c8 55%, #b0b0b0 100%);
     overflow: hidden;
     position: relative;
   }
@@ -734,16 +740,39 @@ const hasDelivery = computed(
   right: 0;
   z-index: 100;
   display: flex;
-  gap: 10px;
-  padding: 12px 16px;
-  padding-bottom: calc(12px + env(safe-area-inset-bottom));
-  background: rgba(247, 243, 238, 0.88);
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 16px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  background: rgba(247, 243, 238, 0.92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid rgba(232, 221, 213, 0.6);
+}
+
+.bottom-bar__btns {
+  display: flex;
+  gap: 10px;
 
   .cta-btn {
     flex: 1;
+  }
+}
+
+.bottom-bar__powered {
+  text-align: center;
+  font-size: 11px;
+  color: #b8a898;
+  letter-spacing: 0.02em;
+
+  a {
+    color: #a07848;
+    text-decoration: none;
+    font-weight: 600;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 

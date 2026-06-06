@@ -1,13 +1,22 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/home.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: "/",
-      name: "home",
+      name: "landing",
+      component: () => import("../views/landing.vue"),
+    },
+    {
+      path: "/login",
+      name: "login",
       component: () => import("../views/home.vue"),
+    },
+    {
+      path: "/register",
+      name: "register",
+      component: () => import("../views/register.vue"),
     },
     {
       path: "/s/:slug",
@@ -81,7 +90,7 @@ router.beforeEach((to, from, next) => {
     // requireAuth = true = 需驗證
     if (!token) {
       ElMessage.error("請重新登入");
-      next("/");
+      next("/login");
     } else {
       next();
     }

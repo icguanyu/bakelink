@@ -34,6 +34,22 @@ export const useAuthStore = defineStore("auth", () => {
     }
   };
 
+  const register = async ({ name, email, password }) => {
+    if (loading.value) return null;
+    loading.value = true;
+    try {
+      const res = await Auth.Register({ name, email, password });
+      const newToken = res.data?.token;
+      if (newToken) {
+        setToken(newToken);
+        await fetchUser();
+      }
+      return newToken || null;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const login = async ({ email, password }) => {
     if (loading.value) return null;
 
@@ -76,8 +92,10 @@ export const useAuthStore = defineStore("auth", () => {
     user,
     loading,
     login,
+    register,
     logout,
     fetchUser,
+    setToken,
     setUser,
   };
 });

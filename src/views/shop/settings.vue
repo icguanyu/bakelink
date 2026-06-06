@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { Users } from "@/api/auth";
 import { ElMessage, ElMessageBox } from "element-plus";
+import imageCompression from "browser-image-compression";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -35,6 +36,7 @@ const defaultBusinessHours = [
 
 const form = reactive({
   avatar: "",
+  coverImage: "",
   shopName: "山丘烘焙坊",
   shopSlug: "",
   owner: "王麵麥",
@@ -61,6 +63,47 @@ const form = reactive({
   facebookUrl: "",
   instagramUrl: "",
 });
+
+const coverLoading = ref(false);
+const avatarLoading = ref(false);
+const coverInput = ref(null);
+const avatarInput = ref(null);
+
+const compressAndUpload = async (file, uploadFn) => {
+  const compressed = await imageCompression(file, { maxSizeMB: 0.5 });
+  const fd = new FormData();
+  fd.append("file", compressed);
+  const res = await uploadFn(fd);
+  return res.data.url;
+};
+
+const handleCoverUpload = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  coverLoading.value = true;
+  try {
+    form.coverImage = await compressAndUpload(file, Users.UploadCover);
+  } catch {
+    ElMessage.error("封面上傳失敗");
+  } finally {
+    coverLoading.value = false;
+    e.target.value = "";
+  }
+};
+
+const handleAvatarUpload = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  avatarLoading.value = true;
+  try {
+    form.avatar = await compressAndUpload(file, Users.UploadAvatar);
+  } catch {
+    ElMessage.error("LOGO 上傳失敗");
+  } finally {
+    avatarLoading.value = false;
+    e.target.value = "";
+  }
+};
 
 const segment = ref("basic");
 
@@ -239,21 +282,47 @@ onMounted(() => {
             <small class="hint">請填寫商家基本資料，使用者可於前台查看</small>
           </div>
 
-          <div class="card__subtitle">標誌/LOGO</div>
-          <UploadAvatar
-            v-model="form.avatar"
-            :disabled="false"
-            @upload="
-              (url) => {
-                form.avatar = url;
-              }
-            "
-            @delete="
-              () => {
-                form.avatar = '';
-              }
-            "
-          />
+          <div class="card__subtitle">店面預覽</div>
+          <div class="store-preview">
+            <!-- 封面 -->
+            <div
+              class="sp-cover"
+              v-loading="coverLoading"
+              @click="coverInput.click()"
+            >
+              <img v-if="form.cover" :src="form.cover" class="sp-cover__img" />
+              <div v-else class="sp-cover__empty">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>上傳封面照</span>
+              </div>
+              <button
+                v-if="form.cover"
+                class="sp-cover__remove"
+                @click.stop="form.cover = ''"
+              >×</button>
+            </div>
+            <!-- 頭像 + 店名 -->
+            <div class="sp-identity">
+              <div
+                class="sp-avatar"
+                v-loading="avatarLoading"
+                @click="avatarInput.click()"
+              >
+                <img v-if="form.avatar" :src="form.avatar" />
+                <span v-else class="sp-avatar__fallback">
+                  {{ form.shopName?.[0] ?? '🍞' }}
+                </span>
+                <div class="sp-avatar__overlay">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                </div>
+              </div>
+              <p class="sp-name">{{ form.shopName || '店名' }}</p>
+              <p v-if="form.intro" class="sp-intro">{{ form.intro }}</p>
+            </div>
+          </div>
+          <p class="seo-hint">封面與 LOGO 設定後將顯示於搜尋引擎（SEO）</p>
+          <input ref="coverInput" type="file" accept=".png,.jpg,.jpeg,.webp" style="display:none" @change="handleCoverUpload" />
+          <input ref="avatarInput" type="file" accept=".png,.jpg,.jpeg,.webp" style="display:none" @change="handleAvatarUpload" />
           <br />
           <div class="card__subtitle">基本資訊</div>
           <el-form-item label="店名">
@@ -263,6 +332,7 @@ onMounted(() => {
               maxlength="20"
               show-word-limit
             />
+            <p class="seo-hint">作為 SEO 網頁標題（&lt;title&gt;）顯示於搜尋結果</p>
           </el-form-item>
           <el-form-item label="負責人">
             <el-input
@@ -307,6 +377,7 @@ onMounted(() => {
               maxlength="200"
               show-word-limit
             />
+            <p class="seo-hint">作為 SEO 摘要（meta description）顯示於搜尋結果，建議 50–150 字</p>
           </el-form-item>
 
           <el-divider />
@@ -682,6 +753,159 @@ h2 {
   color: var(--el-text-color-primary);
   margin-bottom: 12px;
   font-size: 14px;
+}
+
+/* ── 店面預覽 ── */
+.store-preview {
+  border: 1px solid var(--el-border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.sp-cover {
+  height: 140px;
+  background: linear-gradient(160deg, #e0e0e0 0%, #c8c8c8 55%, #b0b0b0 100%);
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+
+  &:hover .sp-cover__empty { opacity: 1; }
+  &:hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.15);
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &__empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+    z-index: 1;
+  }
+
+  &__remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.45);
+    color: #fff;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover { background: rgba(0,0,0,0.7); }
+  }
+}
+
+.sp-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 16px 20px;
+  text-align: center;
+  margin-top: -48px;
+}
+
+.sp-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  overflow: hidden;
+  background: #ffd88a;
+  cursor: pointer;
+  position: relative;
+  z-index: 2001;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #7a4f00;
+  }
+
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  &:hover &__overlay { opacity: 1; }
+}
+
+.sp-name {
+  font-size: 16px;
+  font-weight: 900;
+  color: #1a120b;
+  margin: 0 0 4px;
+  font-family: "Noto Serif TC", serif;
+  letter-spacing: 0.06em;
+}
+
+.sp-intro {
+  font-size: 12px;
+  color: #5c4b3e;
+  margin: 0;
+  line-height: 1.5;
+  max-width: 280px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.seo-hint {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: var(--el-text-color-placeholder);
+  line-height: 1.5;
+  &::before {
+    content: "🔍 ";
+  }
 }
 
 .suffix {

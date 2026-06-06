@@ -246,13 +246,20 @@ defineExpose({ open, close });
         </div>
       </div> -->
       <div v-if="value === '商品圖片'">
-        <el-form-item label="圖片說明" prop="image_urls"> </el-form-item>
-        <UploadPhotos
-          ref="uploadPhotos"
-          v-model="form.image_urls"
-          :disabled="false"
-          @upload="handleUpload"
-        />
+        <div v-if="!form.id" class="photo-gate">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <p>請先儲存商品基本資訊</p>
+          <small>建立商品後才能上傳圖片</small>
+        </div>
+        <template v-else>
+          <el-form-item label="圖片說明" prop="image_urls"> </el-form-item>
+          <UploadPhotos
+            ref="uploadPhotos"
+            v-model="form.image_urls"
+            :disabled="false"
+            @upload="handleUpload"
+          />
+        </template>
       </div>
     </el-form>
     <!-- <pre>{{ form }}</pre> -->
@@ -291,6 +298,30 @@ defineExpose({ open, close });
 </template>
 
 <style scoped lang="scss">
+.photo-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 40px 20px;
+  border: 1.5px dashed var(--el-border-color);
+  border-radius: 10px;
+  color: var(--el-text-color-placeholder);
+  text-align: center;
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--el-text-color-secondary);
+  }
+
+  small {
+    font-size: 12px;
+  }
+}
+
 .ing-table {
   display: flex;
   flex-direction: column;

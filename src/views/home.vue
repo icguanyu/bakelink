@@ -35,71 +35,82 @@ const handleLogin = async () => {
     router.push("/shop");
   } catch (err) {
     console.log("catch", err);
-    const message =
-      err?.response?.data?.message || err?.response?.data || "登入失敗";
-    ElMessage.error(message);
   }
 };
 </script>
 
 <template>
-  <div class="login">
-    <div class="login__card">
-      <div class="login__brand"></div>
-      <div class="login__title">登入</div>
-      <div class="login__subtitle">請使用你的帳號與密碼</div>
-      <el-form
-        ref="formRef"
-        class="login__form"
-        label-position="top"
-        :model="form"
-        :rules="rules"
-        @keyup.enter="handleLogin"
-      >
-        <el-form-item label="帳號" prop="email">
-          <el-input
-            v-model="form.email"
-            placeholder="輸入帳號"
-            autocomplete="username"
-          />
-        </el-form-item>
-        <el-form-item label="密碼" prop="password">
-          <el-input
-            v-model="form.password"
-            placeholder="輸入密碼"
-            type="password"
-            autocomplete="current-password"
-            show-password
-          />
-        </el-form-item>
-        <el-button
-          class="login__submit"
-          type="primary"
-          size="large"
-          :loading="loading"
-          :disabled="loading"
-          @click="handleLogin"
+  <div class="login-page">
+    <div class="login">
+      <div class="login__card">
+        <div class="login__brand"></div>
+        <div class="login__title">登入</div>
+        <div class="login__subtitle">請使用你的帳號與密碼</div>
+        <el-form
+          ref="formRef"
+          class="login__form"
+          label-position="top"
+          :model="form"
+          :rules="rules"
+          @keyup.enter="handleLogin"
         >
-          登入
-        </el-button>
-        <!-- <el-button class="login__ghost" type="default" size="large">
-          忘記密碼
-        </el-button> -->
-      </el-form>
+          <el-form-item label="帳號" prop="email">
+            <el-input
+              v-model="form.email"
+              placeholder="輸入帳號"
+              autocomplete="username"
+            />
+          </el-form-item>
+          <el-form-item label="密碼" prop="password">
+            <el-input
+              v-model="form.password"
+              placeholder="輸入密碼"
+              type="password"
+              autocomplete="current-password"
+              show-password
+            />
+          </el-form-item>
+          <el-button
+            class="login__submit"
+            type="primary"
+            size="large"
+            :loading="loading"
+            :disabled="loading"
+            @click="handleLogin"
+          >
+            登入
+          </el-button>
+        </el-form>
+      </div>
     </div>
+    <FooterBar />
   </div>
 </template>
 
 <style lang="scss" scoped>
-.login {
+.login-page {
   height: 100dvh;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.login {
+  flex: 1;
   display: grid;
   place-items: center;
   padding: 32px 16px;
   background:
-    radial-gradient(circle at 15% 20%, rgba(255, 210, 150, 0.4), transparent 50%),
-    radial-gradient(circle at 85% 80%, rgba(200, 150, 90, 0.2), transparent 50%),
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(255, 210, 150, 0.4),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 85% 80%,
+      rgba(200, 150, 90, 0.2),
+      transparent 50%
+    ),
     #f7f3ee;
 }
 
@@ -146,12 +157,18 @@ const handleLogin = async () => {
     background: #fdf8f2;
     box-shadow: 0 0 0 1px #e8ddd5;
 
-    &:hover { box-shadow: 0 0 0 1px #c8a880; }
-    &.is-focus { box-shadow: 0 0 0 2px #c08a50 !important; }
+    &:hover {
+      box-shadow: 0 0 0 1px #c8a880;
+    }
+    &.is-focus {
+      box-shadow: 0 0 0 2px #c08a50 !important;
+    }
   }
   :deep(.el-input__inner) {
     color: #1a120b;
-    &::placeholder { color: #c0b0a0; }
+    &::placeholder {
+      color: #c0b0a0;
+    }
   }
 }
 

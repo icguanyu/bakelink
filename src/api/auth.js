@@ -4,6 +4,9 @@ export const Auth = {
   Login: (data) => {
     return request.post("/auth/login", data);
   },
+  Register: (data) => {
+    return request.post("/auth/register", data);
+  },
   Me: () => {
     return request.get("/auth/me");
   },
@@ -18,5 +21,8 @@ export const Users = {
   },
   UploadAvatar: (formData) => {
     return request.post("/UploadAvatar", formData);
+  },
+  UploadCover: (formData) => {
+    return request.post("/UploadCover", formData);
   },
 };
