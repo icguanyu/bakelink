@@ -11,6 +11,12 @@ function escape(str) {
 export async function onRequest(context) {
   const { params, request, env } = context;
   const ua = request.headers.get("User-Agent") ?? "";
+  const url = new URL(request.url);
+
+  // 瀏覽器端 JS redirect 帶來的第二次請求，直接交給 SPA
+  if (url.searchParams.has("_spa")) {
+    return context.next();
+  }
 
   if (!BOT_UA.test(ua)) {
     return context.next();
@@ -54,10 +60,10 @@ export async function onRequest(context) {
   <meta name="twitter:description" content="${escape(description)}" />
   ${image ? `<meta name="twitter:image" content="${escape(image)}" />` : ""}
   <link rel="canonical" href="${escape(canonical)}" />
-  <meta http-equiv="refresh" content="0; url=${escape(canonical)}" />
 </head>
 <body>
   <a href="${escape(canonical)}">${escape(title)}</a>
+  <script>window.location.replace("${escape(canonical)}?_spa=1");</script>
 </body>
 </html>`;
 
