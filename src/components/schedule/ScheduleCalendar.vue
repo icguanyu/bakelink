@@ -87,13 +87,13 @@ const selectDate = (date) => emit("select", date);
   gap: 3px;
   margin-bottom: 6px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e8dfd6;
 
   .week-label {
     text-align: center;
     font-size: 12px;
     font-weight: 600;
-    color: #64748b;
+    color: #7a6a5c;
     padding: 3px 0;
   }
 }
@@ -105,7 +105,7 @@ const selectDate = (date) => emit("select", date);
 }
 
 .cal-cell {
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid #e8dfd6;
   border-radius: 5px;
   background: white;
   cursor: pointer;
@@ -120,18 +120,18 @@ const selectDate = (date) => emit("select", date);
     box-shadow 0.15s;
 
   &:hover:not(.is-other-month) {
-    border-color: #94a3b8;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    border-color: #c0a898;
+    box-shadow: 0 2px 6px rgba(100, 60, 20, 0.08);
   }
 
   &.is-selected {
-    border-color: #1e293b;
+    border-color: var(--color-primary);
     border-width: 1px;
-    background: #f8fafc;
+    background: #fff3eb;
   }
 
   &.is-today .cell-date {
-    background: #1e293b;
+    background: var(--color-primary);
     color: white;
     border-radius: 4px;
     width: 22px;
@@ -143,14 +143,14 @@ const selectDate = (date) => emit("select", date);
   &.is-other-month {
     opacity: 0.25;
     pointer-events: none;
-    background: #f8fafc;
+    background: var(--bg-page);
   }
 }
 
 .cell-date {
   font-size: 15px;
   font-weight: 700;
-  color: #1e293b;
+  color: #2d1a0e;
   line-height: 12px;
   display: flex;
   align-items: center;
@@ -158,10 +158,10 @@ const selectDate = (date) => emit("select", date);
   height: 22px;
 
   &.saturday {
-    color: #2563eb;
+    color: #16a34a;
   }
   &.sunday {
-    color: #dc2626;
+    color: #cf4747;
   }
 }
 
@@ -182,8 +182,8 @@ const selectDate = (date) => emit("select", date);
   line-height: 1.4;
 
   &.orders {
-    background: #dbeafe;
-    color: #1e40af;
+    background: #fff3eb;
+    color: #c06228;
   }
 
   &.status {
@@ -191,8 +191,8 @@ const selectDate = (date) => emit("select", date);
     color: #92400e;
 
     &.status--CLOSED {
-      background: #e5e7eb;
-      color: #6b7280;
+      background: #ede7df;
+      color: #8a7a6a;
     }
   }
 }
@@ -201,7 +201,7 @@ const selectDate = (date) => emit("select", date);
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #e2e8f0;
+  background: #e8dfd6;
   margin: 3px 0 0 2px;
 }
 
@@ -259,7 +259,7 @@ const selectDate = (date) => emit("select", date);
       width: 4px;
       height: 4px;
       border-radius: 50%;
-      background: #3b82f6;
+      background: #fe904d;
       display: block;
     }
   }

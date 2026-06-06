@@ -119,7 +119,7 @@ if (typeof window !== "undefined") {
       justify-content: center;
       border: none;
       border-radius: 0 8px 8px 0;
-      background: #fcae08;
+      background: var(--color-primary);
       cursor: pointer;
       z-index: 6;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -134,7 +134,7 @@ if (typeof window !== "undefined") {
     }
 
     .container {
-      background-color: #f8fafc;
+      background-color: var(--bg-page);
       flex: 1;
       overflow: auto;
       @include scrollbar(

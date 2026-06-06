@@ -1,18 +1,22 @@
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/stores/auth";
+
+const REMEMBER_KEY = "prelo-remember-email";
 
 const router = useRouter();
 const authStore = useAuthStore();
 const { loading } = storeToRefs(authStore);
 const formRef = ref();
 
+const savedEmail = localStorage.getItem(REMEMBER_KEY);
 const form = reactive({
-  email: "", // admin@bakelink.local
-  password: "", // Admin123
+  email: savedEmail ?? "",
+  password: "",
 });
+const rememberMe = ref(!!savedEmail);
 
 const rules = {
   email: [{ required: true, message: "請輸入帳號", trigger: "blur" }],
@@ -26,11 +30,12 @@ const handleLogin = async () => {
   if (!valid) return;
 
   try {
-    const res = await authStore.login({
-      email: form.email,
-      password: form.password,
-    });
-    console.log(res);
+    await authStore.login({ email: form.email, password: form.password });
+    if (rememberMe.value) {
+      localStorage.setItem(REMEMBER_KEY, form.email);
+    } else {
+      localStorage.removeItem(REMEMBER_KEY);
+    }
     ElMessage.success("登入成功");
     router.push("/shop");
   } catch (err) {
@@ -98,6 +103,9 @@ const handleLogin = async () => {
               size="large"
             />
           </el-form-item>
+          <div class="login__remember">
+            <el-checkbox v-model="rememberMe">記住帳號</el-checkbox>
+          </div>
           <el-button
             class="login__submit"
             type="primary"
@@ -423,6 +431,25 @@ $text-muted: #7a6a5c;
 @keyframes geo-breathe {
   0%, 100% { opacity: 0.4; }
   50%       { opacity: 1; }
+}
+
+// ─── Remember me ──────────────────────────────────────────────────────────────
+.login__remember {
+  margin-bottom: 14px;
+
+  :deep(.el-checkbox__label) {
+    font-size: 13px;
+    color: $text-muted;
+  }
+
+  :deep(.el-checkbox__inner) {
+    border-radius: 4px;
+  }
+
+  :deep(.el-checkbox.is-checked .el-checkbox__inner) {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
 }
 
 // ─── Submit button ────────────────────────────────────────────────────────────

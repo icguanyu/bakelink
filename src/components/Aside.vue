@@ -35,6 +35,7 @@ onMounted(() => {
 
 <template>
   <aside>
+    <div class="aside-logo" />
     <!-- <div class="date-box">
       <div class="year">{{ currentYear }}</div>
       <div class="month">{{ currentMonth }}</div>
@@ -47,18 +48,18 @@ onMounted(() => {
       <div class="title">總覽</div>
     </router-link> -->
     <router-link class="link" to="/shop">
-      <div class="icon">
-        <img src="@/assets/images/icons/calendar.png" alt="" />
-      </div>
-      <div class="title">接單</div>
-    </router-link>
-    <router-link class="link" to="/shop/order">
       <el-badge :value="todayOrderCount" :max="99" :offset="[-10, 4]">
         <div class="icon">
           <img src="@/assets/images/icons/receipt.png" alt="" />
         </div>
       </el-badge>
       <div class="title">訂單</div>
+    </router-link>
+    <router-link class="link" to="/shop/order">
+      <div class="icon">
+        <img src="@/assets/images/icons/calendar.png" alt="" />
+      </div>
+      <div class="title">接單</div>
     </router-link>
     <router-link class="link" to="/shop/products">
       <div class="icon">
@@ -92,7 +93,8 @@ aside {
   width: 70px;
   flex-basis: 70px;
   height: 100dvh;
-  background-color: #1c2345;
+  background-color: #fff9f4;
+  border-right: 1px solid rgba(180, 140, 100, 0.18);
   display: flex;
   flex-direction: column;
 
@@ -103,45 +105,27 @@ aside {
     flex-basis 0.2s ease,
     opacity 0.2s ease;
 
-  .date-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 8px;
-    margin: 0 8px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #fff;
-
-    .year {
-      font-size: 10px;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.6);
-      letter-spacing: 0.5px;
-    }
-    .month {
-      font-size: 12px;
-      font-weight: 700;
-      color: #ffd700;
-      margin: 0;
-      letter-spacing: 1px;
-    }
-    .date {
-      font-size: 24px;
-
-      line-height: 1;
-      color: #fff;
-    }
+  .aside-logo {
+    width: 55px;
+    height: 15px;
+    margin: 14px auto 6px;
+    background-image: url("@/assets/images/logo.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    flex-shrink: 0;
   }
+
   .link {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    color: #fff;
+    color: #5a4030;
     text-decoration: none;
     padding: 8px 16px;
+    border-radius: 6px;
+    margin: 0 4px;
     .el-badge {
       &::v-deep(sup) {
         border: none;
@@ -155,6 +139,7 @@ aside {
         width: 100%;
         height: 100%;
         object-fit: contain;
+        filter: brightness(0) opacity(0.55);
       }
     }
     .title {
@@ -162,18 +147,22 @@ aside {
     }
   }
   .link.router-link-exact-active {
-    background-color: #303758;
-    &:after {
-      content: "";
-      display: block;
-      width: 10px;
-      height: 10px;
-      background-color: white;
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%) translateX(50%) rotate(45deg);
+    background-color: rgba(254, 144, 77, 0.12);
+    color: var(--color-primary);
+    .icon img {
+      filter: brightness(0) saturate(100%) invert(62%) sepia(60%) saturate(800%) hue-rotate(340deg) brightness(105%);
     }
+    // &:after {
+    //   content: "";
+    //   display: block;
+    //   width: 10px;
+    //   height: 10px;
+    //   background-color: var(--color-primary);
+    //   position: absolute;
+    //   right: 0;
+    //   top: 50%;
+    //   transform: translateY(-50%) translateX(50%) rotate(45deg);
+    // }
   }
   .aside-toggle {
     margin-top: auto;
@@ -184,6 +173,7 @@ aside {
       width: 36px;
       height: 36px;
       object-fit: contain;
+      filter: brightness(0) opacity(0.4);
     }
   }
 }

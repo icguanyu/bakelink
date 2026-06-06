@@ -170,7 +170,7 @@ const handleQuickAction = (action) => {
     h2 {
       font-size: 24px;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--color-primary);
       margin: 0 0 8px 0;
       letter-spacing: -0.5px;
     }
@@ -186,8 +186,8 @@ const handleQuickAction = (action) => {
 
 // 營業狀態欄
 .business-status {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #ffffff 0%, var(--bg-page) 100%);
+  border: 1px solid #e8dfd6;
   border-radius: 8px;
   padding: 12px 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -252,7 +252,7 @@ const handleQuickAction = (action) => {
     margin: 0 0 12px 0;
     font-size: 18px;
     font-weight: 600;
-    color: #0f172a;
+    color: var(--color-primary);
   }
 
   .action-buttons {
@@ -291,7 +291,7 @@ const handleQuickAction = (action) => {
       margin: 0;
       font-size: 18px;
       font-weight: 600;
-      color: #0f172a;
+      color: var(--color-primary);
     }
   }
 
@@ -305,7 +305,7 @@ const handleQuickAction = (action) => {
       justify-content: space-between;
       align-items: center;
       padding: 12px;
-      background: #f8fafc;
+      background: var(--bg-page);
       border-radius: 8px;
       border-left: 4px solid #cbd5e1;
       transition: all 0.3s ease;
@@ -354,13 +354,13 @@ const handleQuickAction = (action) => {
           .progress-bar-small {
             width: 80px;
             height: 4px;
-            background: #e2e8f0;
+            background: #e8dfd6;
             border-radius: 2px;
             overflow: hidden;
 
             .progress-fill {
               height: 100%;
-              background: linear-gradient(90deg, #3b82f6, #06b6d4);
+              background: linear-gradient(90deg, var(--color-primary), var(--color-primary-hover));
               border-radius: 2px;
               transition: width 0.3s ease;
             }
@@ -378,7 +378,7 @@ const handleQuickAction = (action) => {
 
       &.completed {
         border-left-color: #22c55e;
-        background: linear-gradient(to right, rgba(34, 197, 94, 0.05), #f8fafc);
+        background: linear-gradient(to right, rgba(34, 197, 94, 0.05), var(--bg-page));
       }
 
       &.in-progress {
@@ -386,7 +386,7 @@ const handleQuickAction = (action) => {
         background: linear-gradient(
           to right,
           rgba(245, 158, 11, 0.05),
-          #f8fafc
+          var(--bg-page)
         );
       }
 

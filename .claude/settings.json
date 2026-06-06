@@ -45,10 +45,14 @@
       "Bash(git -C \"c:\\\\Users\\\\user\\\\Desktop\\\\prelo\" add src/views/shop/settings.vue)",
       "Bash(git -C 'c:\\\\Users\\\\user\\\\Desktop\\\\prelo' commit -m ' *)",
       "Bash(git -C \"c:\\\\Users\\\\user\\\\Desktop\\\\prelo\" push)",
-      "Bash(git -C \"c:\\\\Users\\\\user\\\\Desktop\\\\prelo\" add \"functions/s/[slug].js\")"
+      "Bash(git -C \"c:\\\\Users\\\\user\\\\Desktop\\\\prelo\" add \"functions/s/[slug].js\")",
+      "Bash(git -C \"c:\\\\Users\\\\user\\\\Desktop\\\\prelo\" diff --stat)",
+      "Bash(git -C \"c:\\\\Users\\\\user\\\\Desktop\\\\prelo\" add src/components/schedule/ScheduleEditor.vue src/views/shop.vue)",
+      "Bash(grep -E \"\\\\.md$|CLAUDE\")"
     ],
     "additionalDirectories": [
-      "c:\\Users\\user\\.claude\\projects\\c--Users-user-Desktop-bakelink\\memory"
+      "c:\\Users\\user\\.claude\\projects\\c--Users-user-Desktop-bakelink\\memory",
+      "c:\\Users\\user\\.claude\\projects\\c--Users-user-Desktop-prelo\\memory"
     ]
   }
 }

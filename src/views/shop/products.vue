@@ -186,15 +186,14 @@ onMounted(() => {
     height: 36px;
     margin: 0 8px;
     border-radius: 8px;
-    background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%);
+    background: linear-gradient(90deg, #faf7f4 0%, #ede7df 50%, #faf7f4 100%);
     background-size: 200% 100%;
     animation: toolbar-shimmer 1.2s ease-in-out infinite;
   }
   .el-segmented {
     padding: 0 8px;
     background-color: #fff;
-    --el-segmented-item-selected-color: var(--el-text-color-primary);
-    --el-segmented-item-selected-bg-color: #ffd100;
+    --el-segmented-item-selected-bg-color: var(--color-primary);
     --el-segmented-item-hover-bg-color: #f1e9e6;
     --el-segmented-item-active-bg-color: #e7d9d4;
     --el-border-radius-base: 8px;

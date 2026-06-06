@@ -2,19 +2,19 @@
 
 <template>
   <nav class="aside-mobile">
-    <router-link class="nav-item" to="/shop" title="接單">
-      <div class="icon">
-        <img src="@/assets/images/icons/calendar.png" alt="接單" />
-      </div>
-      <span class="label">接單</span>
-    </router-link>
-
-    <router-link class="nav-item" to="/shop/order" title="訂單">
+    <router-link class="nav-item" to="/shop" title="訂單">
       <div class="icon">
         <img src="@/assets/images/icons/receipt.png" alt="訂單" />
       </div>
-
       <span class="label">訂單</span>
+    </router-link>
+
+    <router-link class="nav-item" to="/shop/order" title="接單">
+      <div class="icon">
+        <img src="@/assets/images/icons/calendar.png" alt="接單" />
+      </div>
+
+      <span class="label">接單</span>
     </router-link>
 
     <router-link class="nav-item" to="/shop/products" title="商品">
@@ -41,8 +41,8 @@
   right: 0;
   width: 100%;
   height: auto;
-  background-color: #1c2345;
-  // border-top: 1px solid rgba(255, 255, 255, 0.12);
+  background-color: #fff9f4;
+  border-top: 1px solid rgba(180, 140, 100, 0.18);
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -58,7 +58,7 @@
     justify-content: center;
 
     flex: 1;
-    color: #fff;
+    color: #5a4030;
     text-decoration: none;
     padding: 4px 0;
     position: relative;
@@ -67,7 +67,7 @@
     .el-badge {
       &::v-deep(sup) {
         border: none;
-        background-color: #f59e0b;
+        background-color: var(--color-primary);
       }
     }
 
@@ -83,6 +83,7 @@
         width: 100%;
         height: 100%;
         object-fit: contain;
+        filter: brightness(0) opacity(0.55);
       }
     }
 
@@ -91,22 +92,20 @@
       font-size: 12px;
       font-weight: 600;
       white-space: nowrap;
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    &:hover {
-      .label {
-        color: #fff;
-      }
+      color: #7a6a5c;
     }
   }
 
   .nav-item.router-link-exact-active {
-    background-color: rgba(48, 55, 88, 0.6);
+    background-color: rgba(254, 144, 77, 0.1);
     border-radius: 8px;
 
+    .icon img {
+      filter: brightness(0) saturate(100%) invert(62%) sepia(60%) saturate(800%) hue-rotate(340deg) brightness(105%);
+    }
+
     .label {
-      color: #ffd700;
+      color: var(--color-primary);
       font-weight: 700;
     }
 
@@ -118,7 +117,7 @@
       transform: translateX(-50%);
       width: 30px;
       height: 3px;
-      background-color: #ffd700;
+      background-color: var(--color-primary);
       border-radius: 0 0 4px 4px;
     }
   }

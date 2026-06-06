@@ -61,8 +61,8 @@ const router = createRouter({
         // },
         {
           path: "",
-          name: "shop-schedule",
-          component: () => import("../views/shop/schedule.vue"),
+          name: "shop-order",
+          component: () => import("../views/shop/order.vue"),
         },
         {
           path: "products",
@@ -71,8 +71,8 @@ const router = createRouter({
         },
         {
           path: "order",
-          name: "shop-order",
-          component: () => import("../views/shop/order.vue"),
+          name: "shop-schedule",
+          component: () => import("../views/shop/schedule.vue"),
         },
         {
           path: "settings",

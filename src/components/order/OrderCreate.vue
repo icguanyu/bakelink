@@ -42,7 +42,7 @@ const form = reactive({
   customer_phone: "",
   customer_address: "",
   pickup_time: "",
-  pickup_method: "pickup",
+  pickup_method: "",
   bring_own_bag: false,
   note: "",
   payment_method: "cash",
@@ -423,8 +423,8 @@ defineExpose({ open, close });
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-page);
+  border: 1px solid #e8dfd6;
   border-radius: 6px;
   transition: all 0.2s ease;
 
@@ -434,9 +434,9 @@ defineExpose({ open, close });
   }
 
   &.product-selected {
-    background: #eff6ff;
-    border-color: #3b82f6;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+    background: #fff3eb;
+    border-color: #fe904d;
+    box-shadow: 0 2px 4px rgba(254, 144, 77, 0.15);
   }
 
   .product-thumb {
@@ -444,7 +444,7 @@ defineExpose({ open, close });
     width: 60px;
     height: 60px;
     border-radius: 4px;
-    background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
+    background: linear-gradient(135deg, var(--bg-page-alt) 0%, var(--bg-page) 100%);
     border: 1px solid #e2e8f0;
     display: flex;
     align-items: center;

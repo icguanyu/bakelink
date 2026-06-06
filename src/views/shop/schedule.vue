@@ -225,7 +225,7 @@ const getStatusLabel = (status) => {
 
 const getStatusColor = (status) => {
   const map = {
-    PLACED: "#3b82f6",
+    PLACED: "#fe904d",
     COMPLETED: "#10b981",
     CANCELLED: "#ef4444",
   };
@@ -543,7 +543,7 @@ watch(calendarVisible, (val) => {
 @use "@/assets/scss/scrollbar.scss" as *;
 .schedule-container {
   padding: 16px;
-  background: #f8fafc;
+  background: var(--bg-page);
   min-height: 100vh;
 }
 
@@ -587,7 +587,7 @@ watch(calendarVisible, (val) => {
   padding: 8px 10px;
   background: white;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e8dfd6;
 
   .month-label {
     font-size: 16px;
@@ -606,7 +606,7 @@ watch(calendarVisible, (val) => {
 
 .month-nav-btn {
   flex-shrink: 0;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e8dfd6;
   width: 34px;
   height: 34px;
 }
@@ -617,7 +617,7 @@ watch(calendarVisible, (val) => {
 }
 
 .month-toggle {
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e8dfd6;
   width: 36px;
   height: 36px;
 }
@@ -674,7 +674,7 @@ watch(calendarVisible, (val) => {
 
   .day-nav-btn {
     flex-shrink: 0;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #e8dfd6;
     width: 34px;
     height: 34px;
   }
@@ -693,7 +693,7 @@ watch(calendarVisible, (val) => {
 }
 
 .detail-more {
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e8dfd6;
   width: 36px;
   height: 36px;
 }
@@ -702,9 +702,9 @@ watch(calendarVisible, (val) => {
   display: flex;
   align-items: center;
   padding: 10px 16px;
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--bg-page);
+  border-top: 1px solid #e8dfd6;
+  border-bottom: 1px solid #e8dfd6;
 }
 
 .stat-pill {
@@ -741,7 +741,7 @@ watch(calendarVisible, (val) => {
 .pill-divider {
   width: 1px;
   height: 28px;
-  background: #e2e8f0;
+  background: #e8dfd6;
   flex-shrink: 0;
   margin: 0 2px;
 }
@@ -792,7 +792,7 @@ watch(calendarVisible, (val) => {
   color: #1e293b;
   margin-bottom: 6px;
   padding-bottom: 4px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e8dfd6;
   font-size: 15px;
   .count {
     color: #94a3b8;
@@ -817,7 +817,7 @@ watch(calendarVisible, (val) => {
   gap: 10px;
   padding: 6px 8px;
   background: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e8dfd6;
   border-radius: 6px;
   transition: border-color 0.15s, box-shadow 0.15s;
 
@@ -833,7 +833,7 @@ watch(calendarVisible, (val) => {
   height: 56px;
   border-radius: 4px;
   background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e8dfd6;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -925,9 +925,9 @@ watch(calendarVisible, (val) => {
   gap: 6px;
   align-items: center;
   padding: 8px;
-  background: #f8fafc;
+  background: var(--bg-page);
   border-radius: 6px;
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid #fe904d;
   font-size: 14px;
   transition: all 0.2s ease;
 

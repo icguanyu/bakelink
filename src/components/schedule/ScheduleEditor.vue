@@ -490,9 +490,7 @@ const deleteSchedule = async () => {
   border: 1px solid #e2e8f0;
 }
 
-.editor-save {
-  border: 1px solid #1d4ed8;
-}
+
 
 .editor-body {
   flex: 1;
@@ -503,10 +501,10 @@ const deleteSchedule = async () => {
 }
 
 .editor-section {
-  background: #f8fafc;
+  background: var(--bg-page);
   border-radius: 8px;
   padding: 12px 14px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e8dfd6;
 }
 
 .section-title {

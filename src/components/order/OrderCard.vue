@@ -215,11 +215,11 @@ const handleDeleteOrder = () => {
 </template>
 
 <style scoped lang="scss">
-$text-primary: #1e293b;
-$text-secondary: #64748b;
-$text-muted: #94a3b8;
-$border: #e2e8f0;
-$bg-subtle: #fafbfc;
+$text-primary: #2d1a0e;
+$text-secondary: #7a6a5c;
+$text-muted: #a09080;
+$border: #e8dfd6;
+$bg-subtle: #faf7f4;
 
 .order-card {
   position: relative;
@@ -251,7 +251,7 @@ $bg-subtle: #fafbfc;
   }
 
   &.status-placed .card-top-bar {
-    background: #2563eb;
+    background: var(--color-primary);
   }
   &.status-completed .card-top-bar {
     background: #16a34a;

@@ -2,7 +2,7 @@
 .el-message {
   --el-message-padding: 13px 18px;
   --el-message-close-size: 16px;
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 4px 20px rgba(60, 30, 10, 0.10);
   font-size: 14px;
   font-weight: 500;
@@ -10,8 +10,8 @@
   &.el-message--success {
     --el-message-bg-color: #f2faf4;
     --el-message-border-color: #7ab88a;
-    --el-message-text-color: #2d6b42;
-    .el-message__icon { color: #5a9672; }
+    --el-message-text-color: #49ad6b;
+    .el-message__icon { color: #4ca16e; }
   }
 
   &.el-message--warning {
@@ -34,6 +34,11 @@
     --el-message-text-color: #5c4b3e;
     .el-message__icon { color: #8a7060; }
   }
+}
+
+:root {
+  --el-skeleton-color: #ede7df;
+  --el-skeleton-to-color: #faf7f4;
 }
 
 // :root {

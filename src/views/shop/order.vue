@@ -332,49 +332,24 @@ watch(selectedDate, (val) => {
     <!-- 頂部統計卡片 -->
     <div v-show="showStats" class="stats-cards">
       <div class="stat-card">
-        <div class="stat-icon" style="background: #764ba2">
-          <el-icon><Calendar /></el-icon>
-        </div>
-        <div class="stat-content">
-          <div class="stat-value">{{ dateStats.total }}</div>
-          <div class="stat-label">{{ dateLabel }}訂單</div>
-        </div>
+        <div class="stat-value">{{ dateStats.total }}</div>
+        <div class="stat-label">{{ dateLabel }}訂單</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background: #4f82f1">
-          <el-icon><Clock /></el-icon>
-        </div>
-        <div class="stat-content">
-          <div class="stat-value">{{ dateStats.placed }}</div>
-          <div class="stat-label">已下單</div>
-        </div>
+        <div class="stat-value placed">{{ dateStats.placed }}</div>
+        <div class="stat-label">已下單</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background: #22a94a">
-          <el-icon><CircleCheck /></el-icon>
-        </div>
-        <div class="stat-content">
-          <div class="stat-value">{{ dateStats.completed }}</div>
-          <div class="stat-label">已完成</div>
-        </div>
+        <div class="stat-value completed">{{ dateStats.completed }}</div>
+        <div class="stat-label">已完成</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background: #f43f5e">
-          <el-icon><Warning /></el-icon>
-        </div>
-        <div class="stat-content">
-          <div class="stat-value">{{ dateStats.cancelled }}</div>
-          <div class="stat-label">已取消</div>
-        </div>
+        <div class="stat-value cancelled">{{ dateStats.cancelled }}</div>
+        <div class="stat-label">已取消</div>
       </div>
       <div class="stat-card highlight">
-        <div class="stat-icon" style="background: #fa709a">
-          <el-icon><Money /></el-icon>
-        </div>
-        <div class="stat-content">
-          <div class="stat-value">{{ $formatPrice(dateStats.revenue) }}</div>
-          <div class="stat-label">{{ dateLabel }}營收</div>
-        </div>
+        <div class="stat-value">{{ $formatPrice(dateStats.revenue) }}</div>
+        <div class="stat-label">{{ dateLabel }}營收</div>
       </div>
     </div>
 
@@ -547,12 +522,12 @@ watch(selectedDate, (val) => {
 @use "@/assets/scss/scrollbar.scss" as *;
 
 // ── 色彩變數 ──────────────────────────────────────────────
-$accent: #3b82f6;
-$accent-light: #eff6ff;
+$accent: #fe904d;
+$accent-light: #fff3eb;
 $text-primary: #1e293b;
 $text-secondary: #64748b;
-$border: #e2e8f0;
-$bg-page: #f8fafc;
+$border: #e8dfd6;
+$bg-page: #faf7f4;
 $bg-card: #ffffff;
 
 .order-manager {
@@ -572,7 +547,7 @@ $bg-card: #ffffff;
     gap: 20px;
 
     h2 {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 700;
       color: $text-primary;
       margin: 0 0 4px 0;
@@ -621,7 +596,7 @@ $bg-card: #ffffff;
       }
 
       &:hover {
-        background: #f8fafc;
+        background: $bg-page;
         color: $text-primary;
       }
 
@@ -649,51 +624,29 @@ $bg-card: #ffffff;
 .stat-card {
   background: $bg-card;
   border-radius: 8px;
-  padding: 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  padding: 10px 14px;
   border: 1px solid $border;
-  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.06);
-  transition: box-shadow 0.2s ease;
-
-  &:hover {
-    box-shadow: 0 3px 8px rgba(28, 25, 23, 0.1);
-  }
 
   &.highlight {
-    border: 2px solid #fee140;
+    border-color: var(--color-primary);
   }
 
-  .stat-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
+  .stat-value {
     font-size: 20px;
-    flex-shrink: 0;
+    font-weight: 700;
+    color: $text-primary;
+    line-height: 1;
+    margin-bottom: 3px;
+
+    &.placed    { color: var(--color-primary); }
+    &.completed { color: #16a34a; }
+    &.cancelled { color: #cf4747; }
   }
 
-  .stat-content {
-    flex: 1;
-    min-width: 0;
-
-    .stat-value {
-      font-size: 22px;
-      font-weight: 700;
-      color: $text-primary;
-      line-height: 1;
-      margin-bottom: 3px;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: $text-secondary;
-      font-weight: 500;
-    }
+  .stat-label {
+    font-size: 12px;
+    color: $text-secondary;
+    font-weight: 500;
   }
 }
 
@@ -1044,17 +997,7 @@ $bg-card: #ffffff;
   }
 
   .stat-card {
-    padding: 14px;
-
-    .stat-icon {
-      width: 40px;
-      height: 40px;
-      font-size: 18px;
-    }
-
-    .stat-content .stat-value {
-      font-size: 22px;
-    }
+    padding: 10px 14px;
   }
 }
 </style>

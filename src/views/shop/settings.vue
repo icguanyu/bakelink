@@ -120,7 +120,7 @@ const slugError = computed(() => {
 });
 
 const slugUrl = computed(() =>
-  form.shopSlug ? `${window.location.origin}/s/${form.shopSlug}` : ""
+  form.shopSlug ? `${window.location.origin}/s/${form.shopSlug}` : "",
 );
 
 const onSlugInput = (val) => {
@@ -138,7 +138,6 @@ const openSlugUrl = () => {
   if (!slugUrl.value) return;
   window.open(slugUrl.value, "_blank");
 };
-
 
 const dayLabelMap = {
   0: "日",
@@ -271,7 +270,7 @@ onMounted(() => {
         ]"
       />
     </div>
-    <el-form label-width="80px" label-position="left">
+    <el-form label-width="120px" label-position="left">
       <div class="flex flex-col gap-2">
         <el-card class="card" shadow="never" v-show="segment === 'basic'">
           <div class="panel">
@@ -295,14 +294,30 @@ onMounted(() => {
             >
               <img v-if="form.cover" :src="form.cover" class="sp-cover__img" />
               <div v-else class="sp-cover__empty">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
                 <span>上傳封面照</span>
               </div>
               <button
                 v-if="form.cover"
                 class="sp-cover__remove"
                 @click.stop="form.cover = ''"
-              >×</button>
+              >
+                ×
+              </button>
             </div>
             <!-- 頭像 + 店名 -->
             <div class="sp-identity">
@@ -313,19 +328,46 @@ onMounted(() => {
               >
                 <img v-if="form.avatar" :src="form.avatar" />
                 <span v-else class="sp-avatar__fallback">
-                  {{ form.shopName?.[0] ?? '🍞' }}
+                  {{ form.shopName?.[0] ?? "🍞" }}
                 </span>
                 <div class="sp-avatar__overlay">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                    />
+                    <circle cx="12" cy="13" r="4" />
+                  </svg>
                 </div>
               </div>
-              <p class="sp-name">{{ form.shopName || '店名' }}</p>
+              <p class="sp-name">{{ form.shopName || "店名" }}</p>
               <p v-if="form.intro" class="sp-intro">{{ form.intro }}</p>
             </div>
           </div>
           <p class="seo-hint">封面與 LOGO 設定後將顯示於搜尋引擎（SEO）</p>
-          <input ref="coverInput" type="file" accept=".png,.jpg,.jpeg,.webp" style="display:none" @change="handleCoverUpload" />
-          <input ref="avatarInput" type="file" accept=".png,.jpg,.jpeg,.webp" style="display:none" @change="handleAvatarUpload" />
+          <input
+            ref="coverInput"
+            type="file"
+            accept=".png,.jpg,.jpeg,.webp"
+            style="display: none"
+            @change="handleCoverUpload"
+          />
+          <input
+            ref="avatarInput"
+            type="file"
+            accept=".png,.jpg,.jpeg,.webp"
+            style="display: none"
+            @change="handleAvatarUpload"
+          />
           <br />
           <div class="card__subtitle">基本資訊</div>
           <el-form-item label="店名">
@@ -335,7 +377,9 @@ onMounted(() => {
               maxlength="20"
               show-word-limit
             />
-            <p class="seo-hint">作為 SEO 網頁標題（&lt;title&gt;）顯示於搜尋結果</p>
+            <p class="seo-hint">
+              作為 SEO 網頁標題（&lt;title&gt;）顯示於搜尋結果
+            </p>
           </el-form-item>
           <el-form-item label="負責人">
             <el-input
@@ -380,7 +424,9 @@ onMounted(() => {
               maxlength="200"
               show-word-limit
             />
-            <p class="seo-hint">作為 SEO 摘要（meta description）顯示於搜尋結果，建議 50–150 字</p>
+            <p class="seo-hint">
+              作為 SEO 摘要（meta description）顯示於搜尋結果，建議 50–150 字
+            </p>
           </el-form-item>
 
           <el-divider />
@@ -421,24 +467,26 @@ onMounted(() => {
                   @input="onSlugInput"
                 />
               </div>
-              <div v-if="slugError" class="slug-msg error">
-                <el-icon><Warning /></el-icon>{{ slugError }}
-              </div>
-              <div v-else-if="form.shopSlug" class="slug-msg preview">
-                <el-icon><Link /></el-icon>
-                <span class="slug-url">{{ slugUrl }}</span>
-                <el-button type="primary" link size="small" @click="copySlugUrl">複製</el-button>
-                <el-button type="primary" link size="small" @click="openSlugUrl">開啟</el-button>
-              </div>
-              <div v-else class="slug-msg hint">
-                設定後消費者可透過固定網址進入您的訂購頁面
-              </div>
             </div>
           </el-form-item>
+          <div v-if="slugError" class="slug-msg error">
+            <el-icon><Warning /></el-icon>{{ slugError }}
+          </div>
+          <div v-else-if="form.shopSlug" class="slug-msg preview">
+            <el-icon><Link /></el-icon>
+            <span class="slug-url">{{ slugUrl }}</span>
+            <el-button icon="Share" size="small" @click="copySlugUrl" plain />
+            <el-button
+              icon="Position"
+              size="small"
+              @click="openSlugUrl"
+              plain
+            />
+          </div>
 
           <el-divider />
           <el-form-item label="帳號管理">
-            <el-button type="danger" plain @click="handleLogout">
+            <el-button type="danger" size="small" @click="handleLogout">
               登出帳號
             </el-button>
           </el-form-item>
@@ -687,13 +735,13 @@ h2 {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 16px;
-  z-index: 10;
+  z-index: 2002;
   overflow-x: auto;
   .el-segmented {
     padding: 0 8px;
     background-color: #fff;
-    --el-segmented-item-selected-color: var(--el-text-color-primary);
-    --el-segmented-item-selected-bg-color: #ffd100;
+
+    --el-segmented-item-selected-bg-color: var(--color-primary);
     --el-segmented-item-hover-bg-color: #f1e9e6;
     --el-segmented-item-active-bg-color: #e7d9d4;
     --el-border-radius-base: 8px;
@@ -718,7 +766,7 @@ h2 {
       width: 32px;
       height: 32px;
       border-radius: 8px;
-      background: #0f172a;
+      background: var(--color-primary);
       color: white;
       font-weight: 700;
       font-size: 14px;
@@ -728,7 +776,6 @@ h2 {
       margin: 0;
       font-size: 18px;
       line-height: 20px;
-      color: #0f172a;
       white-space: nowrap;
     }
     .label {
@@ -773,12 +820,14 @@ h2 {
   cursor: pointer;
   overflow: hidden;
 
-  &:hover .sp-cover__empty { opacity: 1; }
+  &:hover .sp-cover__empty {
+    opacity: 1;
+  }
   &:hover::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: rgba(0,0,0,0.15);
+    background: rgba(0, 0, 0, 0.15);
   }
 
   &__img {
@@ -796,7 +845,7 @@ h2 {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    color: rgba(255,255,255,0.7);
+    color: rgba(255, 255, 255, 0.7);
     font-size: 12px;
     opacity: 0.6;
     transition: opacity 0.15s;
@@ -812,7 +861,7 @@ h2 {
     height: 24px;
     border-radius: 50%;
     border: none;
-    background: rgba(0,0,0,0.45);
+    background: rgba(0, 0, 0, 0.45);
     color: #fff;
     font-size: 16px;
     line-height: 1;
@@ -821,7 +870,9 @@ h2 {
     align-items: center;
     justify-content: center;
 
-    &:hover { background: rgba(0,0,0,0.7); }
+    &:hover {
+      background: rgba(0, 0, 0, 0.7);
+    }
   }
 }
 
@@ -839,7 +890,7 @@ h2 {
   height: 96px;
   border-radius: 50%;
   border: 3px solid #fff;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   background: #ffd88a;
   cursor: pointer;
@@ -868,7 +919,7 @@ h2 {
   &__overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0,0,0,0.35);
+    background: rgba(0, 0, 0, 0.35);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -877,7 +928,9 @@ h2 {
     transition: opacity 0.15s;
   }
 
-  &:hover &__overlay { opacity: 1; }
+  &:hover &__overlay {
+    opacity: 1;
+  }
 }
 
 .sp-name {
@@ -907,7 +960,7 @@ h2 {
   color: var(--el-text-color-placeholder);
   line-height: 1.5;
   &::before {
-    content: "🔍 ";
+    content: "提示：";
   }
 }
 
@@ -991,18 +1044,28 @@ h2 {
   align-items: center;
   gap: 5px;
   font-size: 12px;
-  .el-button{
+  .el-button {
     margin-left: 0px;
   }
-  .el-icon { font-size: 13px; flex-shrink: 0; }
+  .el-icon {
+    font-size: 13px;
+    flex-shrink: 0;
+  }
 
-  &.error   { color: var(--el-color-danger); }
-  &.preview { color: var(--el-text-color-secondary); }
-  &.hint    { color: var(--el-text-color-placeholder); }
+  &.error {
+    color: var(--el-color-danger);
+  }
+  &.preview {
+    color: var(--el-text-color-secondary);
+  }
+  &.hint {
+    color: var(--el-text-color-placeholder);
+  }
 
   .slug-url {
     font-family: monospace;
     font-size: 12px;
+    line-height: 14px;
     color: var(--el-color-primary);
     word-break: break-all;
   }
