@@ -10,8 +10,8 @@ const { loading } = storeToRefs(authStore);
 const formRef = ref();
 
 const form = reactive({
-  email: "admin@bakelink.local",
-  password: "Admin123!",
+  email: "", // admin@bakelink.local
+  password: "", // Admin123
 });
 
 const rules = {
