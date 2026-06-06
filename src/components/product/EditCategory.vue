@@ -185,7 +185,7 @@ section header {
     justify-content: space-between;
     padding: 8px 12px;
     background-color: #f5f5f5;
-    border-radius: 20px;
+    border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
     .chip__title {

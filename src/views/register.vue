@@ -354,7 +354,7 @@ const features = [
   height: 40px;
   background: rgba(var(--color-primary-rgb), 0.15);
   border: 1px solid rgba(var(--color-primary-rgb), 0.25);
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -443,7 +443,7 @@ const features = [
   }
 
   :deep(.el-input__wrapper) {
-    border-radius: 10px;
+    border-radius: 8px;
     background: #fff;
     box-shadow: 0 0 0 1px #e0d5cc;
     transition: box-shadow 0.15s;
@@ -468,7 +468,7 @@ const features = [
 .submit-btn {
   width: 100%;
   margin-top: 4px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 15px;
   font-weight: 600;
   background: var(--color-primary) !important;

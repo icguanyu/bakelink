@@ -212,15 +212,15 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
           <div class="skeleton-wrap">
             <el-skeleton-item
               variant="rect"
-              style="width: 100%; height: 120px; border-radius: 16px"
+              style="width: 100%; height: 120px; border-radius: 8px"
             />
             <el-skeleton-item
               variant="rect"
-              style="width: 100%; height: 200px; border-radius: 16px"
+              style="width: 100%; height: 200px; border-radius: 8px"
             />
             <el-skeleton-item
               variant="rect"
-              style="width: 100%; height: 160px; border-radius: 16px"
+              style="width: 100%; height: 160px; border-radius: 8px"
             />
           </div>
         </template>
@@ -520,7 +520,7 @@ $_secondary-hex: 'c8944a';
   height: 36px;
   border: none;
   background: #fff;
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -631,7 +631,7 @@ $_secondary-hex: 'c8944a';
 .success-card {
   width: 100%;
   background: #fff;
-  border-radius: 16px;
+  border-radius: 8px;
   padding: 18px 20px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
   margin-bottom: 16px;
@@ -674,7 +674,7 @@ $_secondary-hex: 'c8944a';
   width: 100%;
   background: #fdf8f2;
   border: 1px solid #ede8e2;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 14px 16px;
   margin-bottom: 16px;
 
@@ -759,7 +759,7 @@ $_secondary-hex: 'c8944a';
 /* Card */
 .card {
   background: #fff;
-  border-radius: 16px;
+  border-radius: 8px;
   padding: 18px 20px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 
@@ -808,7 +808,7 @@ $_secondary-hex: 'c8944a';
   flex-shrink: 0;
   width: 52px;
   height: 52px;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #f5ede3;
   overflow: hidden;
   display: flex;
@@ -986,7 +986,7 @@ $_secondary-hex: 'c8944a';
   width: 100%;
   padding: 10px 14px;
   border: 1.5px solid #e8ddd5;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fdf8f2;
   font-size: 14px;
   color: #1a120b;

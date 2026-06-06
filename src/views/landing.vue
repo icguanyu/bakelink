@@ -554,7 +554,7 @@ $border: #e0d5cc;
   border-color: var(--color-primary) !important;
   color: #fff !important;
   font-weight: 700 !important;
-  border-radius: 10px !important;
+  border-radius: 8px !important;
   box-shadow: 0 4px 16px rgba(var(--color-primary-rgb), 0.35) !important;
   transition: all 0.15s !important;
 
@@ -576,7 +576,7 @@ $border: #e0d5cc;
   border-color: $border !important;
   color: $muted !important;
   font-weight: 600 !important;
-  border-radius: 10px !important;
+  border-radius: 8px !important;
   transition: all 0.15s !important;
 
   &:hover {
@@ -635,7 +635,7 @@ $border: #e0d5cc;
 .lp-pain__card {
   background: $white;
   border: 1px solid $border;
-  border-radius: 14px;
+  border-radius: 8px;
   padding: 24px 20px;
   display: flex;
   flex-direction: column;
@@ -777,7 +777,7 @@ $border: #e0d5cc;
 .lp-feat-card {
   background: $white;
   border: 1px solid $border;
-  border-radius: 16px;
+  border-radius: 8px;
   padding: 28px 24px;
   text-align: left;
   transition:
@@ -807,7 +807,7 @@ $border: #e0d5cc;
 .lp-feat-card__icon {
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: 8px;
   background: rgba(var(--color-primary-rgb), 0.1);
   border: 1px solid rgba(var(--color-primary-rgb), 0.2);
   display: flex;
@@ -879,7 +879,7 @@ $border: #e0d5cc;
 }
 
 .lp-preview__browser {
-  border-radius: 14px;
+  border-radius: 8px;
   overflow: hidden;
   border: 1px solid $border;
   box-shadow: 0 16px 60px rgba(0, 0, 0, 0.1);

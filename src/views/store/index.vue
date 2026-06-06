@@ -123,11 +123,11 @@ const hasDelivery = computed(
           <div class="body">
             <el-skeleton-item
               variant="rect"
-              style="width: 100%; height: 80px; border-radius: 16px"
+              style="width: 100%; height: 80px; border-radius: 8px"
             />
             <el-skeleton-item
               variant="rect"
-              style="width: 100%; height: 180px; border-radius: 16px"
+              style="width: 100%; height: 180px; border-radius: 8px"
             />
           </div>
         </template>
@@ -318,7 +318,7 @@ const hasDelivery = computed(
             <div v-for="n in 4" :key="n" class="product-skeleton__item">
               <el-skeleton-item
                 variant="image"
-                style="width: 100%; aspect-ratio: 1; border-radius: 12px"
+                style="width: 100%; aspect-ratio: 1; border-radius: 8px"
               />
               <el-skeleton-item
                 variant="text"
@@ -541,7 +541,7 @@ const hasDelivery = computed(
 /* Card */
 .card {
   background: #fff;
-  border-radius: 16px;
+  border-radius: 8px;
   padding: 18px 20px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 
@@ -977,7 +977,7 @@ const hasDelivery = computed(
 
 .product-card {
   background: #fff;
-  border-radius: 14px;
+  border-radius: 8px;
   overflow: hidden;
   border: 1px solid #ede8e2;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);

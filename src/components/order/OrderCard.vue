@@ -282,7 +282,7 @@ $bg-subtle: #fafbfc;
 
     .status-chip {
       padding: 3px 10px;
-      border-radius: 20px;
+      border-radius: 8px;
       font-size: 11px;
       font-weight: 600;
       color: white;

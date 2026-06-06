@@ -244,7 +244,7 @@ const handleQuickAction = (action) => {
 // 快速操作
 .quick-actions {
   background: #ffffff;
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
@@ -277,7 +277,7 @@ const handleQuickAction = (action) => {
 // 分組區塊
 .today-section {
   background: #ffffff;
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 

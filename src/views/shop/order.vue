@@ -648,7 +648,7 @@ $bg-card: #ffffff;
 
 .stat-card {
   background: $bg-card;
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 12px;
   display: flex;
   align-items: center;
@@ -800,7 +800,7 @@ $bg-card: #ffffff;
 
   .tab-count {
     padding: 1px 7px;
-    border-radius: 10px;
+    border-radius: 8px;
     color: white;
     font-size: 12px;
     font-weight: 700;
@@ -810,7 +810,7 @@ $bg-card: #ffffff;
 
   .tab-count-all {
     padding: 1px 7px;
-    border-radius: 10px;
+    border-radius: 8px;
     background: #e7e5e4;
     color: $text-secondary;
     font-size: 12px;

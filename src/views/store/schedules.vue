@@ -212,13 +212,13 @@ const addToCalendar = (s) => {
           <el-skeleton animated>
             <template #template>
               <div style="display:flex;gap:14px;align-items:flex-start">
-                <el-skeleton-item variant="rect" style="width:48px;height:52px;border-radius:12px;flex-shrink:0" />
+                <el-skeleton-item variant="rect" style="width:48px;height:52px;border-radius:8px;flex-shrink:0" />
                 <div style="flex:1;display:flex;flex-direction:column;gap:8px">
                   <el-skeleton-item variant="text" style="width:60%" />
                   <el-skeleton-item variant="text" style="width:40%" />
                 </div>
               </div>
-              <el-skeleton-item variant="rect" style="width:100%;height:36px;border-radius:12px;margin-top:4px" />
+              <el-skeleton-item variant="rect" style="width:100%;height:36px;border-radius:8px;margin-top:4px" />
             </template>
           </el-skeleton>
         </div>
@@ -356,7 +356,7 @@ const addToCalendar = (s) => {
     height: 36px;
     border: none;
     background: #fff;
-    border-radius: 10px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -395,7 +395,7 @@ const addToCalendar = (s) => {
   align-items: center;
   justify-content: space-between;
   background: #fff;
-  border-radius: 14px;
+  border-radius: 8px;
   padding: 10px 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 
@@ -404,7 +404,7 @@ const addToCalendar = (s) => {
     height: 36px;
     border: none;
     background: #f7f3ee;
-    border-radius: 10px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -425,7 +425,7 @@ const addToCalendar = (s) => {
 /* 月曆 */
 .calendar {
   background: #fff;
-  border-radius: 16px;
+  border-radius: 8px;
   padding: 16px 12px 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 
@@ -457,7 +457,7 @@ const addToCalendar = (s) => {
 
 .cal-cell {
   aspect-ratio: 1;
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -570,7 +570,7 @@ const addToCalendar = (s) => {
 /* 行程卡片 */
 .schedule-card {
   background: #fff;
-  border-radius: 16px;
+  border-radius: 8px;
   padding: 16px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   display: flex;
@@ -626,7 +626,7 @@ const addToCalendar = (s) => {
     width: 48px;
     height: 52px;
     background: #f7f3ee;
-    border-radius: 12px;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;

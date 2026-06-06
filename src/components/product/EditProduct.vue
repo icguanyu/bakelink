@@ -239,7 +239,7 @@ defineExpose({ open, close });
   gap: 6px;
   padding: 40px 20px;
   border: 1.5px dashed var(--el-border-color);
-  border-radius: 10px;
+  border-radius: 8px;
   color: var(--el-text-color-placeholder);
   text-align: center;
 

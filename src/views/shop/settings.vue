@@ -717,7 +717,7 @@ h2 {
       justify-content: center;
       width: 32px;
       height: 32px;
-      border-radius: 10px;
+      border-radius: 8px;
       background: #0f172a;
       color: white;
       font-weight: 700;
@@ -761,7 +761,7 @@ h2 {
 /* ── 店面預覽 ── */
 .store-preview {
   border: 1px solid var(--el-border-color);
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
   margin-bottom: 8px;
 }

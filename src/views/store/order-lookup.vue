@@ -206,7 +206,7 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
     height: 36px;
     border: none;
     background: #fff;
-    border-radius: 10px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -247,7 +247,7 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
 /* Card */
 .card {
   background: #fff;
-  border-radius: 16px;
+  border-radius: 8px;
   padding: 18px 20px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.06);
 
@@ -288,7 +288,7 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
   width: 100%;
   padding: 10px 14px;
   border: 1.5px solid #e8ddd5;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fdf8f2;
   font-size: 14px;
   color: #1a120b;
