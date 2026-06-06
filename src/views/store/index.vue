@@ -3,7 +3,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { Loading } from "@element-plus/icons-vue";
 import { Shop } from "@/api/shop";
-import { useSeoMeta } from "@unhead/vue";
+
 
 const router = useRouter();
 const route = useRoute();
@@ -32,23 +32,11 @@ const products = ref([]);
 const activeCategoryId = ref(null);
 const productsLoading = ref(false);
 
-useSeoMeta({
-  title: () => shop.value?.shopName ? `${shop.value.shopName} | BakeLink` : "BakeLink",
-  description: () => shop.value?.intro ?? "",
-  ogTitle: () => shop.value?.shopName ?? "",
-  ogDescription: () => shop.value?.intro ?? "",
-  ogImage: () => shop.value?.coverImage ?? shop.value?.avatar ?? "",
-  ogType: "website",
-  twitterCard: "summary_large_image",
-  twitterTitle: () => shop.value?.shopName ?? "",
-  twitterDescription: () => shop.value?.intro ?? "",
-  twitterImage: () => shop.value?.coverImage ?? shop.value?.avatar ?? "",
-});
-
 const fetchShop = async () => {
   try {
     const res = await Shop.GetInfo(route.params.slug);
     shop.value = res.data;
+    document.title = res.data.shopName ? `${res.data.shopName} | BakeLink` : "BakeLink";
   } catch (err) {
     if (err?.response?.status === 404) {
       notFound.value = true;

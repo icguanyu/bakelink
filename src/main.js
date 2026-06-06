@@ -1,8 +1,6 @@
 import './assets/scss/main.scss'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { createUnhead } from 'unhead'
-import { VueHeadMixin, headSymbol } from '@unhead/vue'
 
 import App from './App.vue'
 import router from './router'
@@ -13,14 +11,10 @@ import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 import zhTw from "element-plus/es/locale/lang/zh-tw";
 import { formatPrice } from './utils/format';
 
-const head = createUnhead()
-
 const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
-app.provide(headSymbol, head)
-app.mixin(VueHeadMixin)
 app.use(ElementPlus, { locale: zhTw });
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component);
