@@ -4,6 +4,8 @@ import { useRoute } from "vue-router";
 import Aside from "@/components/Aside.vue";
 import AsideMobile from "@/components/AsideMobile.vue";
 
+const year = new Date().getFullYear();
+
 // 從 localStorage 讀取狀態，預設為 true
 const isAsideOpen = ref(
   localStorage.getItem("isAsideOpen") !== "false"
@@ -64,6 +66,14 @@ if (typeof window !== "undefined") {
       </button>
       <div class="container">
         <router-view></router-view>
+        <footer class="shop-footer">
+          <span>© {{ year }} Prelo 鋪樂</span>
+          <nav>
+            <a href="#">服務條款</a>
+            <span class="sep" />
+            <a href="#">隱私權政策</a>
+          </nav>
+        </footer>
       </div>
       <AsideMobile v-if="isMobile" />
     </main>
@@ -133,6 +143,36 @@ if (typeof window !== "undefined") {
         rgba(255, 255, 255, 0.08)
       );
     }
+  }
+}
+
+.shop-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 12px;
+  color: #94a3b8;
+
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    a {
+      color: #94a3b8;
+      text-decoration: none;
+      &:hover { color: #64748b; }
+    }
+  }
+
+  .sep {
+    width: 1px;
+    height: 12px;
+    background: #cbd5e1;
   }
 }
 

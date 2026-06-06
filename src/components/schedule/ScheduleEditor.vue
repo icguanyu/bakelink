@@ -31,6 +31,15 @@ const orderStartTime = ref("");
 const orderEndDate = ref("");
 const orderEndTime = ref("");
 
+const setOrderStartNow = () => {
+  const now = dayjs();
+  const rounded = now.minute() < 30
+    ? now.minute(30).second(0)
+    : now.add(1, "hour").minute(0).second(0);
+  orderStartDate.value = rounded.format("YYYY-MM-DD");
+  orderStartTime.value = rounded.format("HH:mm");
+};
+
 const form = reactive({
   id: props.schedule.id || null,
   schedule_date: props.schedule.schedule_date,
@@ -351,7 +360,9 @@ const deleteSchedule = async () => {
                 step="00:30"
                 end="23:30"
               />
+              <el-button @click="setOrderStartNow">現在</el-button>
             </div>
+            <p class="field-hint">請確認該日期的營業時間是否有開放</p>
           </el-form-item>
           <el-form-item v-if="needsEndTime" label="開單截止時間" class="field">
             <div class="datetime-inputs">
@@ -566,9 +577,15 @@ const deleteSchedule = async () => {
 }
 
 .field-value {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   color: #1e293b;
+}
+
+.field-hint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--el-text-color-placeholder);
 }
 
 .datetime-inputs {
