@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { Loading } from "@element-plus/icons-vue";
 import { Shop } from "@/api/shop";
+import { useSeoMeta } from "@unhead/vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -30,6 +31,19 @@ const categories = ref([]);
 const products = ref([]);
 const activeCategoryId = ref(null);
 const productsLoading = ref(false);
+
+useSeoMeta({
+  title: () => shop.value?.shopName ? `${shop.value.shopName} | BakeLink` : "BakeLink",
+  description: () => shop.value?.intro ?? "",
+  ogTitle: () => shop.value?.shopName ?? "",
+  ogDescription: () => shop.value?.intro ?? "",
+  ogImage: () => shop.value?.coverImage ?? shop.value?.avatar ?? "",
+  ogType: "website",
+  twitterCard: "summary_large_image",
+  twitterTitle: () => shop.value?.shopName ?? "",
+  twitterDescription: () => shop.value?.intro ?? "",
+  twitterImage: () => shop.value?.coverImage ?? shop.value?.avatar ?? "",
+});
 
 const fetchShop = async () => {
   try {
@@ -89,21 +103,15 @@ const hasDelivery = computed(
 <template>
   <div class="store-page">
     <!-- 載入中 -->
-    <div v-if="isLoading" class="state-center">
+    <div v-if="isLoading">
       <el-skeleton animated>
         <template #template>
           <div class="hero">
-            <div class="hero__content">
-              <el-skeleton-item
-                variant="circle"
-                style="width: 88px; height: 88px"
-              />
-              <el-skeleton-item
-                variant="h1"
-                style="width: 140px; margin-top: 12px"
-              />
-              <el-skeleton-item variant="text" style="width: 80px" />
-              <el-skeleton-item variant="text" style="width: 260px" />
+            <div class="hero__cover" style="background: #e8ddd5"></div>
+            <div class="hero__identity">
+              <el-skeleton-item variant="circle" style="width: 80px; height: 80px" />
+              <el-skeleton-item variant="h1" style="width: 160px; margin-top: 12px" />
+              <el-skeleton-item variant="text" style="width: 260px; margin-top: 6px" />
             </div>
           </div>
           <div class="body">
@@ -131,7 +139,10 @@ const hasDelivery = computed(
     <template v-else-if="shop">
       <!-- Hero -->
       <div class="hero">
-        <div class="hero__content">
+        <div class="hero__cover">
+          <img v-if="shop.coverImage" :src="shop.coverImage" :alt="shop.shopName" class="hero__cover-img" />
+        </div>
+        <div class="hero__identity">
           <div class="hero__avatar">
             <img v-if="shop.avatar" :src="shop.avatar" :alt="shop.shopName" />
             <span v-else class="hero__avatar-fallback">
@@ -139,7 +150,6 @@ const hasDelivery = computed(
             </span>
           </div>
           <h1 class="hero__name">{{ shop.shopName }}</h1>
-          <!-- <p class="hero__owner">by {{ shop.ownerName }}</p> -->
           <p v-if="shop.intro" class="hero__intro">{{ shop.intro }}</p>
         </div>
       </div>
@@ -343,7 +353,7 @@ const hasDelivery = computed(
                   <div v-if="product.description" class="product-card__desc">
                     {{ product.description }}
                   </div>
-                  <div class="product-card__price">NT$ {{ product.price }}</div>
+                  <div class="product-card__price">{{ product.price }}</div>
                 </div>
               </div>
             </div>
@@ -422,28 +432,44 @@ const hasDelivery = computed(
 
 /* Hero */
 .hero {
-  padding: 48px 20px 32px;
-  text-align: center;
+  &__cover {
+    height: 180px;
+    background: linear-gradient(160deg, #c9945c 0%, #8a4e22 55%, #3e1e08 100%);
+    overflow: hidden;
+    position: relative;
+  }
 
-  &__content {
+  &__cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &__identity {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    padding: 0 20px 28px;
+    text-align: center;
+    margin-top: -40px;
   }
 
   &__avatar {
-    width: 88px;
-    height: 88px;
+    width: 80px;
+    height: 80px;
     border-radius: 999px;
     overflow: hidden;
-    border: 3px solid #fff;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    border: 4px solid #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
     display: flex;
     align-items: center;
     justify-content: center;
     background: #ffd88a;
-    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 6px;
 
     img {
       width: 100%;
@@ -453,7 +479,7 @@ const hasDelivery = computed(
   }
 
   &__avatar-fallback {
-    font-size: 36px;
+    font-size: 32px;
     line-height: 1;
     font-weight: 700;
     color: #7a4f00;
@@ -461,23 +487,18 @@ const hasDelivery = computed(
 
   &__name {
     font-size: 26px;
-    font-weight: 800;
+    font-weight: 900;
     color: #1a120b;
     margin: 0;
-    letter-spacing: 0.02em;
-  }
-
-  &__owner {
-    font-size: 13px;
-    color: #8a7060;
-    margin: 0;
+    letter-spacing: 0.06em;
+    font-family: "Noto Serif TC", "Georgia", serif;
   }
 
   &__intro {
     font-size: 14px;
     color: #5c4b3e;
     line-height: 1.7;
-    margin: 4px 0 0;
+    margin: 2px 0 0;
     max-width: 340px;
   }
 }
@@ -500,18 +521,17 @@ const hasDelivery = computed(
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 
   &__title {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 700;
-    color: #8a7060;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 14px;
+    color: #2f2a25;
+    margin-bottom: 16px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
 
     i {
-      font-size: 15px;
+      font-size: 17px;
+      color: #c08a50;
     }
   }
 }
@@ -895,14 +915,20 @@ const hasDelivery = computed(
 }
 
 .product-card {
-  background: #fdf8f2;
-  border-radius: 12px;
+  background: #fff;
+  border-radius: 14px;
   overflow: hidden;
-  border: 1px solid #f0e8de;
+  border: 1px solid #ede8e2;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.15s, transform 0.15s;
+
+  &:active {
+    transform: scale(0.98);
+  }
 
   &__img-wrap {
     width: 100%;
-    aspect-ratio: 1.4;
+    aspect-ratio: 1;
     overflow: hidden;
     background: #f5ede3;
   }
@@ -912,6 +938,7 @@ const hasDelivery = computed(
     height: 100%;
     object-fit: cover;
     display: block;
+    transition: transform 0.3s ease;
   }
 
   &__img-fallback {
@@ -921,27 +948,28 @@ const hasDelivery = computed(
     align-items: center;
     justify-content: center;
     color: #d4b896;
-    font-size: 36px;
+    font-size: 40px;
+    background: linear-gradient(135deg, #fdf0e4 0%, #f0e0cc 100%);
   }
 
   &__info {
-    padding: 10px 12px 12px;
+    padding: 12px 14px 14px;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 4px;
   }
 
   &__name {
     font-size: 14px;
     font-weight: 700;
     color: #1a120b;
-    line-height: 1.35;
+    line-height: 1.4;
   }
 
   &__desc {
     font-size: 12px;
     color: #9a8070;
-    line-height: 1.4;
+    line-height: 1.45;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -949,10 +977,17 @@ const hasDelivery = computed(
   }
 
   &__price {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 800;
-    color: #c08a50;
-    margin-top: 4px;
+    color: #1a120b;
+    margin-top: 6px;
+
+    &::before {
+      content: "NT$\00a0";
+      font-size: 11px;
+      font-weight: 600;
+      color: #8a7060;
+    }
   }
 }
 </style>
