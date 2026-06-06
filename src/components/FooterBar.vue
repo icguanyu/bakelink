@@ -4,9 +4,9 @@
     <nav class="footer__links">
       <RouterLink to="/">回到首頁</RouterLink>
       <span class="footer__sep" />
-      <a href="#">服務條款</a>
+      <RouterLink to="/terms">服務條款</RouterLink>
       <span class="footer__sep" />
-      <a href="#">隱私權政策</a>
+      <RouterLink to="/privacy">隱私權政策</RouterLink>
     </nav>
   </footer>
 </template>

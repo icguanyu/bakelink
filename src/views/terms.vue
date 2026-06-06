@@ -1,0 +1,183 @@
+<script setup>
+import { useRouter } from "vue-router";
+const router = useRouter();
+</script>
+
+<template>
+  <div class="doc-wrap">
+    <nav class="doc-nav">
+      <div class="doc-nav__logo" @click="router.push('/')" />
+    </nav>
+
+    <main class="doc-main">
+      <div class="doc-inner">
+        <h1>服務條款</h1>
+        <p class="doc-meta">最後更新日期：2025 年 6 月 6 日</p>
+
+        <p>歡迎使用鋪樂（Prelo，以下簡稱「本服務」）。請在使用前仔細閱讀以下條款。使用本服務即表示您同意本服務條款。</p>
+
+        <h2>一、服務說明</h2>
+        <p>鋪樂是一款預購與訂單管理 SaaS 平台，供小型店家建立專屬訂購頁面，讓客人自助下單。本服務不介入任何金流交易，所有款項由店家與客人自行處理。</p>
+
+        <h2>二、帳號與註冊</h2>
+        <ul>
+          <li>使用本服務需註冊帳號，您須提供真實、正確且完整的資料。</li>
+          <li>您有責任妥善保管帳號密碼，並對帳號下的所有活動負責。</li>
+          <li>如發現帳號遭未授權使用，請立即通知我們。</li>
+          <li>每個電子郵件地址僅可註冊一個帳號。</li>
+        </ul>
+
+        <h2>三、使用規範</h2>
+        <p>使用本服務時，您同意不得：</p>
+        <ul>
+          <li>上架違法、仿冒或侵害他人智慧財產權的商品</li>
+          <li>利用本服務從事詐欺、欺騙或其他非法行為</li>
+          <li>惡意攻擊、干擾或破壞本服務的正常運作</li>
+          <li>爬取、複製本服務的資料或程式碼進行未授權使用</li>
+          <li>冒充他人或提供虛假資訊</li>
+        </ul>
+
+        <h2>四、店家責任</h2>
+        <ul>
+          <li>店家對其發布的商品資訊、定價及服務內容負完全責任。</li>
+          <li>店家有責任依約完成訂單，並與客人妥善溝通。</li>
+          <li>店家應遵守所有適用的法律規定，包含食品安全、消費者保護等相關法規。</li>
+          <li>鋪樂不為店家與客人之間的交易糾紛負責。</li>
+        </ul>
+
+        <h2>五、智慧財產權</h2>
+        <p>本服務的程式碼、設計、商標及內容均為鋪樂所有，受著作權法保護。您上傳的商品圖片及文字之著作權歸您所有，但您授予我們在提供本服務所需範圍內使用的非專屬授權。</p>
+
+        <h2>六、免責聲明</h2>
+        <p>本服務以「現狀」提供，不作任何明示或默示的保證。我們不保證服務不中斷、無錯誤或完全符合您的需求。</p>
+        <p>鋪樂不為以下情形負責：</p>
+        <ul>
+          <li>店家與客人之間的交易糾紛或損失</li>
+          <li>因不可抗力或第三方服務中斷導致的服務暫停</li>
+          <li>用戶資料因自身疏失造成的遺失</li>
+        </ul>
+
+        <h2>七、服務的暫停與終止</h2>
+        <ul>
+          <li>您可隨時刪除帳號，終止使用本服務。</li>
+          <li>若您違反本條款，我們有權暫停或終止您的帳號，恕不另行通知。</li>
+          <li>帳號刪除後，您的資料將依隱私權政策中的保存期限處理。</li>
+        </ul>
+
+        <h2>八、費用與付款</h2>
+        <p>本服務目前免費提供。若未來推出付費方案，我們將提前通知並取得您的同意後才會收費。</p>
+
+        <h2>九、條款的修訂</h2>
+        <p>我們保留隨時修訂本條款的權利。重大變更將透過電子郵件或服務內通知告知。繼續使用本服務視為接受修訂後的條款。</p>
+
+        <h2>十、準據法與管轄</h2>
+        <p>本條款依中華民國法律解釋與執行。如發生爭議，雙方同意以臺灣臺北地方法院為第一審管轄法院。</p>
+
+        <h2>十一、聯絡我們</h2>
+        <p>如對本服務條款有任何疑問，請聯絡：</p>
+        <p><strong>鋪樂 Prelo</strong><br />
+        電子郵件：<a href="mailto:contact@prelo.com.tw">contact@prelo.com.tw</a></p>
+      </div>
+    </main>
+
+    <FooterBar />
+  </div>
+</template>
+
+<style scoped lang="scss">
+$text: #1a120b;
+$muted: #7a6a5c;
+$border: #e0d5cc;
+
+.doc-wrap {
+  height: 100dvh;
+  overflow-y: auto;
+  background: #faf7f3;
+}
+
+.doc-nav {
+  display: flex;
+  align-items: center;
+  padding: 0 48px;
+  height: 64px;
+  background: rgba(#fff9f4, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid $border;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.doc-nav__logo {
+  width: 110px;
+  height: 32px;
+  background-image: url("@/assets/images/logo.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: left center;
+  cursor: pointer;
+}
+
+.doc-main {
+  flex: 1;
+  padding: 60px 24px 80px;
+}
+
+.doc-inner {
+  max-width: 720px;
+  margin: 0 auto;
+
+  h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: $text;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+
+  h2 {
+    font-size: 17px;
+    font-weight: 700;
+    color: $text;
+    margin: 36px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid $border;
+  }
+
+  p {
+    font-size: 14px;
+    color: $muted;
+    line-height: 1.85;
+    margin: 0 0 12px;
+  }
+
+  ul {
+    padding-left: 20px;
+    margin: 0 0 12px;
+
+    li {
+      font-size: 14px;
+      color: $muted;
+      line-height: 1.85;
+      margin-bottom: 4px;
+    }
+  }
+
+  strong {
+    color: $text;
+    font-weight: 600;
+  }
+
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+.doc-meta {
+  font-size: 13px;
+  color: #b0a090;
+  margin: 0 0 32px !important;
+}
+</style>

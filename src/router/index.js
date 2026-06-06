@@ -19,6 +19,16 @@ const router = createRouter({
       component: () => import("../views/register.vue"),
     },
     {
+      path: "/terms",
+      name: "terms",
+      component: () => import("../views/terms.vue"),
+    },
+    {
+      path: "/privacy",
+      name: "privacy",
+      component: () => import("../views/privacy.vue"),
+    },
+    {
       path: "/s/:slug",
       name: "store",
       component: () => import("../views/store/index.vue"),
