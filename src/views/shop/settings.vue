@@ -1009,9 +1009,7 @@ h2 {
 }
 
 .actions {
-  position: sticky;
   background-color: #fff;
-  bottom: 0;
   gap: 12px;
 }
 

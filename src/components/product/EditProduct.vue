@@ -5,10 +5,15 @@ const uploadPhotosLoading = computed(
   () => uploadPhotos.value?.loading || false,
 );
 const visible = ref(false);
-const value = ref("基本資訊");
 const emit = defineEmits(["update"]);
 const loading = ref(false);
 const formRef = ref(null);
+const rules = {
+  name: [{ required: true, message: "請輸入產品名稱", trigger: "blur" }],
+  category_id: [{ required: true, message: "請選擇產品類別", trigger: "change" }],
+  price: [{ required: true, message: "請輸入產品定價", trigger: "blur" }],
+  is_active: [{ required: true, message: "請選擇產品狀態", trigger: "change" }],
+};
 const form = reactive({
   id: null,
   name: "",
@@ -22,19 +27,23 @@ const form = reactive({
   is_sliceable: false,
 });
 
-const resetForm = () => {
-  nextTick(() => {
-    formRef.value?.resetFields();
-  });
-};
-
 const open = (id) => {
-  value.value = "基本資訊";
+  Object.assign(form, {
+    id: null,
+    name: "",
+    category_id: "",
+    price: 0,
+    description: "",
+    ingredients: "",
+    ingredient_details: [],
+    image_urls: [],
+    is_active: true,
+    is_sliceable: false,
+  });
+  nextTick(() => formRef.value?.clearValidate());
   visible.value = true;
   if (id) {
     initProudctById(id);
-  } else {
-    resetForm();
   }
 };
 
@@ -77,21 +86,18 @@ const handleUpload = (urls) => {
 const save = async () => {
   loading.value = true;
   try {
-    let res;
     if (form.id) {
-      res = await Products.Update(form.id, form);
+      await Products.Update(form.id, form);
+      ElNotification({ title: "成功", message: "商品已更新", type: "success" });
     } else {
-      res = await Products.Create(form);
+      const res = await Products.Create(form);
+      form.id = res.data?.id ?? res.data?.data?.id;
+      ElNotification({ title: "成功", message: "商品已新增，可繼續上傳圖片", type: "success" });
     }
-    console.log("save product res", res);
-    ElNotification({
-      title: "成功",
-      message: `商品已${form.id ? "更新" : "新增"}成功`,
-      type: "success",
-    });
     emit("update");
   } catch (err) {
     console.log("save product error", err);
+    ElMessage.error("儲存失敗，請稍後再試");
   } finally {
     loading.value = false;
   }
@@ -140,127 +146,54 @@ defineExpose({ open, close });
     width="800px"
     append-to-body
   >
-    <el-segmented
-      v-model="value"
-      :options="['基本資訊', '商品圖片', /* '詳細成分' */]"
-      block
-    />
-    <br />
     <el-form
       :model="form"
+      :rules="rules"
       :loading="loading"
       ref="formRef"
       label-width="120px"
       label-position="left"
     >
-      <div v-if="value === '基本資訊'">
-        <el-form-item label="產品名稱" required prop="name">
-          <el-input
-            v-model="form.name"
-            placeholder="產品名稱（例：原味軟法）"
-          />
-        </el-form-item>
-        <el-form-item label="產品類別" required prop="category_id">
-          <SelectCategory v-model="form.category_id" />
-        </el-form-item>
-        <el-form-item label="產品定價" required prop="price">
-          <el-input v-model.number="form.price" style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="產品簡介" prop="description">
-          <el-input
-            v-model="form.description"
-            type="textarea"
-            :rows="3"
-            placeholder="產品簡短介紹"
-          />
-        </el-form-item>
-
-        <el-form-item label="成分表" prop="ingredients">
-          <el-input
-            v-model="form.ingredients"
-            type="textarea"
-            :rows="3"
-            placeholder="例如：高筋麵粉、牛奶、酵母、鹽、糖"
-          />
-        </el-form-item>
-
-        <el-form-item label="可切片" prop="is_sliceable">
-          <el-switch v-model="form.is_sliceable" />
-        </el-form-item>
-
-        <el-form-item label="狀態" required prop="is_active">
-          <SelectProductStatus
-            v-model="form.is_active"
-            :placeholder="'選擇產品狀態'"
-          />
-        </el-form-item>
-      </div>
-      <!-- <div v-if="value === '詳細成分'">
-        <div class="ing-table">
-          <small class="hint"
-            >輸入成分與份量，可協助統計訂單所需原料。非必填欄位。</small
-          >
-          <el-table :data="form.ingredient_details" border size="small">
-            <el-table-column label="名稱" align="center">
-              <template #default="{ row }">
-                <el-input v-model="row.name" placeholder="成分名稱" />
-              </template>
-            </el-table-column>
-            <el-table-column label="份量(公克)" width="110" align="center">
-              <template #default="{ row }">
-                <el-input
-                  inputmode="numeric"
-                  v-model="row.grams"
-                  placeholder="份量(公克)"
-                />
-              </template>
-            </el-table-column>
-            <el-table-column label="顯示" width="60" align="center">
-              <template #default="{ row }">
-                <el-switch size="small" v-model="row.is_visible" />
-              </template>
-            </el-table-column>
-            <el-table-column label="" width="50" align="center">
-              <template #default="{ $index }">
-                <el-icon class="delete-btn" @click="removeIngredient($index)">
-                  <Delete />
-                </el-icon>
-              </template>
-            </el-table-column>
-          </el-table>
-
-          <el-button
-            type="primary"
-            plain
-            size="small"
-            @click="
-              form.ingredient_details.push({
-                name: '',
-                grams: '',
-                is_visible: true,
-              })
-            "
-          >
-            新增
-          </el-button>
-        </div>
-      </div> -->
-      <div v-if="value === '商品圖片'">
-        <div v-if="!form.id" class="photo-gate">
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          <p>請先儲存商品基本資訊</p>
-          <small>建立商品後才能上傳圖片</small>
-        </div>
-        <template v-else>
-          <el-form-item label="圖片說明" prop="image_urls"> </el-form-item>
-          <UploadPhotos
-            ref="uploadPhotos"
-            v-model="form.image_urls"
-            :disabled="false"
-            @upload="handleUpload"
-          />
-        </template>
-      </div>
+      <el-form-item label="產品名稱" prop="name">
+        <el-input v-model="form.name" placeholder="產品名稱（例：原味軟法）" />
+      </el-form-item>
+      <el-form-item label="產品類別" prop="category_id">
+        <SelectCategory v-model="form.category_id" />
+      </el-form-item>
+      <el-form-item label="產品定價" prop="price">
+        <el-input v-model.number="form.price" style="width: 100%" />
+      </el-form-item>
+      <el-form-item label="產品簡介" prop="description">
+        <el-input
+          v-model="form.description"
+          type="textarea"
+          :rows="3"
+          placeholder="產品簡短介紹"
+        />
+      </el-form-item>
+      <el-form-item label="成分表" prop="ingredients">
+        <el-input
+          v-model="form.ingredients"
+          type="textarea"
+          :rows="3"
+          placeholder="例如：高筋麵粉、牛奶、酵母、鹽、糖"
+        />
+      </el-form-item>
+      <el-form-item label="可切片" prop="is_sliceable">
+        <el-switch v-model="form.is_sliceable" />
+      </el-form-item>
+      <el-form-item label="狀態" prop="is_active">
+        <SelectProductStatus v-model="form.is_active" :placeholder="'選擇產品狀態'" />
+      </el-form-item>
+      <el-divider />
+      <el-form-item label="商品圖片">
+        <UploadPhotos
+          ref="uploadPhotos"
+          v-model="form.image_urls"
+          :disabled="false"
+          @upload="handleUpload"
+        />
+      </el-form-item>
     </el-form>
     <!-- <pre>{{ form }}</pre> -->
     <template #footer>
@@ -339,6 +272,12 @@ defineExpose({ open, close });
     align-items: center;
     gap: 8px;
   }
+}
+
+.photo-hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--el-text-color-placeholder);
 }
 
 .image-uploader {
