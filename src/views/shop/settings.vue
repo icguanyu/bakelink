@@ -36,7 +36,7 @@ const defaultBusinessHours = [
 
 const form = reactive({
   avatar: "",
-  coverImage: "",
+  cover: "",
   shopName: "",
   shopSlug: "",
   owner: "",
@@ -70,7 +70,10 @@ const coverInput = ref(null);
 const avatarInput = ref(null);
 
 const compressAndUpload = async (file, uploadFn) => {
-  const compressed = await imageCompression(file, { maxSizeMB: 0.5 });
+  const compressed = await imageCompression(file, {
+    maxSizeMB: 0.5,
+    maxWidthOrHeight: 1920,
+  });
   const fd = new FormData();
   fd.append("file", compressed);
   const res = await uploadFn(fd);
@@ -82,7 +85,7 @@ const handleCoverUpload = async (e) => {
   if (!file) return;
   coverLoading.value = true;
   try {
-    form.coverImage = await compressAndUpload(file, Users.UploadCover);
+    form.cover = await compressAndUpload(file, Users.UploadCover);
   } catch {
     ElMessage.error("封面上傳失敗");
   } finally {
