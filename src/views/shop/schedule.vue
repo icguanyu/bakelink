@@ -369,16 +369,8 @@ watch(calendarVisible, (val) => {
             />
           </div>
           <div class="detail-actions">
-            <el-button
-              class="detail-more"
-              circle
-              plain
-              type="primary"
-              :title="isEditorOpen ? '關閉編輯' : '編輯排程'"
-              @click="isEditorOpen ? closeEditor() : openEditor(schedule)"
-            >
-              <el-icon v-if="isEditorOpen"><Close /></el-icon>
-              <el-icon v-else><Edit /></el-icon>
+            <el-button icon="Edit" @click="openEditor(schedule)">
+              編輯
             </el-button>
           </div>
         </div>
@@ -396,7 +388,9 @@ watch(calendarVisible, (val) => {
           </div>
           <div class="pill-divider"></div>
           <div class="stat-pill">
-            <span class="pill-num green">{{ selectedDateStats.completed }}</span>
+            <span class="pill-num green">{{
+              selectedDateStats.completed
+            }}</span>
             <span class="pill-label">已完成</span>
           </div>
           <div class="pill-divider"></div>
@@ -406,8 +400,10 @@ watch(calendarVisible, (val) => {
           </div>
           <div class="pill-divider"></div>
           <div class="stat-pill">
-            <span class="pill-num amber">{{ $formatPrice(selectedDateStats.total_amount) }}</span>
-            <span class="pill-label">營收</span>
+            <span class="pill-num amber">{{
+              $formatPrice(selectedDateStats.total_amount)
+            }}</span>
+            <span class="pill-label">總金額</span>
           </div>
         </div>
 
@@ -516,9 +512,7 @@ watch(calendarVisible, (val) => {
           <div class="month-navigation-actions">
             <el-button
               class="month-toggle"
-              circle
-              plain
-              type="primary"
+              text
               @click="toggleCalendarVisible"
               :title="calendarVisible ? '隱藏月曆' : '顯示月曆'"
             >
@@ -617,7 +611,6 @@ watch(calendarVisible, (val) => {
 }
 
 .month-toggle {
-  border: 1px solid #e8dfd6;
   width: 36px;
   height: 36px;
 }
@@ -662,7 +655,6 @@ watch(calendarVisible, (val) => {
 .detail-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
   padding: 12px 16px;
   gap: 8px;
 
@@ -680,9 +672,6 @@ watch(calendarVisible, (val) => {
   }
 
   h3 {
-    font-size: 18px;
-    font-weight: 700;
-    color: #1e293b;
     margin: 0;
   }
 }
@@ -725,10 +714,19 @@ watch(calendarVisible, (val) => {
     text-overflow: ellipsis;
     max-width: 100%;
 
-    &.blue  { color: #2563eb; }
-    &.green { color: #16a34a; }
-    &.red   { color: #dc2626; }
-    &.amber { color: #d97706; font-size: 14px; }
+    &.blue {
+      color: #2563eb;
+    }
+    &.green {
+      color: #16a34a;
+    }
+    &.red {
+      color: #dc2626;
+    }
+    &.amber {
+      color: #d97706;
+      font-size: 14px;
+    }
   }
 
   .pill-label {
@@ -819,7 +817,9 @@ watch(calendarVisible, (val) => {
   background: white;
   border: 1px solid #e8dfd6;
   border-radius: 6px;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 
   &:hover {
     border-color: #cbd5e1;
@@ -1022,10 +1022,6 @@ watch(calendarVisible, (val) => {
   .detail-header {
     padding: 8px 10px;
     gap: 6px;
-
-    .detail-header-left {
-      gap: 6px;
-    }
   }
 
   .detail-content {
@@ -1066,7 +1062,9 @@ watch(calendarVisible, (val) => {
 
   .stat-pill .pill-num {
     font-size: 16px;
-    &.amber { font-size: 12px; }
+    &.amber {
+      font-size: 12px;
+    }
   }
 }
 </style>

@@ -225,7 +225,7 @@ defineExpose({ visible });
           ref="formRef"
           :model="form"
           :rules="rules"
-          label-width="100px"
+          label-width="120px"
           class="form-group"
           label-position="left"
         >
@@ -409,7 +409,6 @@ defineExpose({ visible });
       >
         <el-button
           type="danger"
-          plain
           @click="handleDeleteOrder"
           :loading="deleteLoading"
         >
@@ -549,7 +548,11 @@ defineExpose({ visible });
           width: 60px;
           height: 60px;
           border-radius: 4px;
-          background: linear-gradient(135deg, var(--bg-page-alt) 0%, var(--bg-page) 100%);
+          background: linear-gradient(
+            135deg,
+            var(--bg-page-alt) 0%,
+            var(--bg-page) 100%
+          );
           border: 1px solid #e2e8f0;
           display: flex;
           align-items: center;

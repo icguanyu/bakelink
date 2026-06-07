@@ -107,13 +107,17 @@ const resetForm = () => {
 };
 
 // 取貨時間 start = orderPickupTime，end = 當日營業結束時間
-const pickupTimeStart = computed(() => shopInfo.value?.orderPickupTime || "09:00");
+const pickupTimeStart = computed(
+  () => shopInfo.value?.orderPickupTime || "09:00",
+);
 
 const pickupTimeEnd = computed(() => {
   const date = currentSchedule.value?.schedule_date;
   if (!date || !shopInfo.value?.businessHours) return "20:00";
   const dow = dayjs(date).day();
-  const hours = shopInfo.value.businessHours.find((h) => h.day === dow && h.enabled);
+  const hours = shopInfo.value.businessHours.find(
+    (h) => h.day === dow && h.enabled,
+  );
   return hours?.time?.[1] || "20:00";
 });
 
@@ -247,7 +251,13 @@ defineExpose({ open, close });
     append-to-body
     :close-on-click-modal="false"
   >
-    <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      label-width="100px"
+      label-position="left"
+    >
       <!-- 顧客資訊 -->
       <!-- <el-divider content-position="left">顧客資訊</el-divider> -->
 
@@ -328,10 +338,7 @@ defineExpose({ open, close });
       <!-- 訂單項目 -->
       <el-divider content-position="left">
         訂單項目
-        <span
-          v-if="selectedItemsCount > 0"
-          style="color: #409eff; margin-left: 8px"
-        >
+        <span v-if="selectedItemsCount > 0" style="margin-left: 8px">
           (已選 {{ selectedItemsCount }} 項 | 小計
           {{ $formatPrice(totalAmount) }})
         </span>
@@ -357,7 +364,10 @@ defineExpose({ open, close });
               {{ $formatPrice(product.unit_price) }}
             </div>
           </div>
-          <div v-if="getQuantity(product.product_id) > 0 && product.is_sliceable" class="slice-control">
+          <div
+            v-if="getQuantity(product.product_id) > 0 && product.is_sliceable"
+            class="slice-control"
+          >
             <span>切</span>
             <el-switch
               v-model="productIsSliced[product.product_id]"
@@ -444,7 +454,11 @@ defineExpose({ open, close });
     width: 60px;
     height: 60px;
     border-radius: 4px;
-    background: linear-gradient(135deg, var(--bg-page-alt) 0%, var(--bg-page) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--bg-page-alt) 0%,
+      var(--bg-page) 100%
+    );
     border: 1px solid #e2e8f0;
     display: flex;
     align-items: center;
@@ -507,7 +521,6 @@ defineExpose({ open, close });
 
 :deep(.el-divider__text) {
   font-weight: 500;
-  color: #409eff;
 }
 @media (max-width: 768px) {
   .product-item {

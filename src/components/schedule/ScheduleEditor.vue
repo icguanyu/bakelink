@@ -33,9 +33,10 @@ const orderEndTime = ref("");
 
 const setOrderStartNow = () => {
   const now = dayjs();
-  const rounded = now.minute() < 30
-    ? now.minute(30).second(0)
-    : now.add(1, "hour").minute(0).second(0);
+  const rounded =
+    now.minute() < 30
+      ? now.minute(30).second(0)
+      : now.add(1, "hour").minute(0).second(0);
   orderStartDate.value = rounded.format("YYYY-MM-DD");
   orderStartTime.value = rounded.format("HH:mm");
 };
@@ -124,8 +125,10 @@ watch(orderEndDate, (newDate) => {
   }
 });
 
-const needsStartTime = computed(() => form.status === "OPEN" || form.status === "ANNOUNCED");
-const needsEndTime   = computed(() => form.status === "OPEN");
+const needsStartTime = computed(
+  () => form.status === "OPEN" || form.status === "ANNOUNCED",
+);
+const needsEndTime = computed(() => form.status === "OPEN");
 const needsOrderTime = needsEndTime; // 向後相容（saveEditor / beforeSave 用）
 
 const excludeProductIds = computed(() => {
@@ -277,22 +280,16 @@ const deleteSchedule = async () => {
           circle
           @click="closeEditor"
         />
-        <el-button
-          v-if="form.id"
-          circle
-          type="danger"
-          plain
-          icon="delete"
-          @click="deleteSchedule"
-        />
+        <el-button v-if="form.id" type="danger" plain @click="deleteSchedule"
+          >刪除</el-button
+        >
         <el-button
           class="editor-save"
           type="primary"
-          circle
           :loading="loading"
           @click="beforeSave(formRef)"
-          icon="Check"
-        />
+          >送出</el-button
+        >
       </div>
     </div>
     <div class="editor-body" v-loading="loading">
@@ -332,20 +329,37 @@ const deleteSchedule = async () => {
           </div>
 
           <!-- 狀態說明 -->
-          <div v-if="form.status" class="status-hint" :class="`status-hint--${form.status.toLowerCase()}`">
+          <div
+            v-if="form.status"
+            class="status-hint"
+            :class="`status-hint--${form.status.toLowerCase()}`"
+          >
             <template v-if="form.status === 'ANNOUNCED'">
               <i class="el-icon-info"></i>
-              <span><b>預告模式</b>：行程對客人可見，但尚未開放下單。填寫「開單開始時間」後，客人可將提醒加入行事曆，到時間自動通知。</span>
+              <span
+                ><b>預告模式</b
+                >：行程對客人可見，但尚未開放下單。填寫「開單開始時間」後，客人可將提醒加入行事曆，到時間自動通知。</span
+              >
             </template>
             <template v-else-if="form.status === 'OPEN'">
-              <span><b>接單中</b>：客人可立即下單。需設定開單區間（開始 → 截止），超過截止時間後請手動切換為「已結單」。</span>
+              <span
+                ><b>接單中</b>：客人可立即下單。需設定開單區間（開始 →
+                截止），超過截止時間後請手動切換為「已結單」。</span
+              >
             </template>
             <template v-else-if="form.status === 'CLOSED'">
-              <span><b>已結單</b>：停止接受新訂單，行程仍對客人可見但按鈕會顯示「已結單」。</span>
+              <span
+                ><b>已結單</b
+                >：停止接受新訂單，行程仍對客人可見但按鈕會顯示「已結單」。</span
+              >
             </template>
           </div>
 
-          <el-form-item v-if="needsStartTime" label="開單開始時間" class="field">
+          <el-form-item
+            v-if="needsStartTime"
+            label="開單開始時間"
+            class="field"
+          >
             <div class="datetime-inputs">
               <el-date-picker
                 v-model="orderStartDate"
@@ -360,9 +374,11 @@ const deleteSchedule = async () => {
                 step="00:30"
                 end="23:30"
               />
-              <el-button @click="setOrderStartNow">現在</el-button>
             </div>
-            <p class="field-hint">請確認該日期的營業時間是否有開放</p>
+            <p class="field-hint">
+              請確認該日期的營業時間是否有開放・
+              <el-button link @click="setOrderStartNow">設為現在</el-button>
+            </p>
           </el-form-item>
           <el-form-item v-if="needsEndTime" label="開單截止時間" class="field">
             <div class="datetime-inputs">
@@ -414,11 +430,9 @@ const deleteSchedule = async () => {
                   <!-- 不限量 -->
                   <template v-if="item.sales_limit === null">
                     <span class="limit-badge">不限量</span>
-                    <el-button
-                      size="small"
-                      plain
-                      @click="item.sales_limit = 10"
-                    >設上限</el-button>
+                    <el-button size="small" plain @click="item.sales_limit = 10"
+                      >設上限</el-button
+                    >
                   </template>
                   <!-- 限量 -->
                   <template v-else>
@@ -448,7 +462,8 @@ const deleteSchedule = async () => {
                       size="small"
                       plain
                       @click="item.sales_limit = null"
-                    >不限量</el-button>
+                      >不限量</el-button
+                    >
                   </template>
                 </div>
               </div>
@@ -490,8 +505,6 @@ const deleteSchedule = async () => {
   border: 1px solid #e2e8f0;
 }
 
-
-
 .editor-body {
   flex: 1;
   padding: 10px 12px;
@@ -524,7 +537,9 @@ const deleteSchedule = async () => {
   line-height: 1.6;
   margin-bottom: 4px;
 
-  b { font-weight: 700; }
+  b {
+    font-weight: 700;
+  }
 
   &--announced {
     background: #eef2ff;
@@ -691,7 +706,7 @@ const deleteSchedule = async () => {
   }
 
   .datetime-inputs {
-    grid-template-columns: 1fr;
+    flex-wrap: wrap;
   }
 
   .product-item {

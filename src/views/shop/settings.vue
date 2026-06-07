@@ -12,7 +12,7 @@ const isLoading = ref(false);
 
 const paymentOptions = [
   { label: "現金", value: "cash" },
-  { label: "Line Pay", value: "linepay" },
+  // { label: "Line Pay", value: "linepay" },
   // { label: "銀行轉帳", value: "bank" },
   // { label: "信用卡", value: "card" },
   // { label: "街口支付", value: "jkpay" },
@@ -20,8 +20,8 @@ const paymentOptions = [
 ];
 
 const pickupOptions = [
-  { label: "門市自取", value: "pickup" },
-  { label: "宅配", value: "delivery" },
+  { label: "門市自取/面交", value: "pickup" },
+  // { label: "宅配", value: "delivery" },
 ];
 
 const defaultBusinessHours = [
@@ -504,17 +504,20 @@ onMounted(() => {
           </div>
 
           <el-form-item label="取貨時間">
-            <div class="flex">
-              <el-time-select
-                v-model="form.orderPickupTime"
-                placeholder="開始"
-                start="06:00"
-                step="00:30"
-                end="22:00"
-                :filterable="false"
-                style="width: 120px"
-              />
-              <span class="white-space-nowrap">後，開放取貨</span>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div class="flex">
+                <el-time-select
+                  v-model="form.orderPickupTime"
+                  placeholder="開始"
+                  start="06:00"
+                  step="00:30"
+                  end="22:00"
+                  :filterable="false"
+                  style="width: 120px"
+                />
+                <span class="white-space-nowrap">後，開放取貨</span>
+              </div>
+              <small class="hint">若未設定，則開放營業時間內均可取貨</small>
             </div>
           </el-form-item>
           <el-form-item label="付款方式" prop="paymentMethods">
@@ -1066,7 +1069,7 @@ h2 {
     font-family: monospace;
     font-size: 12px;
     line-height: 14px;
-    color: var(--el-color-primary);
+    color: #000;
     word-break: break-all;
   }
 }

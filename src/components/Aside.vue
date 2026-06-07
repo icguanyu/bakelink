@@ -165,16 +165,7 @@ aside {
     // }
   }
   .aside-toggle {
-    margin-top: auto;
-    text-align: center;
-    cursor: pointer;
-    padding: 8px 16px;
-    img {
-      width: 36px;
-      height: 36px;
-      object-fit: contain;
-      filter: brightness(0) opacity(0.4);
-    }
+    display: none;
   }
 }
 

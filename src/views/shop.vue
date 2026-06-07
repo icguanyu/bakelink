@@ -106,31 +106,7 @@ if (typeof window !== "undefined") {
     }
 
     .aside-toggle-tag {
-      position: fixed;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 32px;
-      height: 42px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      align-items: center;
-      justify-content: center;
-      border: none;
-      border-radius: 0 8px 8px 0;
-      background: var(--color-primary);
-      cursor: pointer;
-      z-index: 6;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-
-      .bar {
-        display: block;
-        width: 16px;
-        height: 2px;
-        background-color: #fff;
-        border-radius: 999px;
-      }
+      display: none;
     }
 
     .container {

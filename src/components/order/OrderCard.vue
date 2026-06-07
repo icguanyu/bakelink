@@ -61,6 +61,10 @@ const orderNParts = computed(() => {
   return { prefix, lastThree };
 });
 
+const itemsSummary = computed(() =>
+  props.order.items.map((i) => `${i.product_name}×${i.quantity}`).join("、"),
+);
+
 const formatPickupTime = (datetime) => {
   if (!datetime) return "-";
   return dayjs(datetime).format("M/D HH:mm");
@@ -77,12 +81,67 @@ const handleDeleteOrder = () => {
 </script>
 
 <template>
+  <!-- ── Simple mode：橫向 row ─────────────────────────── -->
+  <template v-if="viewMode === 'simple'">
+    <div
+      class="order-card order-row"
+      :class="`status-${order.status.toLowerCase()}`"
+    >
+      <div class="row-bar"></div>
+      <div class="row-body">
+        <div class="col-order">
+          <div class="order-num">
+            <span class="num-prefix">{{ orderNParts.prefix }}</span
+            ><span class="num-main">{{ orderNParts.lastThree }}</span>
+          </div>
+          <span
+            class="status-chip"
+            :style="{ background: getStatusColor(order.status) }"
+            >{{ getStatusLabel(order.status) }}</span
+          >
+        </div>
+        <div class="col-customer">
+          <div class="customer-name">{{ order.customer_name }}</div>
+          <div class="customer-sub">
+            {{ order.customer_phone }} · {{ order.pickup_time }}
+          </div>
+        </div>
+        <div class="col-tags">
+          <el-tag size="small" type="info">{{
+            getPaymentLabel(order.payment_method)
+          }}</el-tag>
+          <el-tag size="small" type="success" v-if="order.pickup_method === 'pickup'">自取</el-tag>
+          <el-tag size="small" type="warning" v-if="order.pickup_method === 'delivery'">宅配</el-tag>
+          <el-tag size="small" type="primary" v-if="order.bring_own_bag">自備袋</el-tag>
+        </div>
+        <div class="col-items">
+          <span>{{ itemsSummary }}</span>
+          <span v-if="order.note" class="row-note">｜{{ order.note }}</span>
+        </div>
+        <div class="col-total">{{ $formatPrice(order.total_amount) }}</div>
+        <div class="col-actions" @click.stop>
+          <el-button icon="edit" link size="small" @click="orderDetail.visible = true">詳情</el-button>
+          <template v-if="order.status === 'PLACED'">
+            <el-button size="small" plain @click="updateStatus('CANCELLED')">取消</el-button>
+            <el-button type="success" size="small" @click="updateStatus('COMPLETED')">✓ 完成</el-button>
+          </template>
+          <el-button
+            v-if="order.status === 'COMPLETED' || order.status === 'CANCELLED'"
+            plain
+            size="small"
+            @click="updateStatus('PLACED')"
+            >復原</el-button
+          >
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- ── Detailed mode：垂直卡片 ───────────────────────── -->
+  <template v-else>
   <div
     class="order-card"
-    :class="[
-      `status-${order.status.toLowerCase()}`,
-      { 'simple-mode': viewMode === 'simple' },
-    ]"
+    :class="`status-${order.status.toLowerCase()}`"
   >
     <!-- 狀態色條 -->
     <div class="card-top-bar"></div>
@@ -203,8 +262,9 @@ const handleDeleteOrder = () => {
       >
     </div>
   </div>
+  </template>
 
-  <!-- 訂購明細模態框 -->
+  <!-- 訂購明細模態框（兩種模式共用） -->
   <OrderDetail
     ref="orderDetail"
     :order="order"
@@ -481,14 +541,146 @@ $bg-subtle: #faf7f4;
   }
 }
 
+// ── Simple mode (order-row) ─────────────────────────────
+.order-row {
+  min-height: initial;
+  flex-direction: row;
+
+  .row-bar {
+    width: 4px;
+    flex-shrink: 0;
+  }
+
+  &.status-placed .row-bar   { background: var(--color-primary); }
+  &.status-completed .row-bar { background: #16a34a; }
+  &.status-cancelled .row-bar { background: #d1d5db; }
+
+  .row-body {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 14px;
+    padding: 10px 14px;
+    min-width: 0;
+  }
+
+  .col-order {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+    min-width: 68px;
+
+    .order-num { font-family: "Courier New", monospace; font-size: 11px; color: $text-muted; }
+    .num-main  { color: $text-primary; font-weight: 700; font-size: 13px; }
+    .status-chip {
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+      white-space: nowrap;
+      align-self: flex-start;
+    }
+  }
+
+  .col-customer {
+    flex-shrink: 0;
+    min-width: 120px;
+    max-width: 180px;
+
+    .customer-name { font-size: 15px; font-weight: 700; color: $text-primary; }
+    .customer-sub  { font-size: 12px; color: $text-secondary; margin-top: 2px; white-space: nowrap; }
+  }
+
+  .col-tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+
+  .col-items {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    color: $text-secondary;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    .row-note { color: #d97706; }
+  }
+
+  .col-total {
+    font-size: 18px;
+    font-weight: 700;
+    color: $text-primary;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .col-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+
+    .el-button { margin: 0; }
+  }
+}
+
+// ── 手機版 simple mode：收成緊湊卡片 ──────────────────────
 @media (max-width: 768px) {
+  .order-row {
+    flex-direction: column;
+
+    .row-bar {
+      width: 100%;
+      height: 3px;
+    }
+
+    .row-body {
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px 12px;
+    }
+
+    .col-order {
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      min-width: unset;
+      flex: 1;
+    }
+
+    .col-customer {
+      max-width: unset;
+      flex: 1;
+    }
+
+    .col-tags { width: 100%; }
+
+    .col-items {
+      width: 100%;
+      white-space: normal;
+    }
+
+    .col-total {
+      font-size: 20px;
+    }
+
+    .col-actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+
   .order-card {
     min-height: 0;
     height: auto;
 
-    .card-items {
-      flex: 0;
-    }
+    .card-items { flex: 0; }
   }
 }
 </style>

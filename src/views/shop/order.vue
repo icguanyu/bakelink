@@ -15,9 +15,12 @@ const shopData = ref(null);
 const activeTab = ref("all");
 const searchQuery = ref("");
 const selectedDate = ref(dayjs().format("YYYY-MM-DD"));
-const viewMode = ref("detailed"); // 'detailed' 或 'simple'
+const viewMode = ref(localStorage.getItem("order-view-mode") || "detailed");
 const loading = ref(false);
-const showStats = ref(true); // 控制統計卡片顯示
+const showStats = ref(localStorage.getItem("order-show-stats") !== "false");
+
+watch(viewMode, (v) => localStorage.setItem("order-view-mode", v));
+watch(showStats, (v) => localStorage.setItem("order-show-stats", String(v)));
 
 // 當日開單
 const schedule = reactive({
@@ -311,10 +314,10 @@ watch(selectedDate, (val) => {
               @click="
                 viewMode = viewMode === 'detailed' ? 'simple' : 'detailed'
               "
-              :title="viewMode === 'detailed' ? '切換簡易' : '切換詳細'"
+              :title="viewMode === 'detailed' ? '卡片' : '清單'"
             >
               <el-icon><Document /></el-icon>
-              <span>詳細</span>
+              <span>{{ viewMode === 'detailed' ? '卡片' : '清單' }}</span>
             </button>
           </div>
           <el-button size="small" @click="setToday">回今天</el-button>
@@ -349,7 +352,7 @@ watch(selectedDate, (val) => {
       </div>
       <div class="stat-card highlight">
         <div class="stat-value">{{ $formatPrice(dateStats.revenue) }}</div>
-        <div class="stat-label">{{ dateLabel }}營收</div>
+        <div class="stat-label">{{ dateLabel }}總金額</div>
       </div>
     </div>
 
@@ -414,7 +417,7 @@ watch(selectedDate, (val) => {
     </div>
 
     <!-- 訂單列表 -->
-    <div class="orders-grid">
+    <div class="orders-grid" :class="{ 'list-view': viewMode === 'simple' }">
       <!-- 讀取中骨架屏 -->
       <template v-if="loading">
         <div v-for="i in 6" :key="`skeleton-${i}`" class="order-skeleton">
@@ -573,7 +576,7 @@ $bg-card: #ffffff;
 
     .view-toggles {
       display: flex;
-      border: 1px solid $border;
+
       border-radius: 8px;
       overflow: hidden;
       background: $bg-card;
@@ -588,7 +591,6 @@ $bg-card: #ffffff;
       border: none;
       cursor: pointer;
       font-size: 13px;
-      color: $text-secondary;
       transition: all 0.15s;
 
       & + .toggle-btn {
@@ -597,13 +599,11 @@ $bg-card: #ffffff;
 
       &:hover {
         background: $bg-page;
-        color: $text-primary;
       }
 
       &.active {
-        background: $accent-light;
-        color: $accent;
-        font-weight: 600;
+        background: $accent;
+        color: #fff;
       }
 
       .el-icon {
@@ -638,9 +638,15 @@ $bg-card: #ffffff;
     line-height: 1;
     margin-bottom: 3px;
 
-    &.placed    { color: var(--color-primary); }
-    &.completed { color: #16a34a; }
-    &.cancelled { color: #cf4747; }
+    &.placed {
+      color: var(--color-primary);
+    }
+    &.completed {
+      color: #16a34a;
+    }
+    &.cancelled {
+      color: #cf4747;
+    }
   }
 
   .stat-label {
@@ -662,6 +668,7 @@ $bg-card: #ffffff;
   .date-nav {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
 
     .el-button[circle] {
@@ -720,8 +727,8 @@ $bg-card: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 7px 10px;
+  gap: 4px;
+  padding: 6px 8px;
   background: $bg-card;
   border: 1px solid $border;
   border-radius: 4px;
@@ -753,9 +760,10 @@ $bg-card: #ffffff;
 
   .tab-count {
     padding: 1px 7px;
-    border-radius: 8px;
+    border-radius: 4px;
     color: white;
     font-size: 12px;
+    line-height: 16px;
     font-weight: 700;
     min-width: 22px;
     text-align: center;
@@ -763,8 +771,8 @@ $bg-card: #ffffff;
 
   .tab-count-all {
     padding: 1px 7px;
-    border-radius: 8px;
-    background: #e7e5e4;
+    border-radius: 4px;
+    background: #fff;
     color: $text-secondary;
     font-size: 12px;
     font-weight: 700;
@@ -779,6 +787,11 @@ $bg-card: #ffffff;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   grid-auto-rows: 1fr;
   gap: 10px;
+
+  &.list-view {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+  }
 }
 
 .order-card-anchor {
@@ -939,10 +952,6 @@ $bg-card: #ffffff;
         font-size: 15px;
       }
     }
-  }
-
-  .stats-cards {
-    display: none;
   }
 
   .toolbar {
