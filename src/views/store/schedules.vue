@@ -87,6 +87,18 @@ const getBadge = (s) => {
 const isPastSchedule = (s) =>
   s.status === "CLOSED" || dayjs(s.schedule_date).isBefore(today, "day");
 
+const getFlowSteps = (s) => [
+  { label: "接單中", time: null },
+  { label: "結單", time: s.order_end_at ? dayjs(s.order_end_at).format("M/D HH:mm") : null },
+  { label: "取貨", time: s.schedule_date ? dayjs(s.schedule_date).format("M/D") : null },
+];
+const getFlowStepIndex = (s) => {
+  if (isPastSchedule(s)) return 2;
+  if (s.status === "OPEN") return 0;
+  if (s.status === "CLOSED") return 1;
+  return -1; // ANNOUNCED → all grey
+};
+
 const expandedIds = ref(new Set());
 const toggleExpand = (id) => {
   const s = new Set(expandedIds.value);
@@ -323,12 +335,12 @@ const addToCalendar = (s) => {
                   {{ getBadge(s).label }}
                 </span>
               </div>
-              <div
+              <!-- <div
                 v-if="s.status !== 'ANNOUNCED'"
                 class="schedule-card__deadline"
               >
                 截單：{{ formatDeadline(s.order_end_at) }}
-              </div>
+              </div> -->
               <div v-if="s.note" class="schedule-card__note">
                 <i class="bx bx-info-circle"></i> {{ s.note }}
               </div>
@@ -337,6 +349,28 @@ const addToCalendar = (s) => {
 
           <!-- 展開內容（已過去時需手動展開；未過去時永遠顯示） -->
           <template v-if="!isPastSchedule(s) || expandedIds.has(s.id)">
+            <!-- 流程步驟 -->
+            <div class="flow-steps">
+              <template v-for="(step, i) in getFlowSteps(s)" :key="step.label">
+                <div
+                  class="flow-step"
+                  :class="{
+                    'flow-step--active': getFlowStepIndex(s) === i,
+                    'flow-step--done': getFlowStepIndex(s) > i,
+                  }"
+                >
+                  <span class="flow-dot"></span>
+                  <span class="flow-label">{{ step.label }}</span>
+                  <span v-if="step.time" class="flow-time">{{ step.time }}</span>
+                </div>
+                <div
+                  v-if="i < getFlowSteps(s).length - 1"
+                  class="flow-line"
+                  :class="{ 'flow-line--active': getFlowStepIndex(s) > i }"
+                ></div>
+              </template>
+            </div>
+
             <!-- 品項列表 -->
             <div v-if="s.items?.length" class="schedule-card__items">
               <div v-for="item in s.items" :key="item.id" class="item-chip">
@@ -862,6 +896,61 @@ const addToCalendar = (s) => {
     background: #ede8e2;
     color: #6b4838;
   }
+}
+
+/* 流程步驟 */
+.flow-steps {
+  display: flex;
+  align-items: flex-start;
+  padding: 2px 4px;
+}
+
+.flow-step {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.flow-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e0d5cc;
+  flex-shrink: 0;
+}
+
+.flow-label {
+  font-size: 12px;
+  color: #c0a898;
+  white-space: nowrap;
+}
+
+.flow-time {
+  font-size: 12px;
+  color: #b0a090;
+  white-space: nowrap;
+}
+
+.flow-line {
+  flex: 1;
+  height: 2px;
+  background: #e0d5cc;
+  align-self: flex-start;
+  margin-top: 3px;
+
+  &--active { background: #2eaa62; }
+}
+
+.flow-step--active {
+  .flow-dot { background: var(--color-primary); }
+  .flow-label { color: var(--color-primary); font-weight: 700; }
+}
+
+.flow-step--done {
+  .flow-dot { background: #2eaa62; }
+  .flow-label { color: #2eaa62; }
 }
 
 /* 品項 chip */

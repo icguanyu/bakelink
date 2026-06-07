@@ -492,7 +492,7 @@ watch(calendarVisible, (val) => {
       <div class="schedule-right">
         <!-- 月份導航 -->
         <div class="month-navigation">
-          <div class="month-navigation-left">
+          <div v-show="calendarVisible" class="month-navigation-left">
             <el-button
               class="month-nav-btn"
               icon="ArrowLeft"
@@ -517,8 +517,11 @@ watch(calendarVisible, (val) => {
               :title="calendarVisible ? '隱藏月曆' : '顯示月曆'"
             >
               <el-icon v-if="calendarVisible"><Hide /></el-icon>
-              <el-icon v-else><View /></el-icon>
+              <el-icon v-else><Calendar /></el-icon>
             </el-button>
+            <span v-if="!calendarVisible" class="calendar-hint"
+              >點擊開啟月曆</span
+            >
           </div>
         </div>
         <ScheduleCalendar
@@ -607,7 +610,18 @@ watch(calendarVisible, (val) => {
 
 .month-navigation-actions {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  gap: 6px;
+}
+
+.calendar-hint {
+  display: none;
+  font-size: 12px;
+  color: #a09080;
+
+  @media (max-width: 1024px) {
+    display: inline;
+  }
 }
 
 .month-toggle {

@@ -420,7 +420,7 @@ const deleteSchedule = async () => {
           <el-step>
             <template #title>
               <div class="tl-step">
-                <span class="tl-label">截單</span>
+                <span class="tl-label">結單</span>
                 <span v-if="orderEndDate" class="tl-time"
                   >{{ orderEndDate }} {{ orderEndTime }}</span
                 >
