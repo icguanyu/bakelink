@@ -409,7 +409,7 @@ const addToCalendar = (s) => {
       </template>
     </div>
 
-    <div class="page-footer">由 <a href="https://prelo.tw" target="_blank" rel="noopener">Prelo</a> 提供服務</div>
+    <div class="page-footer">由 <a href="/" target="_blank" rel="noopener">Prelo</a> 提供服務</div>
   </div>
 </template>
 
