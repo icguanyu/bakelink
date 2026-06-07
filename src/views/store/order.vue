@@ -90,7 +90,8 @@ const hasMultiPickup = computed(
   () => (shop.value?.pickupMethods?.length ?? 0) > 1,
 );
 
-const increment = (itemId, remaining) => {
+const increment = (itemId, remaining, salesLimit) => {
+  if (salesLimit != null && remaining != null && remaining <= 0) return;
   const cur = cart[itemId]?.quantity ?? 0;
   if (remaining > 0 && cur >= remaining) return;
   cart[itemId].quantity = cur + 1;
@@ -306,7 +307,8 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
             此行程尚無品項
           </div>
           <div v-else class="item-list">
-            <div v-for="item in schedule.items" :key="item.id" class="item-row">
+            <div v-for="item in schedule.items" :key="item.id" class="item-row"
+              :class="{ 'item-row--sold': item.sales_limit != null && item.remaining != null && item.remaining <= 0 }">
               <div class="item-img">
                 <img
                   v-if="item.image_url"
@@ -318,7 +320,10 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
               <div class="item-info">
                 <div class="item-name">{{ item.product_name }}</div>
                 <div class="item-price">{{ fmt(item.unit_price) }}</div>
-                <div v-if="item.remaining > 0" class="item-remaining">
+                <div v-if="item.sales_limit != null && item.remaining != null && item.remaining <= 0" class="item-remaining item-remaining--sold">
+                  售完
+                </div>
+                <div v-else-if="item.remaining > 0" class="item-remaining">
                   剩餘 {{ item.remaining }} 份
                 </div>
                 <!-- 切片選項，只在已選數量 > 0 時顯示 -->
@@ -343,10 +348,10 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
                 <button
                   class="qty-btn qty-btn--add"
                   :disabled="
-                    item.remaining > 0 &&
-                    (cart[item.id]?.quantity ?? 0) >= item.remaining
+                    (item.sales_limit != null && item.remaining != null && item.remaining <= 0) ||
+                    (item.remaining > 0 && (cart[item.id]?.quantity ?? 0) >= item.remaining)
                   "
-                  @click="increment(item.id, item.remaining)"
+                  @click="increment(item.id, item.remaining, item.sales_limit)"
                 >
                   <i class="bx bx-plus"></i>
                 </button>
@@ -849,6 +854,15 @@ $_primary-hex: 'c8944a';
   font-size: 11px;
   color: #b09080;
   margin-top: 2px;
+
+  &--sold {
+    color: #c06050;
+    font-weight: 700;
+  }
+}
+
+.item-row--sold {
+  opacity: 0.5;
 }
 
 .slice-toggle {

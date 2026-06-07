@@ -139,6 +139,7 @@ const hasDelivery = computed(
       <i class="bx bx-store-alt"></i>
       <p>找不到此店家</p>
       <small>請確認網址是否正確</small>
+      <button class="home-btn" @click="router.push('/')">回首頁</button>
     </div>
 
     <!-- 正常內容 -->
@@ -452,6 +453,21 @@ const hasDelivery = computed(
   }
   small {
     font-size: 13px;
+  }
+
+  .home-btn {
+    margin-top: 20px;
+    padding: 9px 24px;
+    border-radius: 999px;
+    border: 1.5px solid #e8ddd5;
+    background: #fff;
+    color: #8a7060;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+
+    &:active { opacity: 0.7; }
   }
 }
 

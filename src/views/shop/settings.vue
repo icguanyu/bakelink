@@ -328,7 +328,7 @@ onMounted(() => {
               >
                 <img v-if="form.avatar" :src="form.avatar" />
                 <span v-else class="sp-avatar__fallback">
-                  {{ form.shopName?.[0] ?? "🍞" }}
+                  {{ form.shopName?.[0] ?? "店" }}
                 </span>
                 <div class="sp-avatar__overlay">
                   <svg
@@ -486,7 +486,7 @@ onMounted(() => {
 
           <el-divider />
           <el-form-item label="帳號管理">
-            <el-button type="danger" size="small" @click="handleLogout">
+            <el-button type="danger" text size="small" @click="handleLogout">
               登出帳號
             </el-button>
           </el-form-item>
@@ -616,18 +616,18 @@ onMounted(() => {
                 v-model="row.time[0]"
                 :disabled="!row.enabled"
                 placeholder="開始"
-                start="06:00"
+                start="00:00"
                 step="00:30"
-                end="22:00"
+                end="23:30"
                 :filterable="false"
               />
               <el-time-select
                 v-model="row.time[1]"
                 :disabled="!row.enabled"
                 placeholder="結束"
-                start="06:00"
+                start="00:00"
                 step="00:30"
-                end="22:00"
+                end="23:30"
                 :filterable="false"
               />
             </div>

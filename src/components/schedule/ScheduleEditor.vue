@@ -131,6 +131,11 @@ const needsStartTime = computed(
 const needsEndTime = computed(() => form.status === "OPEN");
 const needsOrderTime = needsEndTime; // 向後相容（saveEditor / beforeSave 用）
 
+const timelineActive = computed(() => {
+  const map = { ANNOUNCED: 0, OPEN: 1, CLOSED: 3 };
+  return map[form.status] ?? -1;
+});
+
 const excludeProductIds = computed(() => {
   return form.items.map((item) => item.product_id);
 });
@@ -311,7 +316,7 @@ const deleteSchedule = async () => {
           label-position="top"
         >
           <div class="field-row">
-            <el-form-item label="開單日期" class="field" prop="schedule_date">
+            <el-form-item label="取貨日期" class="field" prop="schedule_date">
               <div class="field-value">
                 {{ form.schedule_date }}
               </div>
@@ -357,7 +362,7 @@ const deleteSchedule = async () => {
 
           <el-form-item
             v-if="needsStartTime"
-            label="開單開始時間"
+            label="接單開始時間"
             class="field"
           >
             <div class="datetime-inputs">
@@ -380,7 +385,7 @@ const deleteSchedule = async () => {
               <el-button link @click="setOrderStartNow">設為現在</el-button>
             </p>
           </el-form-item>
-          <el-form-item v-if="needsEndTime" label="開單截止時間" class="field">
+          <el-form-item v-if="needsEndTime" label="接單截止時間" class="field">
             <div class="datetime-inputs">
               <el-date-picker
                 v-model="orderEndDate"
@@ -398,6 +403,40 @@ const deleteSchedule = async () => {
             </div>
           </el-form-item>
         </el-form>
+
+        <!-- 時間軸 -->
+        <el-steps :active="timelineActive" simple class="schedule-timeline">
+          <el-step>
+            <template #title>
+              <div class="tl-step">
+                <span class="tl-label">接單</span>
+                <span v-if="orderStartDate" class="tl-time"
+                  >{{ orderStartDate }} {{ orderStartTime }}</span
+                >
+              </div>
+            </template>
+          </el-step>
+          <el-step>
+            <template #title>
+              <div class="tl-step">
+                <span class="tl-label">截單</span>
+                <span v-if="orderEndDate" class="tl-time"
+                  >{{ orderEndDate }} {{ orderEndTime }}</span
+                >
+              </div>
+            </template>
+          </el-step>
+          <el-step>
+            <template #title>
+              <div class="tl-step">
+                <span class="tl-label">取貨日</span>
+                <span v-if="form.schedule_date" class="tl-time">{{
+                  form.schedule_date
+                }}</span>
+              </div>
+            </template>
+          </el-step>
+        </el-steps>
       </div>
 
       <div class="editor-section">
@@ -686,6 +725,37 @@ const deleteSchedule = async () => {
   color: #94a3b8;
   font-size: 13px;
   padding: 8px 0;
+}
+
+.schedule-timeline {
+  margin-top: 14px;
+  :deep(.el-step.is-simple) {
+    background: transparent;
+  }
+
+  :deep(.el-step__icon) {
+    display: none;
+  }
+
+  .tl-step {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tl-label {
+    font-size: 14px;
+  }
+
+  .tl-time {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+}
+:deep(.el-steps--simple) {
+  background: transparent;
+  padding: 5px 5%;
 }
 
 @keyframes slideInRight {

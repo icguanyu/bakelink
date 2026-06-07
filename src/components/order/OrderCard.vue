@@ -223,8 +223,7 @@ const handleDeleteOrder = () => {
 
     <!-- 備註 -->
     <div v-if="viewMode === 'detailed' && order.note" class="card-note">
-      <el-icon><Document /></el-icon>
-      <span>{{ order.note }}</span>
+      <span class="note-label">備註</span>{{ order.note }}
     </div>
 
     <!-- 底部：總金額 -->
@@ -464,22 +463,15 @@ $bg-subtle: #faf7f4;
 
   // ── 備註 ─────────────────────────────────
   .card-note {
-    display: flex;
-    align-items: flex-start;
-    gap: 6px;
-    padding: 8px 12px;
-    background: #fffbeb;
-    border-left: 3px solid #d97706;
-    margin: 0 14px 0;
-    border-radius: 0 4px 4px 0;
-    font-size: 13px;
-    color: #78350f;
-    line-height: 1.4;
+    padding: 2px 14px 8px;
+    font-size: 12px;
+    color: $text-muted;
+    line-height: 1.5;
 
-    .el-icon {
-      color: #d97706;
-      flex-shrink: 0;
-      margin-top: 1px;
+    .note-label {
+      font-weight: 600;
+      margin-right: 4px;
+      color: $text-secondary;
     }
   }
 
