@@ -1,6 +1,6 @@
 <script setup>
 import { ProductCategory } from "@/api/products";
-const emit = defineEmits(["save"]);
+const emit = defineEmits(["save", "updated"]);
 const loading = ref(false);
 const visible = ref(false);
 const categories = ref([]);
@@ -36,6 +36,7 @@ const addCategory = async () => {
     });
     newCategory.name = "";
     await initProductCategories();
+    emit("updated");
   } catch (error) {
     console.log("catch", error);
   } finally {
@@ -59,6 +60,7 @@ const removeCategory = (id) => {
           type: "success",
         });
         await initProductCategories();
+        emit("updated");
       } catch (error) {
         console.log("catch", error);
       } finally {

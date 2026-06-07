@@ -8,7 +8,7 @@ const props = defineProps({
   },
 });
 const loading = ref(false);
-const emits = defineEmits(["update:modelValue"]);
+const emits = defineEmits(["update:modelValue", "manage"]);
 const categories = ref([]);
 
 const initProductCategories = async () => {
@@ -27,6 +27,8 @@ const initProductCategories = async () => {
 onMounted(() => {
   initProductCategories();
 });
+
+defineExpose({ refresh: initProductCategories });
 </script>
 
 <template>
@@ -43,5 +45,28 @@ onMounted(() => {
       :label="category.name"
       :value="category.id"
     />
+    <template #empty>
+      <div class="select-empty">
+        <p>尚無種類</p>
+        <el-button size="small" type="primary" text @click.stop="$emit('manage')">
+          立即建立種類
+        </el-button>
+      </div>
+    </template>
   </el-select>
 </template>
+
+<style scoped lang="scss">
+.select-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 0;
+  p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--el-text-color-secondary);
+  }
+}
+</style>

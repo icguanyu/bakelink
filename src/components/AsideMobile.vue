@@ -1,4 +1,8 @@
-<script setup></script>
+<script setup>
+import { useAuthStore } from "@/stores/auth";
+const authStore = useAuthStore();
+const shopSlug = computed(() => authStore.user?.shopSlug || "");
+</script>
 
 <template>
   <nav class="aside-mobile">
@@ -26,10 +30,24 @@
 
     <router-link class="nav-item" to="/shop/settings" title="設定">
       <div class="icon">
-        <img src="@/assets/images/icons/store.png" alt="設定" />
+        <img src="@/assets/images/icons/setting.png" alt="設定" />
       </div>
       <span class="label">設定</span>
     </router-link>
+
+    <a
+      v-if="shopSlug"
+      class="nav-item"
+      :href="`/s/${shopSlug}`"
+      target="_blank"
+      rel="noopener"
+      title="前台"
+    >
+      <div class="icon">
+        <img src="@/assets/images/icons/store.png" alt="前台" />
+      </div>
+      <span class="label">前台</span>
+    </a>
   </nav>
 </template>
 

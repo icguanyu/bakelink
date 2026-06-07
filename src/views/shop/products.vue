@@ -5,6 +5,8 @@ const editCategory = ref();
 const editProduct = ref();
 const currentCategory = ref(null);
 const loading = ref(false);
+const showTour = ref(false);
+const TOUR_KEY = "products_category_tour_done";
 const props = {
   label: "name",
   value: "id",
@@ -31,11 +33,18 @@ const initProductCategories = async () => {
     const res = await ProductCategory.List();
     // console.log("product categories", res);
     categories.value = [{ name: "全部", id: null }, ...res.data.data];
+    if (res.data.data.length === 0 && !localStorage.getItem(TOUR_KEY)) {
+      showTour.value = true;
+    }
   } catch (error) {
     console.log("catch", error);
   } finally {
     loading.value = false;
   }
+};
+
+const onTourFinish = () => {
+  localStorage.setItem(TOUR_KEY, "1");
 };
 
 const initProducts = async () => {
@@ -72,8 +81,21 @@ onMounted(() => {
       </div>
     </div>
 
-    <EditCategory ref="editCategory" />
+    <EditCategory ref="editCategory" @updated="initProductCategories" />
     <EditProduct ref="editProduct" @update="initProducts" />
+
+    <el-tour
+      v-model="showTour"
+      @finish="onTourFinish"
+      @close="onTourFinish"
+    >
+      <el-tour-step
+        target="#category-setting-btn"
+        title="先建立產品種類"
+        description="新增產品前，請先點擊這裡建立種類，才能在產品中選擇分類。"
+        :next-button-props="{ children: '好，去建立' }"
+      />
+    </el-tour>
     <div class="toolbar">
       <div
         v-if="loading && categories.length <= 1"
@@ -87,7 +109,7 @@ onMounted(() => {
         :props="props"
         v-loading="loading"
       />
-      <el-button icon="setting" text @click="editCategory.open()"></el-button>
+      <el-button id="category-setting-btn" icon="setting" text @click="editCategory.open()"></el-button>
     </div>
 
     <div class="columns-2">

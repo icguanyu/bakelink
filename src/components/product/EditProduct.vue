@@ -1,6 +1,8 @@
 <script setup>
 import { Products } from "@/api/products";
 const uploadPhotos = ref(null);
+const editCategoryRef = ref(null);
+const selectCategoryRef = ref(null);
 const uploadPhotosLoading = computed(
   () => uploadPhotos.value?.loading || false,
 );
@@ -140,6 +142,10 @@ defineExpose({ open, close });
 </script>
 
 <template>
+  <EditCategory
+    ref="editCategoryRef"
+    @updated="selectCategoryRef?.refresh()"
+  />
   <el-dialog
     v-model="visible"
     :title="form.id ? '編輯商品' : '新增商品'"
@@ -158,7 +164,11 @@ defineExpose({ open, close });
         <el-input v-model="form.name" placeholder="產品名稱（例：原味軟法）" />
       </el-form-item>
       <el-form-item label="產品類別" prop="category_id">
-        <SelectCategory v-model="form.category_id" />
+        <SelectCategory
+          ref="selectCategoryRef"
+          v-model="form.category_id"
+          @manage="editCategoryRef?.open()"
+        />
       </el-form-item>
       <el-form-item label="產品定價" prop="price">
         <el-input v-model.number="form.price" style="width: 100%" />

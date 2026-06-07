@@ -2,8 +2,11 @@
 import { computed, onMounted, ref } from "vue";
 import dayjs from "dayjs";
 import { Schedules } from "@/api/schedules";
+import { useAuthStore } from "@/stores/auth";
 
 const emit = defineEmits(["toggle"]);
+const authStore = useAuthStore();
+const shopSlug = computed(() => authStore.user?.shopSlug || "");
 
 const currentYear = computed(() => dayjs().format("YYYY"));
 const currentMonth = computed(() => dayjs().format("MMM").toUpperCase());
@@ -69,10 +72,23 @@ onMounted(() => {
     </router-link>
     <router-link class="link" to="/shop/settings">
       <div class="icon">
-        <img src="@/assets/images/icons/store.png" alt="" />
+        <img src="@/assets/images/icons/setting.png" alt="" />
       </div>
       <div class="title">設定</div>
     </router-link>
+    <a
+      v-if="shopSlug"
+      class="link store-front-link"
+      :href="`/s/${shopSlug}`"
+      target="_blank"
+      rel="noopener"
+      title="前往前台"
+    >
+      <div class="icon">
+        <img src="@/assets/images/icons/store.png" alt="" />
+      </div>
+      <div class="title">前台</div>
+    </a>
     <div
       class="aside-toggle"
       aria-label="Toggle aside menu"
@@ -163,6 +179,11 @@ aside {
     //   top: 50%;
     //   transform: translateY(-50%) translateX(50%) rotate(45deg);
     // }
+  }
+  .store-front-link {
+    margin-top: auto;
+    border-top: 1px solid rgba(180, 140, 100, 0.18);
+    padding-top: 12px;
   }
   .aside-toggle {
     display: none;
