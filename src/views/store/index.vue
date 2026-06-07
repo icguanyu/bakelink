@@ -346,7 +346,7 @@ const hasDelivery = computed(
               <el-icon
                 class="is-loading"
                 size="28"
-                :style="{ color: 'var(--color-secondary)' }"
+                :style="{ color: 'var(--color-primary)' }"
                 ><Loading
               /></el-icon>
             </div>
@@ -556,7 +556,7 @@ const hasDelivery = computed(
 
     i {
       font-size: 17px;
-      color: var(--color-secondary);
+      color: var(--color-primary);
     }
   }
 }
@@ -587,7 +587,7 @@ const hasDelivery = computed(
     text-decoration: none;
 
     &:active {
-      color: var(--color-secondary);
+      color: var(--color-primary);
     }
   }
 
@@ -774,7 +774,7 @@ const hasDelivery = computed(
     flex-shrink: 0;
     font-size: 14px;
     margin-top: 1px;
-    color: var(--color-secondary);
+    color: var(--color-primary);
   }
 }
 
@@ -831,7 +831,7 @@ const hasDelivery = computed(
   padding: 14px 20px;
   border-radius: 999px;
   border: none;
-  background: var(--color-secondary);
+  background: var(--color-primary);
   color: #fff;
   font-size: 15px;
   font-weight: 700;
@@ -840,15 +840,15 @@ const hasDelivery = computed(
   transition:
     background 0.15s,
     box-shadow 0.15s;
-  box-shadow: 0 4px 14px rgba(var(--color-secondary-rgb), 0.35);
+  box-shadow: 0 4px 14px rgba(var(--color-primary-rgb), 0.35);
 
   i {
     font-size: 18px;
   }
 
   &:hover {
-    background: var(--color-secondary-hover);
-    box-shadow: 0 6px 18px rgba(var(--color-secondary-rgb), 0.45);
+    background: var(--color-primary-hover);
+    box-shadow: 0 6px 18px rgba(var(--color-primary-rgb), 0.45);
   }
 
   &:active {
@@ -858,13 +858,13 @@ const hasDelivery = computed(
 
   &--ghost {
     background: #fff;
-    color: var(--color-secondary);
+    color: var(--color-primary);
     border: 1.5px solid #e8ddd5;
     box-shadow: none;
 
     &:hover {
       background: #fff;
-      color: var(--color-secondary);
+      color: var(--color-primary);
       box-shadow: none;
     }
 
@@ -904,19 +904,19 @@ const hasDelivery = computed(
   }
 
   &--active {
-    background: var(--color-secondary);
-    border-color: var(--color-secondary);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
     color: #fff;
   }
 
   &--all {
-    border-color: var(--color-secondary);
-    color: var(--color-secondary);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
   }
 
   &--all-active {
-    background: var(--color-secondary);
-    border-color: var(--color-secondary);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
     color: #fff;
   }
 }

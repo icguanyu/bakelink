@@ -678,7 +678,7 @@ const addToCalendar = (s) => {
     align-items: center;
     gap: 4px;
 
-    i { font-size: 13px; color: var(--color-secondary); }
+    i { font-size: 13px; color: var(--color-primary); }
   }
 
   &__items {

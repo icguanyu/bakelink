@@ -493,7 +493,7 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
 <style lang="scss" scoped>
 // SVG data URI 無法使用 CSS var()，以 SCSS 變數替代（值需與 _variables.scss 同步）
 $_primary-hex: 'fe904d';
-$_secondary-hex: 'c8944a';
+$_primary-hex: 'c8944a';
 
 .order-page {
   height: 100dvh;
@@ -660,13 +660,13 @@ $_secondary-hex: 'c8944a';
   color: #1a120b;
 
   &--price {
-    color: var(--color-secondary);
+    color: var(--color-primary);
     font-size: 16px;
   }
 }
 
 .order-no-suffix {
-  color: var(--color-secondary);
+  color: var(--color-primary);
   font-weight: 800;
 }
 
@@ -731,7 +731,7 @@ $_secondary-hex: 'c8944a';
 .slice-tag {
   font-size: 11px;
   background: #fdf3e3;
-  color: var(--color-secondary);
+  color: var(--color-primary);
   border: 1px solid #f0d8b0;
   border-radius: 4px;
   padding: 1px 6px;
@@ -841,7 +841,7 @@ $_secondary-hex: 'c8944a';
 .item-price {
   font-size: 13px;
   font-weight: 700;
-  color: var(--color-secondary);
+  color: var(--color-primary);
   margin-top: 2px;
 }
 
@@ -880,8 +880,8 @@ $_secondary-hex: 'c8944a';
   transition: all 0.15s;
 
   .slice-toggle input:checked + & {
-    background: var(--color-secondary);
-    border-color: var(--color-secondary);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
 
     &::after {
       content: "";
@@ -931,12 +931,12 @@ $_secondary-hex: 'c8944a';
   }
 
   &--add {
-    background: var(--color-secondary);
-    border-color: var(--color-secondary);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
     color: #fff;
 
     &:not(:disabled):active {
-      background: var(--color-secondary-hover);
+      background: var(--color-primary-hover);
     }
   }
 }
@@ -999,7 +999,7 @@ $_secondary-hex: 'c8944a';
     color: #c0b0a0;
   }
   &:focus {
-    border-color: var(--color-secondary);
+    border-color: var(--color-primary);
   }
 }
 
@@ -1010,7 +1010,7 @@ $_secondary-hex: 'c8944a';
 
 .form-select {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23#{$_secondary-hex}' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23#{$_primary-hex}' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
   padding-right: 36px;
@@ -1040,8 +1040,8 @@ $_secondary-hex: 'c8944a';
   }
 
   &--active {
-    background: var(--color-secondary);
-    border-color: var(--color-secondary);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
     color: #fff;
   }
 }
@@ -1080,7 +1080,7 @@ $_secondary-hex: 'c8944a';
   }
 
   input:checked + .switch-track {
-    background: var(--color-secondary);
+    background: var(--color-primary);
 
     &::after {
       transform: translateX(18px);
@@ -1132,7 +1132,7 @@ $_secondary-hex: 'c8944a';
   padding: 14px 20px;
   border-radius: 999px;
   border: none;
-  background: var(--color-secondary);
+  background: var(--color-primary);
   color: #fff;
   font-size: 15px;
   font-weight: 700;
@@ -1141,14 +1141,14 @@ $_secondary-hex: 'c8944a';
   transition:
     background 0.15s,
     box-shadow 0.15s;
-  box-shadow: 0 4px 14px rgba(var(--color-secondary-rgb), 0.35);
+  box-shadow: 0 4px 14px rgba(var(--color-primary-rgb), 0.35);
 
   i {
     font-size: 20px;
   }
 
   &:hover {
-    background: var(--color-secondary-hover);
+    background: var(--color-primary-hover);
   }
   &:active {
     background: #8a5e30;
