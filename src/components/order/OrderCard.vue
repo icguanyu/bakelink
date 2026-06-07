@@ -110,9 +110,21 @@ const handleDeleteOrder = () => {
           <el-tag size="small" type="info">{{
             getPaymentLabel(order.payment_method)
           }}</el-tag>
-          <el-tag size="small" type="success" v-if="order.pickup_method === 'pickup'">自取</el-tag>
-          <el-tag size="small" type="warning" v-if="order.pickup_method === 'delivery'">宅配</el-tag>
-          <el-tag size="small" type="primary" v-if="order.bring_own_bag">自備袋</el-tag>
+          <el-tag
+            size="small"
+            type="success"
+            v-if="order.pickup_method === 'pickup'"
+            >自取</el-tag
+          >
+          <el-tag
+            size="small"
+            type="warning"
+            v-if="order.pickup_method === 'delivery'"
+            >宅配</el-tag
+          >
+          <el-tag size="small" type="primary" v-if="order.bring_own_bag"
+            >自備袋</el-tag
+          >
         </div>
         <div class="col-items">
           <span>{{ itemsSummary }}</span>
@@ -120,10 +132,23 @@ const handleDeleteOrder = () => {
         </div>
         <div class="col-total">{{ $formatPrice(order.total_amount) }}</div>
         <div class="col-actions" @click.stop>
-          <el-button icon="edit" link size="small" @click="orderDetail.visible = true">詳情</el-button>
+          <el-button
+            icon="edit"
+            link
+            size="small"
+            @click="orderDetail.visible = true"
+            >詳情</el-button
+          >
           <template v-if="order.status === 'PLACED'">
-            <el-button size="small" plain @click="updateStatus('CANCELLED')">取消</el-button>
-            <el-button type="success" size="small" @click="updateStatus('COMPLETED')">✓ 完成</el-button>
+            <el-button size="small" plain @click="updateStatus('CANCELLED')"
+              >取消</el-button
+            >
+            <el-button
+              type="success"
+              size="small"
+              @click="updateStatus('COMPLETED')"
+              >✓ 完成</el-button
+            >
           </template>
           <el-button
             v-if="order.status === 'COMPLETED' || order.status === 'CANCELLED'"
@@ -139,128 +164,124 @@ const handleDeleteOrder = () => {
 
   <!-- ── Detailed mode：垂直卡片 ───────────────────────── -->
   <template v-else>
-  <div
-    class="order-card"
-    :class="`status-${order.status.toLowerCase()}`"
-  >
-    <!-- 狀態色條 -->
-    <div class="card-top-bar"></div>
+    <div class="order-card" :class="`status-${order.status.toLowerCase()}`">
+      <!-- 狀態色條 -->
+      <div class="card-top-bar"></div>
 
-    <!-- 頭部：編號 + 狀態 -->
-    <div class="card-header">
-      <div class="order-num">
-        <span class="num-prefix">{{ orderNParts.prefix }}</span
-        ><span class="num-main">{{ orderNParts.lastThree }}</span>
+      <!-- 頭部：編號 + 狀態 -->
+      <div class="card-header">
+        <div class="order-num">
+          <span class="num-prefix">{{ orderNParts.prefix }}</span
+          ><span class="num-main">{{ orderNParts.lastThree }}</span>
+        </div>
+        <span
+          class="status-chip"
+          :style="{ background: getStatusColor(order.status) }"
+          >{{ getStatusLabel(order.status) }}</span
+        >
       </div>
-      <span
-        class="status-chip"
-        :style="{ background: getStatusColor(order.status) }"
-        >{{ getStatusLabel(order.status) }}</span
-      >
-    </div>
 
-    <!-- 客戶資訊 -->
-    <div class="card-customer">
-      <div class="customer-name">{{ order.customer_name }}</div>
-      <div v-if="viewMode === 'detailed'" class="customer-meta">
-        <span class="meta-item">
-          <el-icon><Phone /></el-icon>{{ order.customer_phone }}
-        </span>
-        <span class="meta-item">
-          <el-icon><AlarmClock /></el-icon>{{ order.pickup_time }}
-        </span>
-      </div>
-      <div v-if="viewMode === 'detailed'" class="customer-tags">
-        <el-tag size="small" type="info">{{
-          getPaymentLabel(order.payment_method)
-        }}</el-tag>
-        <el-tag
-          size="small"
-          type="success"
-          v-if="order.pickup_method === 'pickup'"
-          >自取</el-tag
-        >
-        <el-tag
-          size="small"
-          type="warning"
-          v-if="order.pickup_method === 'delivery'"
-          >宅配</el-tag
-        >
-        <el-tag
-          size="small"
-          type="primary"
-          v-if="order.bring_own_bag"
-          >自備袋</el-tag
-        >
-      </div>
-    </div>
-
-    <!-- 訂購明細 -->
-    <div v-if="viewMode === 'detailed'" class="card-items">
-      <div class="items-label">
-        <span>訂購明細</span>
-        <el-button
-          type="primary"
-          icon="edit"
-          link
-          size="small"
-          @click="orderDetail.visible = true"
-        >
-          查看詳情
-        </el-button>
-      </div>
-      <div class="items-list">
-        <div v-for="(item, idx) in order.items" :key="idx" class="item-row">
-          <span class="item-name">
-            {{ item.product_name }}
-            <el-tag v-if="item.is_sliced" size="small">切</el-tag>
+      <!-- 客戶資訊 -->
+      <div class="card-customer">
+        <div class="customer-name">{{ order.customer_name }}</div>
+        <div v-if="viewMode === 'detailed'" class="customer-meta">
+          <span class="meta-item">
+            <el-icon><Phone /></el-icon>{{ order.customer_phone }}
           </span>
-          <span class="item-qty">× {{ item.quantity }}</span>
-          <span class="item-price">{{ $formatPrice(item.line_total) }}</span>
+          <span class="meta-item">
+            <el-icon><AlarmClock /></el-icon>{{ order.pickup_time }}
+          </span>
+        </div>
+        <div v-if="viewMode === 'detailed'" class="customer-tags">
+          <el-tag size="small" type="info">{{
+            getPaymentLabel(order.payment_method)
+          }}</el-tag>
+          <el-tag
+            size="small"
+            type="success"
+            v-if="order.pickup_method === 'pickup'"
+            >自取</el-tag
+          >
+          <el-tag
+            size="small"
+            type="warning"
+            v-if="order.pickup_method === 'delivery'"
+            >宅配</el-tag
+          >
+          <el-tag size="small" type="primary" v-if="order.bring_own_bag"
+            >自備袋</el-tag
+          >
         </div>
       </div>
-    </div>
 
-    <!-- 備註 -->
-    <div v-if="viewMode === 'detailed' && order.note" class="card-note">
-      <span class="note-label">備註</span>{{ order.note }}
-    </div>
+      <!-- 訂購明細 -->
+      <div v-if="viewMode === 'detailed'" class="card-items">
+        <div class="items-label">
+          <span>訂購明細</span>
+          <el-button
+            type="primary"
+            icon="edit"
+            link
+            size="small"
+            @click="orderDetail.visible = true"
+          >
+            查看詳情
+          </el-button>
+        </div>
+        <div class="items-list">
+          <div v-for="(item, idx) in order.items" :key="idx" class="item-row">
+            <span class="item-name">
+              {{ item.product_name }}
+              <el-tag v-if="item.is_sliced" size="small">切</el-tag>
+            </span>
+            <span class="item-qty">× {{ item.quantity }}</span>
+            <span class="item-price">{{ $formatPrice(item.line_total) }}</span>
+          </div>
+        </div>
+      </div>
 
-    <!-- 底部：總金額 -->
-    <div class="card-footer">
-      <div class="order-total">
-        <span class="total-label">合計</span>
-        <span class="total-amount">{{ $formatPrice(order.total_amount) }}</span>
+      <!-- 備註 -->
+      <div v-if="viewMode === 'detailed' && order.note" class="card-note">
+        <span class="note-label">備註</span>{{ order.note }}
+      </div>
+
+      <!-- 底部：總金額 -->
+      <div class="card-footer">
+        <div class="order-total">
+          <span class="total-label">合計</span>
+          <span class="total-amount">{{
+            $formatPrice(order.total_amount)
+          }}</span>
+        </div>
+      </div>
+
+      <!-- 操作按鈕 -->
+      <div class="card-actions" @click.stop>
+        <template v-if="order.status === 'PLACED'">
+          <el-button
+            size="small"
+            plain
+            class="btn-cancel"
+            @click="updateStatus('CANCELLED')"
+            >取消</el-button
+          >
+          <el-button
+            type="success"
+            class="btn-complete"
+            @click="updateStatus('COMPLETED')"
+            >✓ 完成取貨</el-button
+          >
+        </template>
+        <el-button
+          v-if="order.status === 'COMPLETED' || order.status === 'CANCELLED'"
+          plain
+          size="small"
+          style="flex: 1"
+          @click="updateStatus('PLACED')"
+          >復原為已下單</el-button
+        >
       </div>
     </div>
-
-    <!-- 操作按鈕 -->
-    <div class="card-actions" @click.stop>
-      <template v-if="order.status === 'PLACED'">
-        <el-button
-          size="small"
-          plain
-          class="btn-cancel"
-          @click="updateStatus('CANCELLED')"
-          >取消</el-button
-        >
-        <el-button
-          type="success"
-          class="btn-complete"
-          @click="updateStatus('COMPLETED')"
-          >✓ 完成取貨</el-button
-        >
-      </template>
-      <el-button
-        v-if="order.status === 'COMPLETED' || order.status === 'CANCELLED'"
-        plain
-        size="small"
-        style="flex: 1"
-        @click="updateStatus('PLACED')"
-        >復原為已下單</el-button
-      >
-    </div>
-  </div>
   </template>
 
   <!-- 訂購明細模態框（兩種模式共用） -->
@@ -351,7 +372,7 @@ $bg-subtle: #faf7f4;
 
   // ── 客戶資訊 ─────────────────────────────
   .card-customer {
-    padding: 2px 14px 10px;
+    padding: 0px 14px 10px;
     border-bottom: 1px solid $border;
 
     .customer-name {
@@ -543,9 +564,15 @@ $bg-subtle: #faf7f4;
     flex-shrink: 0;
   }
 
-  &.status-placed .row-bar   { background: var(--color-primary); }
-  &.status-completed .row-bar { background: #16a34a; }
-  &.status-cancelled .row-bar { background: #d1d5db; }
+  &.status-placed .row-bar {
+    background: var(--color-primary);
+  }
+  &.status-completed .row-bar {
+    background: #16a34a;
+  }
+  &.status-cancelled .row-bar {
+    background: #d1d5db;
+  }
 
   .row-body {
     display: flex;
@@ -563,8 +590,16 @@ $bg-subtle: #faf7f4;
     flex-shrink: 0;
     min-width: 68px;
 
-    .order-num { font-family: "Courier New", monospace; font-size: 11px; color: $text-muted; }
-    .num-main  { color: $text-primary; font-weight: 700; font-size: 13px; }
+    .order-num {
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+      color: $text-muted;
+    }
+    .num-main {
+      color: $text-primary;
+      font-weight: 700;
+      font-size: 13px;
+    }
     .status-chip {
       padding: 2px 8px;
       border-radius: 8px;
@@ -581,8 +616,17 @@ $bg-subtle: #faf7f4;
     min-width: 120px;
     max-width: 180px;
 
-    .customer-name { font-size: 15px; font-weight: 700; color: $text-primary; }
-    .customer-sub  { font-size: 12px; color: $text-secondary; margin-top: 2px; white-space: nowrap; }
+    .customer-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: $text-primary;
+    }
+    .customer-sub {
+      font-size: 12px;
+      color: $text-secondary;
+      margin-top: 2px;
+      white-space: nowrap;
+    }
   }
 
   .col-tags {
@@ -601,7 +645,9 @@ $bg-subtle: #faf7f4;
     text-overflow: ellipsis;
     white-space: nowrap;
 
-    .row-note { color: #d97706; }
+    .row-note {
+      color: #d97706;
+    }
   }
 
   .col-total {
@@ -618,7 +664,9 @@ $bg-subtle: #faf7f4;
     gap: 6px;
     flex-shrink: 0;
 
-    .el-button { margin: 0; }
+    .el-button {
+      margin: 0;
+    }
   }
 }
 
@@ -641,6 +689,7 @@ $bg-subtle: #faf7f4;
     .col-order {
       flex-direction: row;
       align-items: center;
+      justify-content: flex-end;
       gap: 8px;
       min-width: unset;
       flex: 1;
@@ -649,9 +698,16 @@ $bg-subtle: #faf7f4;
     .col-customer {
       max-width: unset;
       flex: 1;
+      order: -1;
     }
 
-    .col-tags { width: 100%; }
+    .col-order {
+      order: 0;
+    }
+
+    .col-tags {
+      width: 100%;
+    }
 
     .col-items {
       width: 100%;
@@ -672,7 +728,9 @@ $bg-subtle: #faf7f4;
     min-height: 0;
     height: auto;
 
-    .card-items { flex: 0; }
+    .card-items {
+      flex: 0;
+    }
   }
 }
 </style>
