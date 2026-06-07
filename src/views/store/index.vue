@@ -187,9 +187,12 @@ const hasDelivery = computed(
           </div>
           <div v-if="shop.phone" class="info-row">
             <span class="info-row__label">電話</span>
-            <a :href="`tel:${shop.phone}`" class="info-row__link">{{
-              shop.phone
-            }}</a>
+            <span class="info-row__phone">
+              {{ shop.phone }}
+              <a :href="`tel:${shop.phone}`" class="call-btn" title="撥打電話">
+                <i class="bx bx-phone-call"></i>
+              </a>
+            </span>
           </div>
           <div
             v-if="shop.lineUrl || shop.facebookUrl || shop.instagramUrl"
@@ -413,7 +416,7 @@ const hasDelivery = computed(
         </button>
       </div>
       <div class="bottom-bar__powered">
-        由 <a href="/" target="_blank" rel="noopener">Prelo</a> 提供服務
+        由 <a href="https://prelo.tw" target="_blank" rel="noopener">Prelo</a> 提供服務
       </div>
     </div>
   </div>
@@ -580,7 +583,7 @@ const hasDelivery = computed(
 /* Info rows */
 .info-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
   font-size: 14px;
   color: #2f2a25;
@@ -605,6 +608,13 @@ const hasDelivery = computed(
     &:active {
       color: var(--color-primary);
     }
+  }
+
+  &__phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1;
   }
 
   &__address {
@@ -658,6 +668,24 @@ const hasDelivery = computed(
     );
     color: #fff;
   }
+}
+
+.call-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: #e8f5ee;
+  color: #1e7a48;
+  font-size: 14px;
+  flex-shrink: 0;
+  text-decoration: none;
+  transition: background 0.15s;
+
+  &:hover { background: #d0f0e0; }
+  &:active { background: #b0e8cc; }
 }
 
 .map-link {
@@ -850,7 +878,6 @@ const hasDelivery = computed(
   background: var(--color-primary);
   color: #fff;
   font-size: 15px;
-  font-weight: 700;
   letter-spacing: 0.03em;
   cursor: pointer;
   transition:

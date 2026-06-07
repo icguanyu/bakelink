@@ -42,6 +42,7 @@ const selectDate = (date) => emit("select", date);
           'is-today': schedule.date === today,
           'is-other-month': !schedule.isCurrentMonth,
           'has-schedule': schedule.hasSchedule,
+          'is-announced': schedule.status === 'ANNOUNCED',
         }"
         @click="selectDate(schedule.date)"
       >
@@ -140,6 +141,10 @@ const selectDate = (date) => emit("select", date);
     justify-content: center;
   }
 
+  &.is-announced:not(.is-selected) {
+    border-color: #a0b4e8;
+  }
+
   &.is-other-month {
     opacity: 0.25;
     pointer-events: none;
@@ -189,6 +194,16 @@ const selectDate = (date) => emit("select", date);
   &.status {
     background: #fef3c7;
     color: #92400e;
+
+    &.status--ANNOUNCED {
+      background: #eef2ff;
+      color: #6080d0;
+    }
+
+    &.status--OPEN {
+      background: #e0f7ec;
+      color: #1a7a45;
+    }
 
     &.status--CLOSED {
       background: #ede7df;
@@ -251,17 +266,21 @@ const selectDate = (date) => emit("select", date);
     display: none;
   }
 
-  // 有排程時在手機上顯示一個小藍點
+  // 有排程時在手機上顯示一個小點
   .cal-cell.has-schedule .cell-body {
     display: flex;
     &::before {
       content: "";
-      width: 4px;
-      height: 4px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: #fe904d;
       display: block;
     }
+  }
+
+  .cal-cell.has-schedule.is-announced .cell-body::before {
+    background: #6080d0;
   }
 
   .cell-badge {

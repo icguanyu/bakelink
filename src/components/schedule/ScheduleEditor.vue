@@ -129,6 +129,7 @@ const needsStartTime = computed(
   () => form.status === "OPEN" || form.status === "ANNOUNCED",
 );
 const needsEndTime = computed(() => form.status === "OPEN");
+const canHaveEndTime = computed(() => form.status === "OPEN" || form.status === "ANNOUNCED");
 const needsOrderTime = needsEndTime; // 向後相容（saveEditor / beforeSave 用）
 
 const timelineActive = computed(() => {
@@ -211,7 +212,7 @@ const saveEditor = async () => {
   if (needsStartTime.value && orderStartDate.value && orderStartTime.value) {
     form.order_start_at = `${orderStartDate.value} ${orderStartTime.value}:00`;
   }
-  if (needsEndTime.value && orderEndDate.value) {
+  if (canHaveEndTime.value && orderEndDate.value) {
     const endTime = orderEndTime.value || "00:00";
     form.order_end_at = `${orderEndDate.value} ${endTime}:00`;
   }
@@ -385,7 +386,7 @@ const deleteSchedule = async () => {
               <el-button link @click="setOrderStartNow">設為現在</el-button>
             </p>
           </el-form-item>
-          <el-form-item v-if="needsEndTime" label="接單截止時間" class="field">
+          <el-form-item v-if="canHaveEndTime" label="接單截止時間" class="field">
             <div class="datetime-inputs">
               <el-date-picker
                 v-model="orderEndDate"
@@ -405,7 +406,7 @@ const deleteSchedule = async () => {
         </el-form>
 
         <!-- 時間軸 -->
-        <el-steps :active="timelineActive" simple class="schedule-timeline">
+        <el-steps v-if="form.status !== 'DRAFT'" :active="timelineActive" simple class="schedule-timeline">
           <el-step>
             <template #title>
               <div class="tl-step">

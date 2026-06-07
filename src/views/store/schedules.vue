@@ -30,16 +30,20 @@ const fetchSchedules = async () => {
 onMounted(fetchSchedules);
 watch(currentMonth, fetchSchedules);
 
-const prevMonth = () => { currentMonth.value = currentMonth.value.subtract(1, "month"); };
-const nextMonth = () => { currentMonth.value = currentMonth.value.add(1, "month"); };
+const prevMonth = () => {
+  currentMonth.value = currentMonth.value.subtract(1, "month");
+};
+const nextMonth = () => {
+  currentMonth.value = currentMonth.value.add(1, "month");
+};
 
-const monthLabel = computed(() =>
-  currentMonth.value.format("YYYY 年 M 月")
-);
+const monthLabel = computed(() => currentMonth.value.format("YYYY 年 M 月"));
 
 const scheduleMap = computed(() => {
   const map = {};
-  schedules.value.forEach((s) => { map[s.schedule_date] = s; });
+  schedules.value.forEach((s) => {
+    map[s.schedule_date] = s;
+  });
   return map;
 });
 
@@ -62,8 +66,8 @@ const calendarCells = computed(() => {
 // API 已按月篩好，直接排序即可
 const monthSchedules = computed(() =>
   [...schedules.value].sort((a, b) =>
-    a.schedule_date.localeCompare(b.schedule_date)
-  )
+    a.schedule_date.localeCompare(b.schedule_date),
+  ),
 );
 
 const statusConfig = {
@@ -97,8 +101,7 @@ const goOrder = (schedule) => {
   });
 };
 
-const formatDeadline = (iso) =>
-  dayjs(iso).format("M/D HH:mm");
+const formatDeadline = (iso) => dayjs(iso).format("M/D HH:mm");
 
 const addToCalendar = (s) => {
   const shopName = route.params.slug;
@@ -109,11 +112,11 @@ const addToCalendar = (s) => {
   if (s.order_start_at) {
     const dt = dayjs(s.order_start_at);
     dtStart = `DTSTART:${dt.format("YYYYMMDDTHHmmss")}`;
-    dtEnd   = `DTEND:${dt.add(30, "minute").format("YYYYMMDDTHHmmss")}`;
+    dtEnd = `DTEND:${dt.add(30, "minute").format("YYYYMMDDTHHmmss")}`;
   } else {
     const dateStr = dayjs(s.schedule_date).format("YYYYMMDD");
     dtStart = `DTSTART;VALUE=DATE:${dateStr}`;
-    dtEnd   = `DTEND;VALUE=DATE:${dateStr}`;
+    dtEnd = `DTEND;VALUE=DATE:${dateStr}`;
   }
 
   const ics = [
@@ -170,7 +173,11 @@ const addToCalendar = (s) => {
       <!-- 月曆 -->
       <div class="calendar" :class="{ 'calendar--loading': isLoading }">
         <div class="calendar__week-header">
-          <span v-for="d in ['日','一','二','三','四','五','六']" :key="d">{{ d }}</span>
+          <span
+            v-for="d in ['日', '一', '二', '三', '四', '五', '六']"
+            :key="d"
+            >{{ d }}</span
+          >
         </div>
         <div class="calendar__grid">
           <div
@@ -180,8 +187,12 @@ const addToCalendar = (s) => {
             :class="{
               'cal-cell--empty': !cell,
               'cal-cell--today': cell && cell.isSame(today, 'day'),
-              'cal-cell--open': cell && scheduleMap[cell.format('YYYY-MM-DD')]?.status === 'OPEN',
-              'cal-cell--announced': cell && scheduleMap[cell.format('YYYY-MM-DD')]?.status === 'ANNOUNCED',
+              'cal-cell--open':
+                cell &&
+                scheduleMap[cell.format('YYYY-MM-DD')]?.status === 'OPEN',
+              'cal-cell--announced':
+                cell &&
+                scheduleMap[cell.format('YYYY-MM-DD')]?.status === 'ANNOUNCED',
             }"
           >
             <span v-if="cell" class="cal-cell__day">{{ cell.date() }}</span>
@@ -211,14 +222,37 @@ const addToCalendar = (s) => {
         <div v-for="n in 2" :key="n" class="schedule-card">
           <el-skeleton animated>
             <template #template>
-              <div style="display:flex;gap:14px;align-items:flex-start">
-                <el-skeleton-item variant="rect" style="width:48px;height:52px;border-radius:8px;flex-shrink:0" />
-                <div style="flex:1;display:flex;flex-direction:column;gap:8px">
-                  <el-skeleton-item variant="text" style="width:60%" />
-                  <el-skeleton-item variant="text" style="width:40%" />
+              <div style="display: flex; gap: 14px; align-items: flex-start">
+                <el-skeleton-item
+                  variant="rect"
+                  style="
+                    width: 48px;
+                    height: 52px;
+                    border-radius: 8px;
+                    flex-shrink: 0;
+                  "
+                />
+                <div
+                  style="
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                  "
+                >
+                  <el-skeleton-item variant="text" style="width: 60%" />
+                  <el-skeleton-item variant="text" style="width: 40%" />
                 </div>
               </div>
-              <el-skeleton-item variant="rect" style="width:100%;height:36px;border-radius:8px;margin-top:4px" />
+              <el-skeleton-item
+                variant="rect"
+                style="
+                  width: 100%;
+                  height: 36px;
+                  border-radius: 8px;
+                  margin-top: 4px;
+                "
+              />
             </template>
           </el-skeleton>
         </div>
@@ -232,97 +266,116 @@ const addToCalendar = (s) => {
 
       <!-- 行程卡片 -->
       <template v-else>
-      <div
-        v-for="s in monthSchedules"
-        :key="s.id"
-        class="schedule-card"
-        :class="{
-          'schedule-card--announced': s.status === 'ANNOUNCED',
-          'schedule-card--past': isPastSchedule(s),
-        }"
-      >
-        <!-- 已過去：可收合的標題列 -->
         <div
-          v-if="isPastSchedule(s)"
-          class="schedule-card__collapsed"
-          @click="toggleExpand(s.id)"
+          v-for="s in monthSchedules"
+          :key="s.id"
+          class="schedule-card"
+          :class="{
+            'schedule-card--announced': s.status === 'ANNOUNCED',
+            'schedule-card--past': isPastSchedule(s),
+          }"
         >
-          <div class="schedule-card__collapsed-left">
-            <span class="schedule-card__collapsed-date">
-              {{ dayjs(s.schedule_date).format("M/D") }}
-              （週{{ ["日","一","二","三","四","五","六"][dayjs(s.schedule_date).day()] }}）
-            </span>
-            <span class="badge badge--closed">已結單</span>
-          </div>
-          <i
-            class="bx schedule-card__collapsed-chevron"
-            :class="expandedIds.has(s.id) ? 'bx-chevron-up' : 'bx-chevron-down'"
-          ></i>
-        </div>
-
-        <!-- 未過去：完整標題 -->
-        <div v-else class="schedule-card__head">
-          <div class="schedule-card__date">
-            <span class="schedule-card__day">{{ dayjs(s.schedule_date).date() }}</span>
-            <span class="schedule-card__month">{{ dayjs(s.schedule_date).format("M 月") }}</span>
-          </div>
-          <div class="schedule-card__info">
-            <div class="schedule-card__top">
-              <span class="schedule-card__weekday">
-                週{{ ["日","一","二","三","四","五","六"][dayjs(s.schedule_date).day()] }}
-              </span>
-              <span class="badge" :class="getBadge(s).class">
-                {{ getBadge(s).label }}
-              </span>
-            </div>
-            <div v-if="s.status !== 'ANNOUNCED'" class="schedule-card__deadline">
-              截單：{{ formatDeadline(s.order_end_at) }}
-            </div>
-            <button v-if="s.status === 'ANNOUNCED' && s.order_start_at" class="cal-btn" @click.stop="addToCalendar(s)">
-              <i class="bx bx-calendar-plus"></i> 加入行事曆提醒
-            </button>
-            <div v-if="s.note" class="schedule-card__note">
-              <i class="bx bx-info-circle"></i> {{ s.note }}
-            </div>
-          </div>
-        </div>
-
-        <!-- 展開內容（已過去時需手動展開；未過去時永遠顯示） -->
-        <template v-if="!isPastSchedule(s) || expandedIds.has(s.id)">
-          <!-- 品項列表 -->
-          <div v-if="s.items?.length" class="schedule-card__items">
-            <div
-              v-for="item in s.items"
-              :key="item.id"
-              class="item-chip"
-            >
-              <div class="item-chip__main">
-                <span class="item-chip__name">{{ item.product_name }}</span>
-                <span class="item-chip__price">${{ item.unit_price }}</span>
-              </div>
-              <span
-                v-if="item.sales_limit > 0 && !isPastSchedule(s)"
-                class="item-chip__stock"
-                :class="{ 'item-chip__stock--low': item.remaining <= 5 }"
-              >
-                限量 {{ item.remaining }}
-              </span>
-            </div>
-          </div>
-          <div v-else class="schedule-card__items-empty">品項即將公告</div>
-
-          <el-button
-            v-if="s.status === 'OPEN'"
-            type="primary"
-            class="schedule-card__btn"
-            @click="goOrder(s)"
+          <!-- 已過去：可收合的標題列 -->
+          <div
+            v-if="isPastSchedule(s)"
+            class="schedule-card__collapsed"
+            @click="toggleExpand(s.id)"
           >
-            我要訂購
-          </el-button>
-        </template>
-      </div>
+            <div class="schedule-card__collapsed-left">
+              <span class="schedule-card__collapsed-date">
+                {{ dayjs(s.schedule_date).format("M/D") }}
+                （週{{
+                  ["日", "一", "二", "三", "四", "五", "六"][
+                    dayjs(s.schedule_date).day()
+                  ]
+                }}）
+              </span>
+              <span class="badge badge--closed">已結單</span>
+            </div>
+            <i
+              class="bx schedule-card__collapsed-chevron"
+              :class="
+                expandedIds.has(s.id) ? 'bx-chevron-up' : 'bx-chevron-down'
+              "
+            ></i>
+          </div>
+
+          <!-- 未過去：完整標題 -->
+          <div v-else class="schedule-card__head">
+            <div class="schedule-card__date">
+              <span class="schedule-card__day">{{
+                dayjs(s.schedule_date).date()
+              }}</span>
+              <span class="schedule-card__month">{{
+                dayjs(s.schedule_date).format("M 月")
+              }}</span>
+            </div>
+            <div class="schedule-card__info">
+              <div class="schedule-card__top">
+                <span class="schedule-card__weekday">
+                  週{{
+                    ["日", "一", "二", "三", "四", "五", "六"][
+                      dayjs(s.schedule_date).day()
+                    ]
+                  }}
+                </span>
+                <span class="badge" :class="getBadge(s).class">
+                  {{ getBadge(s).label }}
+                </span>
+              </div>
+              <div
+                v-if="s.status !== 'ANNOUNCED'"
+                class="schedule-card__deadline"
+              >
+                截單：{{ formatDeadline(s.order_end_at) }}
+              </div>
+              <div v-if="s.note" class="schedule-card__note">
+                <i class="bx bx-info-circle"></i> {{ s.note }}
+              </div>
+            </div>
+          </div>
+
+          <!-- 展開內容（已過去時需手動展開；未過去時永遠顯示） -->
+          <template v-if="!isPastSchedule(s) || expandedIds.has(s.id)">
+            <!-- 品項列表 -->
+            <div v-if="s.items?.length" class="schedule-card__items">
+              <div v-for="item in s.items" :key="item.id" class="item-chip">
+                <div class="item-chip__main">
+                  <span class="item-chip__name">{{ item.product_name }}</span>
+                  <span class="item-chip__price">${{ item.unit_price }}</span>
+                </div>
+                <span
+                  v-if="item.sales_limit > 0 && !isPastSchedule(s)"
+                  class="item-chip__stock"
+                  :class="{ 'item-chip__stock--low': item.remaining <= 5 }"
+                >
+                  限量 {{ item.remaining }}
+                </span>
+              </div>
+            </div>
+            <div v-else class="schedule-card__items-empty">品項即將公告</div>
+
+            <el-button
+              v-if="s.status === 'OPEN'"
+              type="primary"
+              class="schedule-card__btn"
+              @click="goOrder(s)"
+            >
+              我要訂購
+            </el-button>
+            <button
+              v-if="s.status === 'ANNOUNCED' && s.order_start_at"
+              class="cal-btn cal-btn--full"
+              @click.stop="addToCalendar(s)"
+            >
+              <i class="bx bx-calendar-plus"></i> 加入行事曆
+            </button>
+          </template>
+        </div>
       </template>
     </div>
+
+    <div class="page-footer">由 <a href="https://prelo.tw" target="_blank" rel="noopener">Prelo</a> 提供服務</div>
   </div>
 </template>
 
@@ -332,6 +385,21 @@ const addToCalendar = (s) => {
   overflow-y: auto;
   background: #f7f3ee;
   padding-bottom: 40px;
+}
+
+.page-footer {
+  text-align: center;
+  padding: 24px 16px 32px;
+  font-size: 12px;
+  color: #c0a898;
+
+  a {
+    font-weight: 700;
+    color: #a08878;
+    text-decoration: none;
+
+    &:hover { text-decoration: underline; }
+  }
 }
 
 /* 月曆載入中淡化 */
@@ -361,7 +429,7 @@ const addToCalendar = (s) => {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     font-size: 20px;
     color: #2f2a25;
   }
@@ -397,7 +465,7 @@ const addToCalendar = (s) => {
   background: #fff;
   border-radius: 8px;
   padding: 10px 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 
   &__btn {
     width: 36px;
@@ -412,7 +480,9 @@ const addToCalendar = (s) => {
     font-size: 20px;
     color: #5c4b3e;
 
-    &:active { background: #ede5dc; }
+    &:active {
+      background: #ede5dc;
+    }
   }
 
   &__label {
@@ -427,7 +497,7 @@ const addToCalendar = (s) => {
   background: #fff;
   border-radius: 8px;
   padding: 16px 12px 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 
   &__week-header {
     display: grid;
@@ -443,8 +513,12 @@ const addToCalendar = (s) => {
       color: #6b5040;
       letter-spacing: 0.03em;
 
-      &:first-child { color: #e07060; }  /* 日 */
-      &:last-child  { color: #6080c0; }  /* 六 */
+      &:first-child {
+        color: #e07060;
+      } /* 日 */
+      &:last-child {
+        color: #6080c0;
+      } /* 六 */
     }
   }
 
@@ -466,7 +540,9 @@ const addToCalendar = (s) => {
   cursor: default;
   transition: background 0.15s;
 
-  &--empty { pointer-events: none; }
+  &--empty {
+    pointer-events: none;
+  }
 
   &__day {
     font-size: 13px;
@@ -484,14 +560,22 @@ const addToCalendar = (s) => {
   /* 有行程但不是今天 */
   &--open {
     background: #edfaf3;
-    .cal-cell__day { color: #1e7a48; }
-    .cal-cell__dot { background: #2eaa62; }
+    .cal-cell__day {
+      color: #1e7a48;
+    }
+    .cal-cell__dot {
+      background: #2eaa62;
+    }
   }
 
   &--announced {
     background: #eef2ff;
-    .cal-cell__day { color: #3050a0; }
-    .cal-cell__dot { background: #6080d0; }
+    .cal-cell__day {
+      color: #3050a0;
+    }
+    .cal-cell__dot {
+      background: #6080d0;
+    }
   }
 
   /* 今天：品牌黃圈，覆蓋其他背景 */
@@ -514,12 +598,16 @@ const addToCalendar = (s) => {
   /* 今天同時有行程：保留底色 + 黃圈 */
   &--today.cal-cell--open {
     background: #edfaf3;
-    .cal-cell__dot { background: #2eaa62; }
+    .cal-cell__dot {
+      background: #2eaa62;
+    }
   }
 
   &--today.cal-cell--announced {
     background: #eef2ff;
-    .cal-cell__dot { background: #6080d0; }
+    .cal-cell__dot {
+      background: #6080d0;
+    }
   }
 }
 
@@ -542,8 +630,12 @@ const addToCalendar = (s) => {
     height: 8px;
     border-radius: 50%;
 
-    &--open { background: #2eaa62; }
-    &--announced { background: #6080d0; }
+    &--open {
+      background: #2eaa62;
+    }
+    &--announced {
+      background: #6080d0;
+    }
   }
 }
 
@@ -563,8 +655,15 @@ const addToCalendar = (s) => {
   padding: 40px 0;
   color: #7a5040;
 
-  i { font-size: 40px; display: block; margin-bottom: 8px; }
-  p { font-size: 14px; margin: 0; }
+  i {
+    font-size: 40px;
+    display: block;
+    margin-bottom: 8px;
+  }
+  p {
+    font-size: 14px;
+    margin: 0;
+  }
 }
 
 /* 行程卡片 */
@@ -572,7 +671,7 @@ const addToCalendar = (s) => {
   background: #fff;
   border-radius: 8px;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -595,7 +694,9 @@ const addToCalendar = (s) => {
     cursor: pointer;
     user-select: none;
     padding: 2px 0;
-    &:active { opacity: 0.6; }
+    &:active {
+      opacity: 0.6;
+    }
   }
 
   &__collapsed-left {
@@ -678,7 +779,10 @@ const addToCalendar = (s) => {
     align-items: center;
     gap: 4px;
 
-    i { font-size: 13px; color: var(--color-primary); }
+    i {
+      font-size: 13px;
+      color: var(--color-primary);
+    }
   }
 
   &__items {
@@ -716,15 +820,31 @@ const addToCalendar = (s) => {
   transition: background 0.15s;
   font-family: inherit;
 
-  i { font-size: 14px; }
-  &:hover { background: #ddeef8; }
-  &:active { background: #cce4f4; }
+  i {
+    font-size: 14px;
+  }
+
+  &--full {
+    width: 100%;
+    justify-content: center;
+    height: 44px;
+    font-size: 15px;
+    border-radius: 8px;
+    margin-top: 0;
+    padding: 0;
+  }
+
+  &:hover {
+    background: #ddeef8;
+  }
+  &:active {
+    background: #cce4f4;
+  }
 }
 
 /* Badge */
 .badge {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12px;
   padding: 3px 8px;
   border-radius: 6px;
 
@@ -756,7 +876,7 @@ const addToCalendar = (s) => {
   padding: 8px 12px;
   width: 100%;
 
-&__main {
+  &__main {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -786,7 +906,9 @@ const addToCalendar = (s) => {
     white-space: nowrap;
     flex-shrink: 0;
 
-    &--low { color: #d06020; }
+    &--low {
+      color: #d06020;
+    }
   }
 }
 </style>

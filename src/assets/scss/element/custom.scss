@@ -14,19 +14,19 @@
     .el-message__icon { color: #4ca16e; }
   }
 
-  &.el-message--warning {
-    --el-message-bg-color: #fdf6ec;
-    --el-message-border-color: #c08a50;
-    --el-message-text-color: #7a5020;
-    .el-message__icon { color: #c08a50; }
-  }
+  // &.el-message--warning {
+  //   --el-message-bg-color: #fdf6ec;
+  //   --el-message-border-color: #c08a50;
+  //   --el-message-text-color: #7a5020;
+  //   .el-message__icon { color: #c08a50; }
+  // }
 
-  &.el-message--error {
-    --el-message-bg-color: #fdf2f0;
-    --el-message-border-color: #c06050;
-    --el-message-text-color: #7a2a20;
-    .el-message__icon { color: #c06050; }
-  }
+  // &.el-message--error {
+  //   --el-message-bg-color: #fdf2f0;
+  //   --el-message-border-color: #c06050;
+  //   --el-message-text-color: #7a2a20;
+  //   .el-message__icon { color: #c06050; }
+  // }
 
   &.el-message--info {
     --el-message-bg-color: #f5f1ed;
