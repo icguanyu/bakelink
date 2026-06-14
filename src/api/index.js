@@ -1,4 +1,5 @@
 import axios from "axios";
+import router from "@/router";
 const token = localStorage.getItem("prelo-token");
 
 let isShowAlert = false; // 避免顯示太多次 ElMessageBox
@@ -16,6 +17,13 @@ axios.interceptors.response.use(
   (err) => {
     console.log("err.response", err.response);
     if (err && err.response) {
+      if (err.response.status === 401) {
+        localStorage.removeItem("prelo-token");
+        delete axios.defaults.headers.common["Authorization"];
+        router.push("/login");
+        return Promise.reject(err);
+      }
+
       const errorMessage = err.response.data?.message || "發生錯誤，請重試";
       const errorType = err.response.status >= 500 ? "error" : "warning";
 

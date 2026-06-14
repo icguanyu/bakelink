@@ -76,12 +76,16 @@ const cartItems = computed(() =>
       quantity: cart[item.id].quantity,
       is_sliced: cart[item.id].is_sliced,
       unit_price: item.unit_price,
+      slice_price: item.slice_price,
       name: item.product_name,
     })),
 );
 
 const totalAmount = computed(() =>
-  cartItems.value.reduce((sum, i) => sum + i.unit_price * i.quantity, 0),
+  cartItems.value.reduce((sum, i) => {
+    const price = i.is_sliced && i.slice_price ? i.slice_price : i.unit_price;
+    return sum + price * i.quantity;
+  }, 0),
 );
 
 const isDelivery = computed(() => form.pickup_method === "DELIVERY");
@@ -319,7 +323,12 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
               </div>
               <div class="item-info">
                 <div class="item-name">{{ item.product_name }}</div>
-                <div class="item-price">{{ fmt(item.unit_price) }}</div>
+                <div class="item-price">
+                  {{ fmt(item.unit_price) }}
+                  <span v-if="item.is_sliceable && item.slice_price" class="item-slice-price">
+                    切片 {{ fmt(item.slice_price) }}
+                  </span>
+                </div>
                 <div v-if="item.sales_limit != null && item.remaining != null && item.remaining <= 0" class="item-remaining item-remaining--sold">
                   售完
                 </div>
@@ -848,6 +857,16 @@ $_primary-hex: 'c8944a';
   font-weight: 700;
   color: var(--color-primary);
   margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.item-slice-price {
+  font-size: 11px;
+  font-weight: 500;
+  color: #a09080;
 }
 
 .item-remaining {

@@ -128,7 +128,10 @@ onMounted(() => {
             <el-icon @click="editProduct.open(item.id)"><MoreFilled /></el-icon>
           </div>
           <p class="description text-ellipsis-2">{{ item.description }}</p>
-          <span class="price">${{ item.price }}</span>
+          <div class="price-row">
+            <span class="price">${{ item.price }}</span>
+            <span v-if="item.is_sliceable && item.slice_price" class="slice-price">切片 ${{ item.slice_price }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -342,12 +345,23 @@ onMounted(() => {
       line-height: 1.4;
     }
 
+    .price-row {
+      margin-top: auto;
+      display: flex;
+      align-items: baseline;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
     .price {
       font-size: 1.125rem;
-      margin-top: auto;
       font-weight: 700;
       color: #1f345f;
-      text-align: right;
+    }
+    .slice-price {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--el-text-color-secondary);
     }
   }
 }

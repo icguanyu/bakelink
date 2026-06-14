@@ -1,6 +1,6 @@
 <script setup>
 import { ProductCategory } from "@/api/products";
-const emit = defineEmits(["save", "updated"]);
+const emit = defineEmits(["save", "updated", "close"]);
 const loading = ref(false);
 const visible = ref(false);
 const categories = ref([]);
@@ -106,6 +106,7 @@ const initProductCategories = async () => {
     destroy-on-close
     :close-on-click-modal="false"
     @opened="initProductCategories"
+    @closed="emit('close')"
   >
     <div class="layout">
       <section class="list" v-loading="loading">

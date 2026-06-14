@@ -27,6 +27,7 @@ const form = reactive({
   image_urls: [],
   is_active: true,
   is_sliceable: false,
+  slice_price: null,
 });
 
 const open = (id) => {
@@ -41,6 +42,7 @@ const open = (id) => {
     image_urls: [],
     is_active: true,
     is_sliceable: false,
+    slice_price: null,
   });
   nextTick(() => formRef.value?.clearValidate());
   visible.value = true;
@@ -144,7 +146,7 @@ defineExpose({ open, close });
 <template>
   <EditCategory
     ref="editCategoryRef"
-    @updated="selectCategoryRef?.refresh()"
+    @close="selectCategoryRef?.refresh()"
   />
   <el-dialog
     v-model="visible"
@@ -181,7 +183,7 @@ defineExpose({ open, close });
           placeholder="產品簡短介紹"
         />
       </el-form-item>
-      <el-form-item label="成分表" prop="ingredients">
+      <el-form-item label="成分介紹" prop="ingredients">
         <el-input
           v-model="form.ingredients"
           type="textarea"
@@ -190,7 +192,10 @@ defineExpose({ open, close });
         />
       </el-form-item>
       <el-form-item label="可切片" prop="is_sliceable">
-        <el-switch v-model="form.is_sliceable" />
+        <el-switch v-model="form.is_sliceable" @change="(v) => { if (v) form.slice_price = form.price; else form.slice_price = null }" />
+      </el-form-item>
+      <el-form-item v-if="form.is_sliceable" label="切片售價" prop="slice_price" :required="form.is_sliceable">
+        <el-input v-model.number="form.slice_price" style="width: 100%" placeholder="切片售價(整份)" />
       </el-form-item>
       <el-form-item label="狀態" prop="is_active">
         <SelectProductStatus v-model="form.is_active" :placeholder="'選擇產品狀態'" />

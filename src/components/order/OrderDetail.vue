@@ -198,10 +198,11 @@ const handleDeleteOrder = async () => {
 };
 
 const total_amount = computed(() => {
-  return form.items.reduce(
-    (total, item) => total + item.unit_price * item.quantity,
-    0,
-  );
+  return form.items.reduce((total, item) => {
+    const product = props.availableItems.find((p) => p.product_id === item.product_id);
+    const price = item.is_sliced && product?.slice_price ? product.slice_price : item.unit_price;
+    return total + price * item.quantity;
+  }, 0);
 });
 
 defineExpose({ visible });
@@ -342,7 +343,10 @@ defineExpose({ visible });
             <div class="item-info">
               <div class="item-name">{{ product.product_name }}</div>
               <div class="item-price">
-                {{ $formatPrice(product.unit_price) }}
+                <span>{{ $formatPrice(product.unit_price) }}</span>
+                <span v-if="product.is_sliceable && product.slice_price" class="slice-price-hint">
+                  切片 {{ $formatPrice(product.slice_price) }}
+                </span>
               </div>
             </div>
 
@@ -583,6 +587,15 @@ defineExpose({ visible });
           .item-price {
             font-weight: 700;
             color: #1c2345;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            .slice-price-hint {
+              font-size: 12px;
+              font-weight: 500;
+              color: var(--el-text-color-secondary);
+            }
           }
         }
 
