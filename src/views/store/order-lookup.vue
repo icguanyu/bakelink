@@ -1,6 +1,7 @@
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import StoreTopbar from "@/components/store/StoreTopbar.vue";
 import dayjs from "dayjs";
 import { Shop } from "@/api/shop";
 import { ElMessage } from "element-plus";
@@ -13,21 +14,37 @@ const isLoading = ref(false);
 const orders = ref(null); // null = 尚未查詢，[] = 查詢過但無結果
 const expandedIds = ref(new Set()); // 過去訂單手動展開的 id 集合
 
-const form = reactive({ phone: "" });
+const STORAGE_KEY = "prelo-lookup-phone";
+const form = reactive({ phone: "", rememberMe: false });
+
+onMounted(() => {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    form.phone = saved;
+    form.rememberMe = true;
+  }
+});
 
 const statusLabel = { PLACED: "已下單", COMPLETED: "已完成", CANCELLED: "已取消" };
 const statusColor = { PLACED: "var(--color-primary)", COMPLETED: "#5a9672", CANCELLED: "#c06050" };
 const paymentLabel = { cash: "現金", linepay: "Line Pay", bank: "銀行轉帳", card: "信用卡" };
-const pickupLabel = { pickup: "門市自取", delivery: "宅配" };
+const pickupLabel = { pickup: "自取", delivery: "宅配" };
 
 const lookup = async () => {
   if (!form.phone.trim()) { ElMessage.warning("請輸入電話"); return; }
+
+  if (form.rememberMe) {
+    localStorage.setItem(STORAGE_KEY, form.phone.trim());
+  } else {
+    localStorage.removeItem(STORAGE_KEY);
+  }
 
   isLoading.value = true;
   orders.value = null;
   expandedIds.value = new Set();
   try {
     const res = await Shop.GetOrdersByPhone(slug, form.phone.trim());
+    console.log("查詢訂單", res);
     orders.value = res.data?.data ?? [];
   } catch {
     ElMessage.error("查詢失敗，請稍後再試");
@@ -53,14 +70,7 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
 <template>
   <div class="lookup-page">
 
-    <!-- 頂部導覽 -->
-    <div class="topbar">
-      <button class="topbar__back" @click="router.back()">
-        <i class="bx bx-chevron-left"></i>
-      </button>
-      <span class="topbar__title">查詢訂單</span>
-      <span class="topbar__spacer"></span>
-    </div>
+    <StoreTopbar title="查詢訂單" />
 
     <div class="lookup-body">
 
@@ -77,6 +87,11 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
             @keyup.enter="lookup"
           />
         </div>
+        <label class="remember-me">
+          <input type="checkbox" v-model="form.rememberMe" />
+          <span class="remember-me__check"></span>
+          <span class="remember-me__label">記住我的電話號碼</span>
+        </label>
         <button class="query-btn" :disabled="isLoading" @click="lookup">
           <span v-if="isLoading">查詢中...</span>
           <span v-else><i class="bx bx-search-alt"></i> 查詢</span>
@@ -105,7 +120,9 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
           >
             <div class="order-header-left">
               <div class="order-no">{{ order.order_no }}</div>
-              <div v-if="!isPast(order)" class="order-date-chip">{{ fmtDate(order.schedule_date) }}</div>
+              <span v-if="order.is_venue" class="venue-chip">
+                <i class="bx bxs-truck"></i> 巡迴
+              </span>
             </div>
             <div class="order-header-right">
               <span
@@ -114,7 +131,6 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
               >
                 {{ statusLabel[order.status] ?? order.status }}
               </span>
-              <span v-if="!isPast(order)" class="order-total-mini">{{ fmt(order.total_amount) }}</span>
               <i
                 v-if="isPast(order)"
                 class="bx order-chevron"
@@ -127,8 +143,34 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
           <template v-if="isExpanded(order)">
             <div class="divider" />
 
+            <!-- 巡迴場地 -->
+            <a
+              v-if="order.is_venue"
+              class="venue-banner"
+              :href="`https://maps.google.com/?q=${encodeURIComponent(order.venue_address || order.venue_name)}`"
+              target="_blank"
+              rel="noopener"
+            >
+              <div class="venue-banner__icon-wrap">
+                <img src="https://www.google.com/s2/favicons?domain=maps.google.com&sz=32" alt="Google Maps" />
+              </div>
+              <div class="venue-banner__body">
+                <span class="venue-banner__name">
+                  {{ order.venue_name }}
+                  <span v-if="order.venue_start && order.venue_end" class="venue-banner__time">{{ order.venue_start }}–{{ order.venue_end }}</span>
+                </span>
+                <span v-if="order.venue_address" class="venue-banner__address">{{ order.venue_address }}</span>
+              </div>
+              <i class="bx bx-chevron-right venue-banner__arrow"></i>
+            </a>
+            <div v-if="order.is_venue" class="divider" />
+
             <!-- 取貨資訊 -->
             <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">取貨日期</span>
+                <span class="info-val">{{ fmtDate(order.schedule_date) }}</span>
+              </div>
               <div class="info-item">
                 <span class="info-label">取貨時間</span>
                 <span class="info-val">{{ order.pickup_time ?? "—" }}</span>
@@ -191,45 +233,6 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
   flex-direction: column;
 }
 
-/* Topbar */
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: #f7f3ee;
-
-  &__back {
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: #fff;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    font-size: 20px;
-    color: #2f2a25;
-    flex-shrink: 0;
-  }
-
-  &__title {
-    flex: 1;
-    text-align: center;
-    font-size: 16px;
-    font-weight: 700;
-    color: #1a120b;
-  }
-
-  &__spacer {
-    width: 36px;
-    flex-shrink: 0;
-  }
-}
 
 /* Body */
 .lookup-body {
@@ -299,6 +302,50 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
 
   &::placeholder { color: #c0b0a0; }
   &:focus { border-color: var(--color-primary); }
+}
+
+.remember-me {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-bottom: 14px;
+
+  input { display: none; }
+
+  &__check {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 1.5px solid #d4b896;
+    background: #fdf8f2;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+
+    .remember-me input:checked + & {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+
+      &::after {
+        content: "";
+        width: 10px;
+        height: 6px;
+        border-left: 2px solid #fff;
+        border-bottom: 2px solid #fff;
+        transform: rotate(-45deg) translate(1px, -1px);
+        display: block;
+      }
+    }
+  }
+
+  &__label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #8a7060;
+  }
 }
 
 .query-btn {
@@ -373,19 +420,7 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
   white-space: nowrap;
 }
 
-.order-date-chip {
-  font-size: 12px;
-  color: #a09080;
-  font-weight: 500;
-  white-space: nowrap;
-}
 
-.order-total-mini {
-  font-size: 13px;
-  font-weight: 700;
-  color: #5c4b3e;
-  white-space: nowrap;
-}
 
 .order-chevron {
   font-size: 18px;
@@ -511,5 +546,89 @@ const fmtDate = (d) => d ? dayjs(d).format("YYYY/MM/DD") : "—";
   font-size: 20px;
   font-weight: 800;
   color: var(--color-primary);
+}
+
+/* 巡迴標記 */
+.venue-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #fef3c7;
+  color: #7a4f00;
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+
+  i { font-size: 12px; }
+}
+
+/* 巡迴場地橫幅 */
+.venue-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fffbeb;
+  border: 1.5px solid #f0d070;
+  border-radius: 10px;
+  padding: 12px 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 2px;
+
+  &:active { background: #fef3c7; }
+
+  &__icon-wrap {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    background: #fff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+
+    img { width: 20px; height: 20px; }
+  }
+
+  &__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #6b4000;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  &__address {
+    font-size: 12px;
+    color: #8a5c10;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__time {
+    font-size: 12px;
+    font-weight: 500;
+    color: #a07820;
+  }
+
+  &__arrow {
+    font-size: 18px;
+    color: #c0a060;
+    flex-shrink: 0;
+  }
 }
 </style>

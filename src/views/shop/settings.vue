@@ -20,7 +20,7 @@ const paymentOptions = [
 ];
 
 const pickupOptions = [
-  { label: "門市自取/面交", value: "pickup" },
+  { label: "自取/面交", value: "pickup" },
   // { label: "宅配", value: "delivery" },
 ];
 

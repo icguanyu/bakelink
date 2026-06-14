@@ -3,6 +3,7 @@ import { ref, computed, watch, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import dayjs from "dayjs";
 import { Shop } from "@/api/shop";
+import StoreTopbar from "@/components/store/StoreTopbar.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -90,7 +91,12 @@ const isPastSchedule = (s) =>
 const getFlowSteps = (s) => [
   { label: "接單中", time: null },
   { label: "結單", time: s.order_end_at ? dayjs(s.order_end_at).format("M/D HH:mm") : null },
-  { label: "取貨", time: s.schedule_date ? dayjs(s.schedule_date).format("M/D") : null },
+  {
+    label: s.is_venue ? "現場取貨" : "到店取貨",
+    time: s.is_venue && s.venue_start
+      ? `${dayjs(s.schedule_date).format("M/D")} ${s.venue_start}${s.venue_end ? "–" + s.venue_end : ""}`
+      : s.schedule_date ? dayjs(s.schedule_date).format("M/D") : null,
+  },
 ];
 const getFlowStepIndex = (s) => {
   if (isPastSchedule(s)) return 2;
@@ -161,14 +167,7 @@ const addToCalendar = (s) => {
 
 <template>
   <div class="schedules-page">
-    <!-- 頂部導覽 -->
-    <div class="topbar">
-      <button class="topbar__back" @click="router.back()">
-        <i class="bx bx-chevron-left"></i>
-      </button>
-      <span class="topbar__title">接單行程</span>
-      <span class="topbar__spacer"></span>
-    </div>
+    <StoreTopbar title="接單行程" />
 
     <div class="content">
       <!-- 月份切換 -->
@@ -205,11 +204,17 @@ const addToCalendar = (s) => {
               'cal-cell--announced':
                 cell &&
                 scheduleMap[cell.format('YYYY-MM-DD')]?.status === 'ANNOUNCED',
+              'cal-cell--venue':
+                cell && !!scheduleMap[cell.format('YYYY-MM-DD')]?.is_venue,
             }"
           >
             <span v-if="cell" class="cal-cell__day">{{ cell.date() }}</span>
+            <i
+              v-if="cell && scheduleMap[cell.format('YYYY-MM-DD')]?.is_venue"
+              class="bx bxs-truck cal-cell__venue-icon"
+            ></i>
             <span
-              v-if="cell && scheduleMap[cell.format('YYYY-MM-DD')]"
+              v-else-if="cell && scheduleMap[cell.format('YYYY-MM-DD')]"
               class="cal-cell__dot"
             ></span>
           </div>
@@ -223,6 +228,9 @@ const addToCalendar = (s) => {
         </span>
         <span class="legend__item">
           <span class="legend__dot legend__dot--announced"></span>即將開放
+        </span>
+        <span class="legend__item">
+          <span class="legend__dot legend__dot--venue"></span>巡迴場
         </span>
       </div>
 
@@ -302,6 +310,9 @@ const addToCalendar = (s) => {
                   ]
                 }}）
               </span>
+              <span v-if="s.is_venue" class="badge badge--venue badge--venue-sm">
+                <i class="bx bxs-truck"></i>
+              </span>
               <span class="badge badge--closed">已結單</span>
             </div>
             <i
@@ -314,7 +325,7 @@ const addToCalendar = (s) => {
 
           <!-- 未過去：完整標題 -->
           <div v-else class="schedule-card__head">
-            <div class="schedule-card__date">
+            <div class="schedule-card__date" :class="{ 'schedule-card__date--venue': s.is_venue }">
               <span class="schedule-card__day">{{
                 dayjs(s.schedule_date).date()
               }}</span>
@@ -331,6 +342,9 @@ const addToCalendar = (s) => {
                     ]
                   }}
                 </span>
+                <span v-if="s.is_venue" class="badge badge--venue">
+                  <i class="bx bxs-truck"></i> 巡迴場
+                </span>
                 <span class="badge" :class="getBadge(s).class">
                   {{ getBadge(s).label }}
                 </span>
@@ -346,6 +360,24 @@ const addToCalendar = (s) => {
               </div>
             </div>
           </div>
+
+          <!-- 巡迴場地資訊 -->
+          <a
+            v-if="s.is_venue && !isPastSchedule(s)"
+            class="venue-info"
+            :href="`https://maps.google.com/?q=${encodeURIComponent(s.venue_address || s.venue_name)}`"
+            target="_blank"
+            rel="noopener"
+          >
+            <img src="https://www.google.com/s2/favicons?domain=maps.google.com&sz=32" class="venue-info__icon" alt="Google Maps" />
+            <div class="venue-info__body">
+              <span class="venue-info__name">
+                {{ s.venue_name }}<template v-if="s.venue_start && s.venue_end">・{{ s.venue_start }}–{{ s.venue_end }}</template>
+              </span>
+              <span v-if="s.venue_address" class="venue-info__address">{{ s.venue_address }}</span>
+            </div>
+            <i class="bx bx-chevron-right venue-info__arrow"></i>
+          </a>
 
           <!-- 展開內容（已過去時需手動展開；未過去時永遠顯示） -->
           <template v-if="!isPastSchedule(s) || expandedIds.has(s.id)">
@@ -443,43 +475,6 @@ const addToCalendar = (s) => {
   transition: opacity 0.2s;
 }
 
-/* Topbar */
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: #f7f3ee;
-
-  &__back {
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: #fff;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-    font-size: 20px;
-    color: #2f2a25;
-  }
-
-  &__title {
-    flex: 1;
-    text-align: center;
-    font-size: 16px;
-    font-weight: 700;
-    color: #1a120b;
-  }
-
-  &__spacer {
-    width: 36px;
-  }
-}
 
 /* Content */
 .content {
@@ -591,6 +586,12 @@ const addToCalendar = (s) => {
     border-radius: 50%;
   }
 
+  &__venue-icon {
+    font-size: 15px;
+    color: #b07808;
+    line-height: 1;
+  }
+
   /* 有行程但不是今天 */
   &--open {
     background: #edfaf3;
@@ -630,6 +631,12 @@ const addToCalendar = (s) => {
   }
 
   /* 今天同時有行程：保留底色 + 黃圈 */
+  &--venue {
+    background: #fffbeb;
+    .cal-cell__day { color: #92600a; }
+    .cal-cell__dot { background: #d4a017; }
+  }
+
   &--today.cal-cell--open {
     background: #edfaf3;
     .cal-cell__dot {
@@ -642,6 +649,11 @@ const addToCalendar = (s) => {
     .cal-cell__dot {
       background: #6080d0;
     }
+  }
+
+  &--today.cal-cell--venue {
+    background: #fffbeb;
+    .cal-cell__dot { background: #d4a017; }
   }
 }
 
@@ -669,6 +681,9 @@ const addToCalendar = (s) => {
     }
     &--announced {
       background: #6080d0;
+    }
+    &--venue {
+      background: #d4a017;
     }
   }
 }
@@ -767,6 +782,10 @@ const addToCalendar = (s) => {
     align-items: center;
     justify-content: center;
     gap: 1px;
+
+    &--venue {
+      background: #fef3c7;
+    }
   }
 
   &__day {
@@ -896,6 +915,21 @@ const addToCalendar = (s) => {
     background: #ede8e2;
     color: #6b4838;
   }
+
+  &--venue {
+    background: #fef3c7;
+    color: #7a4f00;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+
+    i { font-size: 13px; }
+  }
+
+  &--venue-sm {
+    padding: 2px 6px;
+    font-size: 11px;
+  }
 }
 
 /* 流程步驟 */
@@ -951,6 +985,61 @@ const addToCalendar = (s) => {
 .flow-step--done {
   .flow-dot { background: #2eaa62; }
   .flow-label { color: #2eaa62; }
+}
+
+/* 巡迴場地資訊 */
+.venue-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #fffbeb;
+  border: 1px solid #f0d070;
+  border-radius: 8px;
+  padding: 8px 10px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:active { background: #fef3c7; }
+
+  &__icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    border-radius: 3px;
+    margin-top: 2px;
+  }
+
+  &__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b4000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__address {
+    font-size: 12px;
+    color: #8a5c10;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__arrow {
+    font-size: 16px;
+    color: #c0a060;
+    flex-shrink: 0;
+  }
 }
 
 /* 品項 chip */

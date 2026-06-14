@@ -43,19 +43,24 @@ const selectDate = (date) => emit("select", date);
           'is-other-month': !schedule.isCurrentMonth,
           'has-schedule': schedule.hasSchedule,
           'is-announced': schedule.status === 'ANNOUNCED',
+          'is-venue': !!schedule.venueName,
         }"
         @click="selectDate(schedule.date)"
       >
-        <div
-          class="cell-date"
-          :class="{
-            saturday: schedule.dateObj.day() === 6,
-            sunday: schedule.dateObj.day() === 0,
-          }"
-        >
-          {{ schedule.dateObj.format("D") }}
+        <div class="cell-date-row">
+          <div
+            class="cell-date"
+            :class="{
+              saturday: schedule.dateObj.day() === 6,
+              sunday: schedule.dateObj.day() === 0,
+            }"
+          >
+            {{ schedule.dateObj.format("D") }}
+          </div>
+          <span v-if="schedule.venueName" class="venue-icon" :title="schedule.venueName">
+            <i class="bx bxs-truck"></i>
+          </span>
         </div>
-
         <div class="cell-body">
           <template v-if="isLoading && !schedule.hasSchedule">
             <span class="cell-dot"></span>
@@ -150,6 +155,29 @@ const selectDate = (date) => emit("select", date);
     pointer-events: none;
     background: var(--bg-page);
   }
+
+  &.is-venue {
+    border-color: #f0d070;
+    background: #fffbeb;
+
+    &.is-selected {
+      border-color: #d4a017;
+      background: #fef3c7;
+    }
+  }
+}
+
+.cell-date-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.venue-icon {
+  font-size: 14px;
+  color: #b07808;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .cell-date {
@@ -281,6 +309,10 @@ const selectDate = (date) => emit("select", date);
 
   .cal-cell.has-schedule.is-announced .cell-body::before {
     background: #6080d0;
+  }
+
+  .cal-cell.has-schedule.is-venue .cell-body::before {
+    background: #d4a017;
   }
 
   .cell-badge {

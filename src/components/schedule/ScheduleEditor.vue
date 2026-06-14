@@ -7,6 +7,7 @@ import { ElNotification, ElMessage, ElMessageBox } from "element-plus";
 
 const formRef = ref(null);
 const statusOptions = scheduleStatusOptions;
+const enableVenue = ref(false);
 
 const props = defineProps({
   schedule: {
@@ -52,6 +53,10 @@ const form = reactive({
     product_name: item.product_name,
     sales_limit: item.sales_limit,
   })),
+  venue_name: props.schedule.venue_name || "",
+  venue_address: props.schedule.venue_address || "",
+  venue_start: props.schedule.venue_start || "",
+  venue_end: props.schedule.venue_end || "",
 });
 
 const selectedProducts = ref([]);
@@ -101,6 +106,11 @@ const resetFormFromSchedule = (schedule) => {
         sales_limit: item.sales_limit,
       }))
     : [];
+  form.venue_name = schedule?.venue_name || "";
+  form.venue_address = schedule?.venue_address || "";
+  form.venue_start = schedule?.venue_start || "";
+  form.venue_end = schedule?.venue_end || "";
+  enableVenue.value = !!schedule?.venue_name;
 };
 
 watch(
@@ -117,6 +127,31 @@ watch(selectedProductId, (val) => {
   if (!val) return;
   addProduct();
 });
+
+const clearVenueFields = () => {
+  form.venue_name = "";
+  form.venue_address = "";
+  form.venue_start = "";
+  form.venue_end = "";
+};
+
+const handleVenueToggle = (val) => {
+  if (val) return;
+  const hasFilled = form.venue_name || form.venue_address || form.venue_start || form.venue_end;
+  if (!hasFilled) {
+    clearVenueFields();
+    return;
+  }
+  ElMessageBox.confirm("關閉後將清除已填寫的場地資訊，確定要關閉嗎？", "確認關閉", {
+    confirmButtonText: "確定清除",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(() => {
+    clearVenueFields();
+  }).catch(() => {
+    enableVenue.value = true;
+  });
+};
 
 // 監聽截止日期變化，若時間未填則預設為 00:00
 watch(orderEndDate, (newDate) => {
@@ -440,6 +475,57 @@ const deleteSchedule = async () => {
         </el-steps>
       </div>
 
+      <!-- 巡迴場地 -->
+      <div class="editor-section">
+        <div class="venue-header">
+          <div>
+            <div class="section-title">巡迴場地</div>
+            <div class="section-note">走出工作室、到外地販售時填寫</div>
+          </div>
+          <el-switch :model-value="enableVenue" @change="handleVenueToggle" />
+        </div>
+
+        <template v-if="enableVenue">
+          <div class="field-row venue-row">
+            <el-form-item label="場次名稱" class="field">
+              <el-input v-model="form.venue_name" placeholder="例：嘉義場、員林場" />
+            </el-form-item>
+            <el-form-item label="販售地址" class="field">
+              <el-input v-model="form.venue_address" placeholder="例：嘉義市某街某號" />
+            </el-form-item>
+          </div>
+          <el-form-item label="販售時間區間" class="field">
+            <div class="datetime-inputs">
+              <el-time-select
+                v-model="form.venue_start"
+                placeholder="開始時間"
+                start="06:00"
+                step="00:30"
+                end="22:00"
+              />
+              <span class="time-sep">—</span>
+              <el-time-select
+                v-model="form.venue_end"
+                placeholder="結束時間"
+                start="06:00"
+                step="00:30"
+                end="22:00"
+                :min-time="form.venue_start"
+              />
+            </div>
+          </el-form-item>
+
+          <div class="venue-preview" v-if="form.venue_name">
+            <i class="bx bx-map-pin"></i>
+            <span>
+              <b>{{ form.venue_name }}</b>
+              <template v-if="form.venue_address"> · {{ form.venue_address }}</template>
+              <template v-if="form.venue_start && form.venue_end"> · {{ form.venue_start }}–{{ form.venue_end }}</template>
+            </span>
+          </div>
+        </template>
+      </div>
+
       <div class="editor-section">
         <div class="section-title">今日出爐產品</div>
         <div class="section-note">不設上限則任意數量皆可下單</div>
@@ -726,6 +812,40 @@ const deleteSchedule = async () => {
   color: #94a3b8;
   font-size: 13px;
   padding: 8px 0;
+}
+
+.venue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  .section-title { margin-bottom: 2px; }
+  .section-note { margin-bottom: 0; }
+}
+
+.venue-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.time-sep {
+  flex-shrink: 0;
+  color: #94a3b8;
+  line-height: 32px;
+}
+
+.venue-preview {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #0369a1;
+  i { flex-shrink: 0; font-size: 15px; margin-top: 1px; }
+  b { font-weight: 700; }
 }
 
 .schedule-timeline {

@@ -4,6 +4,7 @@ import { useRouter, useRoute } from "vue-router";
 import dayjs from "dayjs";
 import { Shop } from "@/api/shop";
 import { ElMessage } from "element-plus";
+import StoreTopbar from "@/components/store/StoreTopbar.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -17,7 +18,7 @@ const paymentLabel = {
   bank: "銀行轉帳",
   card: "信用卡",
 };
-const pickupMethodLabel = { PICKUP: "門市自取", DELIVERY: "宅配" };
+const pickupMethodLabel = { PICKUP: "自取", DELIVERY: "宅配" };
 
 const isLoading = ref(true);
 const isSubmitting = ref(false);
@@ -107,13 +108,18 @@ const decrement = (itemId) => {
 };
 
 const pickupTimeOptions = computed(() => {
-  const dow = dayjs(date).day(); // 0=日 ~ 6=六
-  const hours = shop.value?.businessHours?.find(
-    (h) => h.day === dow && h.enabled,
-  );
-  if (!hours) return [];
+  let startStr, endStr;
 
-  const [startStr, endStr] = hours.time; // ["09:00", "17:00"]
+  if (schedule.value?.is_venue && schedule.value.venue_start && schedule.value.venue_end) {
+    startStr = schedule.value.venue_start;
+    endStr = schedule.value.venue_end;
+  } else {
+    const dow = dayjs(date).day();
+    const hours = shop.value?.businessHours?.find((h) => h.day === dow && h.enabled);
+    if (!hours) return [];
+    [startStr, endStr] = hours.time;
+  }
+
   const [startH, startM] = startStr.split(":").map(Number);
   const [endH, endM] = endStr.split(":").map(Number);
   const startTotal = startH * 60 + startM;
@@ -198,17 +204,7 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
 
 <template>
   <div class="order-page">
-    <!-- 頂部導覽 -->
-    <div class="order-nav">
-      <button class="nav-back" @click="router.back()">
-        <i class="bx bx-chevron-left"></i>
-      </button>
-      <div class="nav-title">
-        <div class="nav-date">{{ dateLabel }}</div>
-        <div class="nav-shop">{{ shop?.shopName ?? "" }}</div>
-      </div>
-      <span class="nav-spacer"></span>
-    </div>
+    <StoreTopbar :title="dateLabel" :subtitle="shop?.shopName ?? ''" />
 
     <!-- 載入中 -->
     <div v-if="isLoading" class="state-loading">
@@ -292,7 +288,28 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
         </div>
       </div>
 
-      <p class="success-hint">請憑訂單編號到店取貨，或來電確認</p>
+      <!-- 巡迴場地提醒 -->
+      <a
+        v-if="schedule?.is_venue"
+        class="venue-banner venue-banner--success"
+        :href="`https://maps.google.com/?q=${encodeURIComponent(schedule.venue_address || schedule.venue_name)}`"
+        target="_blank"
+        rel="noopener"
+      >
+        <div class="venue-banner__icon-wrap">
+          <img src="https://www.google.com/s2/favicons?domain=maps.google.com&sz=32" alt="Google Maps" />
+        </div>
+        <div class="venue-banner__body">
+          <span class="venue-banner__name">
+            {{ schedule.venue_name }}
+            <span v-if="schedule.venue_start && schedule.venue_end" class="venue-banner__time">{{ schedule.venue_start }}–{{ schedule.venue_end }}</span>
+          </span>
+          <span v-if="schedule.venue_address" class="venue-banner__address">{{ schedule.venue_address }}</span>
+        </div>
+        <i class="bx bx-chevron-right venue-banner__arrow"></i>
+      </a>
+
+      <p class="success-hint">{{ schedule?.is_venue ? "請前往指定地點，憑訂單編號取貨" : "請憑訂單編號到店取貨，或來電確認" }}</p>
       <button
         class="cta-btn"
         @click="router.push({ name: 'store-schedules', params: { slug } })"
@@ -304,6 +321,27 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString()}`;
     <!-- 正常下單畫面 -->
     <template v-else-if="schedule">
       <div class="order-body">
+        <!-- 巡迴場提醒 -->
+        <a
+          v-if="schedule.is_venue"
+          class="venue-banner"
+          :href="`https://maps.google.com/?q=${encodeURIComponent(schedule.venue_address || schedule.venue_name)}`"
+          target="_blank"
+          rel="noopener"
+        >
+          <div class="venue-banner__icon-wrap">
+            <img src="https://www.google.com/s2/favicons?domain=maps.google.com&sz=32" alt="Google Maps" />
+          </div>
+          <div class="venue-banner__body">
+            <span class="venue-banner__name">
+              {{ schedule.venue_name }}
+              <span v-if="schedule.venue_start && schedule.venue_end" class="venue-banner__time">{{ schedule.venue_start }}–{{ schedule.venue_end }}</span>
+            </span>
+            <span v-if="schedule.venue_address" class="venue-banner__address">{{ schedule.venue_address }}</span>
+          </div>
+          <i class="bx bx-chevron-right venue-banner__arrow"></i>
+        </a>
+
         <!-- 商品選擇 -->
         <section class="card">
           <div class="card__title"><i class="bx bx-basket"></i> 選擇商品</div>
@@ -517,59 +555,6 @@ $_primary-hex: 'c8944a';
   flex-direction: column;
 }
 
-/* Nav */
-.order-nav {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: #f7f3ee;
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-}
-
-.nav-back {
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border: none;
-  background: #fff;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  font-size: 20px;
-  color: #2f2a25;
-
-  &:active { opacity: 0.7; }
-}
-
-.nav-title {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-
-.nav-date {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1a120b;
-  line-height: 1.2;
-}
-
-.nav-shop {
-  font-size: 12px;
-  color: #8a7060;
-}
-
-.nav-spacer {
-  width: 36px;
-  flex-shrink: 0;
-}
 
 /* States */
 .state-loading {
@@ -1192,6 +1177,82 @@ $_primary-hex: 'c8944a';
     background: #d4c5b0;
     box-shadow: none;
     cursor: default;
+  }
+}
+
+/* 巡迴場橫幅 */
+.venue-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fffbeb;
+  border: 1.5px solid #f0d070;
+  border-radius: 10px;
+  padding: 12px 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:active { background: #fef3c7; }
+
+  &--success {
+    width: 100%;
+    margin-bottom: 12px;
+    text-align: left;
+  }
+
+  &__icon-wrap {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    background: #fff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+
+    img {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #6b4000;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  &__address {
+    font-size: 12px;
+    color: #8a5c10;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__time {
+    font-size: 12px;
+    font-weight: 500;
+    color: #a07820;
+  }
+
+  &__arrow {
+    font-size: 18px;
+    color: #c0a060;
+    flex-shrink: 0;
   }
 }
 

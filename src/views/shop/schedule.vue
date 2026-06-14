@@ -75,6 +75,7 @@ const generateScheduleList = () => {
       hasSchedule,
       hasOrders,
       isCurrentMonth, // 是否為當月日期
+      venueName: scheduleData?.venue_name || "",
     });
 
     currentDate = currentDate.add(1, "day");

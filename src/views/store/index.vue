@@ -17,7 +17,7 @@ const paymentLabel = {
 };
 
 const pickupLabel = {
-  pickup: "門市自取",
+  pickup: "自取",
   delivery: "宅配",
 };
 

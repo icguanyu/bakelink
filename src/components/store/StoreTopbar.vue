@@ -1,0 +1,87 @@
+<script setup>
+import { useRouter, useRoute } from "vue-router";
+
+defineProps({
+  title: { type: String, required: true },
+  subtitle: { type: String, default: null },
+  showHome: { type: Boolean, default: true },
+});
+
+const router = useRouter();
+const route = useRoute();
+</script>
+
+<template>
+  <div class="store-topbar">
+    <button class="store-topbar__btn" @click="router.back()">
+      <i class="bx bx-chevron-left"></i>
+    </button>
+    <div class="store-topbar__center">
+      <span class="store-topbar__title">{{ title }}</span>
+      <span v-if="subtitle" class="store-topbar__subtitle">{{ subtitle }}</span>
+    </div>
+    <button
+      v-if="showHome"
+      class="store-topbar__btn"
+      @click="router.push({ name: 'store', params: { slug: route.params.slug } })"
+    >
+      <i class="bx bx-store"></i>
+    </button>
+    <span v-else class="store-topbar__spacer"></span>
+  </div>
+</template>
+
+<style scoped lang="scss">
+.store-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f7f3ee;
+
+  &__center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  &__title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a120b;
+    line-height: 1.2;
+  }
+
+  &__subtitle {
+    font-size: 12px;
+    color: #8a7060;
+  }
+
+  &__btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: #fff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    font-size: 20px;
+    color: #2f2a25;
+    flex-shrink: 0;
+
+    &:active { opacity: 0.7; }
+  }
+
+  &__spacer {
+    width: 36px;
+    flex-shrink: 0;
+  }
+}
+</style>
